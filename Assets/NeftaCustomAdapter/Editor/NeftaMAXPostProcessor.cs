@@ -27,7 +27,7 @@ end";
                 var text = File.ReadAllText(path);
                 var podIndex = text.IndexOf("pod 'AppLovinSDK'", StringComparison.InvariantCulture);
                 var index = text.IndexOf('\n', podIndex); 
-                text = text.Insert(index + 1, $"  pod 'NeftaMAXAdapter', :git => 'https://github.com/Nefta-io/NeftaMAXAdapter.git', :tag => '{Application.version}'\n");
+                text = text.Insert(index + 1, $"  pod 'NeftaMAXAdapter', :git => 'https://github.com/Nefta-io/NeftaMAXAdapter.git', :tag => '1.0.2'\n");
                 
                 var iphoneTargetIndex = text.IndexOf("target 'Unity-iPhone' do", StringComparison.InvariantCulture);
                 if (iphoneTargetIndex < 0)
@@ -48,7 +48,7 @@ end";
         [MenuItem("AppLovin/Export Nefta Custom Adapter SDK", false, int.MaxValue)]
         private static void ExportAdSdkPackage()
         {
-            var packageName = $"NeftaMAX_SDK_v{Application.version}.unitypackage";
+            var packageName = $"NeftaMAX_SDK_v1.0.2.unitypackage";
             var assetPaths = new string[] { "Assets/NeftaCustomAdapter" };
 
             try
