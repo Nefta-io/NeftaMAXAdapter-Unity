@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -572,6 +573,22 @@ public abstract class MaxSdkBase
             MaxSdkLogger.UserError("Unable to notify ad delegate due to an error in the publisher callback '" + eventName + "' due to exception: " + exception.Message);
             Debug.LogException(exception);
         }
+    }
+
+    protected static string SerializeLocalExtraParameterValue(object value)
+    {
+        if (!(value.GetType().IsPrimitive || value is string || value is IList || value is IDictionary))
+        {
+            MaxSdkLogger.UserError("Local extra parameters must be an IList, IDictionary, string, or a primitive type");
+            return "";
+        }
+
+        Dictionary<string, object> data = new Dictionary<string, object>
+        {
+            {"value", value}
+        };
+
+        return Json.Serialize(data);
     }
 
     [Obsolete("This API has been deprecated and will be removed in a future release.")]

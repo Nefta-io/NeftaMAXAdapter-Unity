@@ -349,10 +349,42 @@ public class MaxSdkUtils
 #endif
     }
 
+    /// <summary>
+    /// Parses the IAB TCF String to determine the consent status for the IAB vendor with the provided ID.
+    /// </summary>
+    /// <param name="vendorId">Vendor ID as defined in the Global Vendor List.</param>
+    /// <returns>The consent status of the IAB vendor. Returns <c>true</c> if the vendor has consent, <c>false</c> if not, or <c>null</c> if no TCF string is available on disk.</returns>
+    /// <see href="https://vendor-list.consensu.org/v3/vendor-list.json">Current Version of Global Vendor List</see>
+    public static bool? GetTcfConsentStatus(int vendorId)
+    {
+        var tcfConsentStatus = GetPlatformSpecificTcfConsentStatus(vendorId);
+        if (tcfConsentStatus == -1)
+        {
+            return null;
+        }
+        else
+        {
+            return tcfConsentStatus == 1;
+        }
+    }
+
 #if UNITY_IOS
     [DllImport("__Internal")]
-    private static extern int _MaxGetAdditionalConsentStatus(int atpIdentifier);
+    private static extern int _MaxGetTcfConsentStatus(int vendorIdentifier);
 #endif
+
+    private static int GetPlatformSpecificTcfConsentStatus(int vendorId)
+    {
+#if UNITY_EDITOR
+        return -1;
+#elif UNITY_IOS
+        return _MaxGetTcfConsentStatus(vendorId);
+#elif UNITY_ANDROID
+        return MaxUnityPluginClass.CallStatic<int>("getTcfConsentStatus", vendorId);
+#else
+        return -1;
+#endif
+    }
 
     /// <summary>
     /// Parses the Google UMP's Additional Consent (AC) string to determine the consent status for the advertising entity represented by the provided Ad Technology Provider (ATP) ID.
@@ -365,7 +397,7 @@ public class MaxSdkUtils
     /// <see href="https://storage.googleapis.com/tcfac/additional-consent-providers.csv">List of Google ATPs and their IDs</see>
     public static bool? GetAdditionalConsentStatus(int atpId)
     {
-        int additionalConsentStatus = GetPlatformSpecificConsentStatus(atpId);
+        var additionalConsentStatus = GetPlatformSpecificAdditionalConsentStatus(atpId);
         if (additionalConsentStatus == -1)
         {
             return null;
@@ -376,7 +408,12 @@ public class MaxSdkUtils
         }
     }
 
-    private static int GetPlatformSpecificConsentStatus(int atpId)
+#if UNITY_IOS
+    [DllImport("__Internal")]
+    private static extern int _MaxGetAdditionalConsentStatus(int atpIdentifier);
+#endif
+
+    private static int GetPlatformSpecificAdditionalConsentStatus(int atpId)
     {
 #if UNITY_EDITOR
         return -1;

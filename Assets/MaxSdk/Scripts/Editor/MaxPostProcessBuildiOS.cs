@@ -59,6 +59,7 @@ namespace AppLovinMax.Scripts.Editor
             "HyprMX.xcframework",
             "LinkedinAudienceNetwork.xcframework",
             "IASDKCore.xcframework",
+            "Maio.xcframework",
             "MobileFuseSDK.xcframework",
             "OMSDK_Appodeal.xcframework",
             "OMSDK_Ogury.xcframework",
@@ -594,8 +595,13 @@ namespace AppLovinMax.Scripts.Editor
             if (Directory.Exists(maxMediationDirectory))
             {
                 var mediationNetworkDirectories = Directory.GetDirectories(maxMediationDirectory);
-                var installedNetworks = mediationNetworkDirectories.Select(Path.GetFileName).ToArray();
-                var adNetworks = string.Join(",", installedNetworks);
+                var installedNetworks = mediationNetworkDirectories.Select(Path.GetFileName).ToList();
+                if (AppLovinSettings.Instance.AddApsSkAdNetworkIds)
+                {
+                    installedNetworks.Add("AmazonPublisherServices");
+                }
+
+                var adNetworks = string.Join(",", installedNetworks.ToArray());
                 if (!string.IsNullOrEmpty(adNetworks))
                 {
                     uriBuilder.Query += string.Format("ad_networks={0}", adNetworks);

@@ -63,7 +63,7 @@ namespace AppLovinMax.Scripts.IntegrationManager.Editor
         /// Updates the provided Gradle script to add Quality Service plugin.
         /// </summary>
         /// <param name="applicationGradleBuildFilePath">The gradle file to update.</param>
-        protected void AddAppLovinQualityServicePlugin(string applicationGradleBuildFilePath)
+        protected static void AddAppLovinQualityServicePlugin(string applicationGradleBuildFilePath)
         {
             if (!AppLovinSettings.Instance.QualityServiceEnabled) return;
 

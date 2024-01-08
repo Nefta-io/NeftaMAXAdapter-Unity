@@ -22,7 +22,7 @@ namespace Nefta.Core.Events
         private static readonly Dictionary<ReceiveMethod, string> MethodToString = new Dictionary<ReceiveMethod, string>()
         {
             { ReceiveMethod.Undefined, null },
-            { ReceiveMethod.LevelEnd, "level-end" },
+            { ReceiveMethod.LevelEnd, "level_end" },
             { ReceiveMethod.Reward, "reward" },
             { ReceiveMethod.Loot, "loot" },
             { ReceiveMethod.Shop, "shop" },

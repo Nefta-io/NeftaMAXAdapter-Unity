@@ -80,6 +80,8 @@ public class MaxCmpService
             return MaxUnityPluginClass.CallStatic<bool>("hasSupportedCmp");
 #elif UNITY_IOS
             return _MaxHasSupportedCmp();
+#else
+            return false;
 #endif
         }
     }

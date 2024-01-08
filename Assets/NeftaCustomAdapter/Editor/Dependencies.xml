@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dependencies>
+    <androidPackages>
+        <androidPackage spec="androidx.lifecycle:lifecycle-process:2.4.1" />
+    </androidPackages>
+</dependencies>

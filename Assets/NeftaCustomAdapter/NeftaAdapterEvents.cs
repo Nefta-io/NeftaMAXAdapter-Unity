@@ -19,6 +19,9 @@ namespace NeftaCustomAdapter
         private static extern IntPtr NeftaPlugin_Init(string appId);
 
         [DllImport ("__Internal")]
+        private static extern IntPtr NeftaPlugin_SetCustomBatchSize(IntPtr instance, int newBatchSize);
+
+        [DllImport ("__Internal")]
         private static extern void NeftaPlugin_Record(IntPtr instance, string recordedEvent);
 
         private static IntPtr _plugin;
@@ -41,6 +44,17 @@ namespace NeftaCustomAdapter
 
             AndroidJavaClass neftaPluginClass = new AndroidJavaClass("com.nefta.sdk.NeftaPlugin");
             _plugin = neftaPluginClass.CallStatic<AndroidJavaObject>("Init", unityActivity, appId);
+#endif
+        }
+        
+        public static void SetCustomBatchSize(int newBatchSize)
+        {
+#if UNITY_EDITOR
+
+#elif UNITY_IOS
+            NeftaPlugin_SetCustomBatchSize(_plugin, newBatchSize);
+#elif UNITY_ANDROID
+            _plugin.Call("SetCustomBatchSize", newBatchSize);
 #endif
         }
 
