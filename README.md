@@ -1,7 +1,5 @@
-# MAX Demo App
+# Nefta Ad Custom Adapter for the MAX SDK Demo App
 
-A demo app that shows how to load and show ads using AppLovin MAX Unity plugin.
+A demo app that shows how to use Nefta platfrom through AppLovin MAX SDK.
 
-## Usage
-
-To run the demo app you should first download and import the latest version of AppLovin MAX Unity Plugin from the [Getting Started](https://dash.applovin.com/documentation/mediation/unity/getting-started) guide.
+Complete integration guid: https://docs-adnetwork.nefta.io/docs/max-unity

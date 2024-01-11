@@ -12,6 +12,9 @@ namespace NeftaCustomAdapter.Editor
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     if target.name == 'NeftaMAXAdapter'
+      target.build_configurations.each do |config|
+        config.build_settings['MACH_O_TYPE'] = 'staticlib'
+      end
       framework_ref = installer.pods_project.reference_for_path(File.dirname(__FILE__) + '/Pods/AppLovinSDK/applovin-ios-sdk-12.1.0/AppLovinSDK.xcframework')
       target.frameworks_build_phase.add_file_reference(framework_ref, true)
     end
@@ -62,6 +65,18 @@ end";
             var packageName = $"NeftaMAX_SDK_{Application.version}.unitypackage";
             var assetPaths = new string[] { "Assets/NeftaCustomAdapter" };
 
+            var guid = AssetDatabase.FindAssets("NeftaMaxAdapter-debug")[0];
+            var path = AssetDatabase.GUIDToAssetPath(guid);
+            var importer = (PluginImporter) AssetImporter.GetAtPath(path);
+            importer.SetCompatibleWithPlatform(BuildTarget.Android, true);
+            importer.SaveAndReimport();
+            
+            guid = AssetDatabase.FindAssets("NeftaMaxAdapter-release")[0];
+            path = AssetDatabase.GUIDToAssetPath(guid);
+            importer = (PluginImporter) AssetImporter.GetAtPath(path);
+            importer.SetCompatibleWithPlatform(BuildTarget.Android, false);
+            importer.SaveAndReimport();
+            
             try
             {
                 AssetDatabase.ExportPackage(assetPaths, packageName, ExportPackageOptions.Recurse);

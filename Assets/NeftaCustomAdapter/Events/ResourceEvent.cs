@@ -21,15 +21,15 @@ namespace Nefta.Core.Events
         private static readonly Dictionary<Category, string> CategoryToString = new Dictionary<Category, string>()
         {
             { Category.Undefined, null },
-            { Category.SoftCurrency, "soft-currency" },
-            { Category.PremiumCurrency, "premium-currency" },
+            { Category.SoftCurrency, "soft_currency" },
+            { Category.PremiumCurrency, "premium_currency" },
             { Category.Resource, "resource" },
-            { Category.CoreItem, "core-item" },
-            { Category.CosmeticItem, "cosmetic-item" },
+            { Category.CoreItem, "core_item" },
+            { Category.CosmeticItem, "cosmetic_item" },
             { Category.Consumable, "consumable" },
             { Category.Experience, "experience" },
             { Category.Chest, "chest" },
-            { Category.Other, "other" },
+            { Category.Other, "other" }
         };
 
         /// <summary>
