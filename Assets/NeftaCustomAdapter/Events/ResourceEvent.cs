@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Nefta.Core.Events
 {
-    public enum Category
+    public enum ResourceCategory
     {
         Undefined,
         SoftCurrency,
@@ -18,18 +18,18 @@ namespace Nefta.Core.Events
 
     public class ResourceEvent : GameEvent
     {
-        private static readonly Dictionary<Category, string> CategoryToString = new Dictionary<Category, string>()
+        private static readonly Dictionary<ResourceCategory, string> CategoryToString = new Dictionary<ResourceCategory, string>()
         {
-            { Category.Undefined, null },
-            { Category.SoftCurrency, "soft_currency" },
-            { Category.PremiumCurrency, "premium_currency" },
-            { Category.Resource, "resource" },
-            { Category.CoreItem, "core_item" },
-            { Category.CosmeticItem, "cosmetic_item" },
-            { Category.Consumable, "consumable" },
-            { Category.Experience, "experience" },
-            { Category.Chest, "chest" },
-            { Category.Other, "other" }
+            { ResourceCategory.Undefined, null },
+            { ResourceCategory.SoftCurrency, "soft_currency" },
+            { ResourceCategory.PremiumCurrency, "premium_currency" },
+            { ResourceCategory.Resource, "resource" },
+            { ResourceCategory.CoreItem, "core_item" },
+            { ResourceCategory.CosmeticItem, "cosmetic_item" },
+            { ResourceCategory.Consumable, "consumable" },
+            { ResourceCategory.Experience, "experience" },
+            { ResourceCategory.Chest, "chest" },
+            { ResourceCategory.Other, "other" }
         };
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace Nefta.Core.Events
         /// <summary>
         /// The category of the resource
         /// </summary>
-        public Category _category;
+        public ResourceCategory _resourceCategory;
         
         /// <summary>
         /// Quantity that player received
@@ -61,7 +61,7 @@ namespace Nefta.Core.Events
         {
             return new RecordedEvent()
             {
-                _category = CategoryToString[_category],
+                _category = CategoryToString[_resourceCategory],
                 _itemName = _name,
                 _value = _quantity,
                 _customPayload = _customString,
