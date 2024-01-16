@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e979d7036d742e6ac62539fbdab6ae6, type: 3}
   m_Name: NeftaConfiguration
   m_EditorClassIdentifier: 
-  _neftaSDKDependencyInRoot: 0
+  _neftaSDKDependencyInRoot: 1
   _isLoggingEnabled: 1

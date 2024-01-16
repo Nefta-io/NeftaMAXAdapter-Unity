@@ -12,6 +12,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+    void EnableLogging(bool enable);
     void * NeftaPlugin_Init(const char *appId);
     void NeftaPlugin_Record(void *instance, const char *event);
     void NeftaPlugin_SetCustomBatchSize(void *instance, int newBatchSize);
@@ -20,6 +21,10 @@ extern "C" {
 #endif
 
 NeftaPlugin_iOS *_plugin;
+
+void NeftaPlugin_EnableLogging(bool enable) {
+    [NeftaPlugin_iOS EnableLogging: enable];
+}
 
 void * NeftaPlugin_Init(const char *appId)
 {

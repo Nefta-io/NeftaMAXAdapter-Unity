@@ -1,0 +1,4 @@
+framework module NeftaSDK {
+  header "NeftaSDK-Swift.h"
+  requires objc
+}

@@ -16,6 +16,9 @@ namespace NeftaCustomAdapter
         private static bool _plugin;
 #elif UNITY_IOS
         [DllImport ("__Internal")]
+        private static extern void NeftaPlugin_EnableLogging(bool enable);
+
+        [DllImport ("__Internal")]
         private static extern IntPtr NeftaPlugin_Init(string appId);
 
         [DllImport ("__Internal")]
@@ -29,6 +32,14 @@ namespace NeftaCustomAdapter
         private static AndroidJavaObject _plugin;
 #endif
         private static StringBuilder _eventBuilder;
+        
+        public static void EnableLogging(bool enable)
+        {
+#if UNITY_EDITOR
+#elif UNITY_IOS
+            NeftaPlugin_EnableLogging(enable);
+#endif
+        }
         
         public static void Init(string appId)
         {
