@@ -286,6 +286,7 @@ typedef unsigned int swift_uint4  __attribute__((__ext_vector_type__(4)));
 
 #if defined(__OBJC__)
 @class NSString;
+enum AdMarkupTypes : NSInteger;
 
 SWIFT_CLASS("_TtC8NeftaSDK11BidResponse")
 @interface BidResponse : NSObject
@@ -294,6 +295,7 @@ SWIFT_CLASS("_TtC8NeftaSDK11BidResponse")
 @property (nonatomic) float _price;
 @property (nonatomic, copy) NSString * _Nullable _winNoticeUrl;
 @property (nonatomic, copy) NSString * _Nullable _adMarkup;
+@property (nonatomic) enum AdMarkupTypes _adMarkupType;
 @property (nonatomic, copy) NSArray<NSString *> * _Nullable _advertiserDomain;
 @property (nonatomic, copy) NSString * _Nullable _campaignId;
 @property (nonatomic) BOOL _creativeQualityCheck;
@@ -301,6 +303,13 @@ SWIFT_CLASS("_TtC8NeftaSDK11BidResponse")
 @property (nonatomic, copy) NSString * _Nullable _redirectClickUrl;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
+
+typedef SWIFT_ENUM(NSInteger, AdMarkupTypes, open) {
+  AdMarkupTypesVastXml = 0,
+  AdMarkupTypesHtmlRaw = 1,
+  AdMarkupTypesHtmlLink = 2,
+  AdMarkupTypesImageLink = 3,
+};
 
 enum ProgressionStatus : NSInteger;
 enum ProgressionType : NSInteger;
@@ -395,6 +404,7 @@ typedef SWIFT_ENUM(NSInteger, SessionCategory, open) {
 @class Placement;
 enum Types : NSInteger;
 enum Modes : NSInteger;
+@class UIView;
 
 SWIFT_CLASS("_TtC8NeftaSDK11NeftaPlugin")
 @interface NeftaPlugin : NSObject
@@ -411,6 +421,9 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _No
 @property (nonatomic, copy) void (^ _Nullable OnClick)(Placement * _Nonnull);
 @property (nonatomic, copy) void (^ _Nullable OnClose)(Placement * _Nonnull);
 @property (nonatomic, copy) void (^ _Nullable OnReward)(Placement * _Nonnull);
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable OnLog)(NSString * _Nonnull);)
++ (void (^ _Nullable)(NSString * _Nonnull))OnLog SWIFT_WARN_UNUSED_RESULT;
++ (void)setOnLog:(void (^ _Nullable)(NSString * _Nonnull))value;
 @property (nonatomic, copy) void (^ _Nullable IOnReady)(NSString * _Nonnull);
 @property (nonatomic, copy) void (^ _Nullable IOnBid)(NSString * _Nonnull, float);
 @property (nonatomic, copy) void (^ _Nullable IOnLoadStart)(NSString * _Nonnull);
@@ -441,12 +454,13 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _No
 - (BOOL)IsReadyWithId:(NSString * _Nonnull)id SWIFT_WARN_UNUSED_RESULT;
 - (void)ShowWithType:(enum Types)type;
 - (void)ShowWithId:(NSString * _Nonnull)id;
+- (void)ShowMainWithId:(NSString * _Nonnull)id;
 - (void)Close;
 - (void)CloseWithId:(NSString * _Nonnull)id;
+- (UIView * _Nullable)GetViewForPlacement:(Placement * _Nonnull)placement SWIFT_WARN_UNUSED_RESULT;
 @end
 
 @class UIViewController;
-@class UIView;
 
 SWIFT_CLASS("_TtC8NeftaSDK15NeftaPlugin_iOS")
 @interface NeftaPlugin_iOS : NeftaPlugin
@@ -454,23 +468,24 @@ SWIFT_CLASS("_TtC8NeftaSDK15NeftaPlugin_iOS")
 + (NeftaPlugin_iOS * _Nonnull)InitWithAppId:(NSString * _Nullable)appId SWIFT_WARN_UNUSED_RESULT;
 - (void)PrepareRendererWithViewController:(UIViewController * _Nonnull)viewController;
 - (void)PrepareRendererWithView:(UIView * _Nonnull)view;
+- (UIView * _Nullable)GetViewForPlacement:(Placement * _Nonnull)placement SWIFT_WARN_UNUSED_RESULT;
 @end
 
 
 SWIFT_CLASS("_TtC8NeftaSDK9Placement")
 @interface Placement : NSObject
 @property (nonatomic, copy) NSString * _Nonnull _id;
+@property (nonatomic) NSInteger _width;
+@property (nonatomic) NSInteger _height;
 @property (nonatomic) enum Types _type;
 @property (nonatomic, strong) BidResponse * _Nullable _availableBid;
 @property (nonatomic, strong) BidResponse * _Nullable _bufferBid;
 @property (nonatomic, strong) BidResponse * _Nullable _renderedBid;
-@property (nonatomic) NSInteger _renderedWidth;
-@property (nonatomic) NSInteger _renderedHeight;
 @property (nonatomic) enum Modes _mode;
 @property (nonatomic) NSUInteger _bidTime;
 @property (nonatomic) NSUInteger _loadTime;
-@property (nonatomic) NSInteger _showTime;
-@property (nonatomic) NSUInteger _timeSinceContinuousLoad;
+@property (nonatomic) NSUInteger _showTime;
+@property (nonatomic) NSUInteger _timeSinceFailedLoad;
 @property (nonatomic) BOOL _isHidden;
 - (BOOL)IsBidding SWIFT_WARN_UNUSED_RESULT;
 - (BOOL)IsLoading SWIFT_WARN_UNUSED_RESULT;
@@ -494,27 +509,9 @@ typedef SWIFT_ENUM(NSInteger, Modes, open) {
   ModesContinuous = 3,
 };
 
-@class Creative;
 
 SWIFT_CLASS("_TtC8NeftaSDK14VideoPlacement")
 @interface VideoPlacement : Placement
-@property (nonatomic, copy) NSArray<Creative *> * _Nullable _bufferedCreatives;
-@property (nonatomic, copy) NSArray<Creative *> * _Nullable _renderedCreatives;
-@end
-
-@class MediaFile;
-
-SWIFT_CLASS("_TtCC8NeftaSDK14VideoPlacement8Creative")
-@interface Creative : NSObject
-@property (nonatomic, copy) NSArray<MediaFile *> * _Nonnull _mediaFiles;
-- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
-@end
-
-
-SWIFT_CLASS("_TtCC8NeftaSDK14VideoPlacement9MediaFile")
-@interface MediaFile : NSObject
-@property (nonatomic, copy) NSString * _Nullable _url;
-- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
 @class NSCoder;
@@ -535,11 +532,6 @@ SWIFT_CLASS("_TtC8NeftaSDK13WebController")
 
 SWIFT_CLASS("_TtC8NeftaSDK12WebPlacement")
 @interface WebPlacement : Placement
-@property (nonatomic, copy) NSString * _Nullable _position;
-@property (nonatomic) NSInteger _width;
-@property (nonatomic) NSInteger _height;
-@property (nonatomic, strong) WebController * _Nullable _bufferWebController;
-@property (nonatomic, strong) WebController * _Nullable _renderWebController;
 @end
 
 #endif
@@ -838,6 +830,7 @@ typedef unsigned int swift_uint4  __attribute__((__ext_vector_type__(4)));
 
 #if defined(__OBJC__)
 @class NSString;
+enum AdMarkupTypes : NSInteger;
 
 SWIFT_CLASS("_TtC8NeftaSDK11BidResponse")
 @interface BidResponse : NSObject
@@ -846,6 +839,7 @@ SWIFT_CLASS("_TtC8NeftaSDK11BidResponse")
 @property (nonatomic) float _price;
 @property (nonatomic, copy) NSString * _Nullable _winNoticeUrl;
 @property (nonatomic, copy) NSString * _Nullable _adMarkup;
+@property (nonatomic) enum AdMarkupTypes _adMarkupType;
 @property (nonatomic, copy) NSArray<NSString *> * _Nullable _advertiserDomain;
 @property (nonatomic, copy) NSString * _Nullable _campaignId;
 @property (nonatomic) BOOL _creativeQualityCheck;
@@ -853,6 +847,13 @@ SWIFT_CLASS("_TtC8NeftaSDK11BidResponse")
 @property (nonatomic, copy) NSString * _Nullable _redirectClickUrl;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
+
+typedef SWIFT_ENUM(NSInteger, AdMarkupTypes, open) {
+  AdMarkupTypesVastXml = 0,
+  AdMarkupTypesHtmlRaw = 1,
+  AdMarkupTypesHtmlLink = 2,
+  AdMarkupTypesImageLink = 3,
+};
 
 enum ProgressionStatus : NSInteger;
 enum ProgressionType : NSInteger;
@@ -947,6 +948,7 @@ typedef SWIFT_ENUM(NSInteger, SessionCategory, open) {
 @class Placement;
 enum Types : NSInteger;
 enum Modes : NSInteger;
+@class UIView;
 
 SWIFT_CLASS("_TtC8NeftaSDK11NeftaPlugin")
 @interface NeftaPlugin : NSObject
@@ -963,6 +965,9 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _No
 @property (nonatomic, copy) void (^ _Nullable OnClick)(Placement * _Nonnull);
 @property (nonatomic, copy) void (^ _Nullable OnClose)(Placement * _Nonnull);
 @property (nonatomic, copy) void (^ _Nullable OnReward)(Placement * _Nonnull);
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable OnLog)(NSString * _Nonnull);)
++ (void (^ _Nullable)(NSString * _Nonnull))OnLog SWIFT_WARN_UNUSED_RESULT;
++ (void)setOnLog:(void (^ _Nullable)(NSString * _Nonnull))value;
 @property (nonatomic, copy) void (^ _Nullable IOnReady)(NSString * _Nonnull);
 @property (nonatomic, copy) void (^ _Nullable IOnBid)(NSString * _Nonnull, float);
 @property (nonatomic, copy) void (^ _Nullable IOnLoadStart)(NSString * _Nonnull);
@@ -993,12 +998,13 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _No
 - (BOOL)IsReadyWithId:(NSString * _Nonnull)id SWIFT_WARN_UNUSED_RESULT;
 - (void)ShowWithType:(enum Types)type;
 - (void)ShowWithId:(NSString * _Nonnull)id;
+- (void)ShowMainWithId:(NSString * _Nonnull)id;
 - (void)Close;
 - (void)CloseWithId:(NSString * _Nonnull)id;
+- (UIView * _Nullable)GetViewForPlacement:(Placement * _Nonnull)placement SWIFT_WARN_UNUSED_RESULT;
 @end
 
 @class UIViewController;
-@class UIView;
 
 SWIFT_CLASS("_TtC8NeftaSDK15NeftaPlugin_iOS")
 @interface NeftaPlugin_iOS : NeftaPlugin
@@ -1006,23 +1012,24 @@ SWIFT_CLASS("_TtC8NeftaSDK15NeftaPlugin_iOS")
 + (NeftaPlugin_iOS * _Nonnull)InitWithAppId:(NSString * _Nullable)appId SWIFT_WARN_UNUSED_RESULT;
 - (void)PrepareRendererWithViewController:(UIViewController * _Nonnull)viewController;
 - (void)PrepareRendererWithView:(UIView * _Nonnull)view;
+- (UIView * _Nullable)GetViewForPlacement:(Placement * _Nonnull)placement SWIFT_WARN_UNUSED_RESULT;
 @end
 
 
 SWIFT_CLASS("_TtC8NeftaSDK9Placement")
 @interface Placement : NSObject
 @property (nonatomic, copy) NSString * _Nonnull _id;
+@property (nonatomic) NSInteger _width;
+@property (nonatomic) NSInteger _height;
 @property (nonatomic) enum Types _type;
 @property (nonatomic, strong) BidResponse * _Nullable _availableBid;
 @property (nonatomic, strong) BidResponse * _Nullable _bufferBid;
 @property (nonatomic, strong) BidResponse * _Nullable _renderedBid;
-@property (nonatomic) NSInteger _renderedWidth;
-@property (nonatomic) NSInteger _renderedHeight;
 @property (nonatomic) enum Modes _mode;
 @property (nonatomic) NSUInteger _bidTime;
 @property (nonatomic) NSUInteger _loadTime;
-@property (nonatomic) NSInteger _showTime;
-@property (nonatomic) NSUInteger _timeSinceContinuousLoad;
+@property (nonatomic) NSUInteger _showTime;
+@property (nonatomic) NSUInteger _timeSinceFailedLoad;
 @property (nonatomic) BOOL _isHidden;
 - (BOOL)IsBidding SWIFT_WARN_UNUSED_RESULT;
 - (BOOL)IsLoading SWIFT_WARN_UNUSED_RESULT;
@@ -1046,27 +1053,9 @@ typedef SWIFT_ENUM(NSInteger, Modes, open) {
   ModesContinuous = 3,
 };
 
-@class Creative;
 
 SWIFT_CLASS("_TtC8NeftaSDK14VideoPlacement")
 @interface VideoPlacement : Placement
-@property (nonatomic, copy) NSArray<Creative *> * _Nullable _bufferedCreatives;
-@property (nonatomic, copy) NSArray<Creative *> * _Nullable _renderedCreatives;
-@end
-
-@class MediaFile;
-
-SWIFT_CLASS("_TtCC8NeftaSDK14VideoPlacement8Creative")
-@interface Creative : NSObject
-@property (nonatomic, copy) NSArray<MediaFile *> * _Nonnull _mediaFiles;
-- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
-@end
-
-
-SWIFT_CLASS("_TtCC8NeftaSDK14VideoPlacement9MediaFile")
-@interface MediaFile : NSObject
-@property (nonatomic, copy) NSString * _Nullable _url;
-- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
 @class NSCoder;
@@ -1087,11 +1076,6 @@ SWIFT_CLASS("_TtC8NeftaSDK13WebController")
 
 SWIFT_CLASS("_TtC8NeftaSDK12WebPlacement")
 @interface WebPlacement : Placement
-@property (nonatomic, copy) NSString * _Nullable _position;
-@property (nonatomic) NSInteger _width;
-@property (nonatomic) NSInteger _height;
-@property (nonatomic, strong) WebController * _Nullable _bufferWebController;
-@property (nonatomic, strong) WebController * _Nullable _renderWebController;
 @end
 
 #endif

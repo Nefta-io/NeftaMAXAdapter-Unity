@@ -235,7 +235,7 @@ namespace AppLovinMax.Scripts.Editor
             var internalSettings = AppLovinInternalSettings.Instance;
 
             return (!internalSettings.ConsentFlowEnabled || !internalSettings.UserTrackingUsageLocalizationEnabled)
-                && !settings.ConsentFlowEnabled || !settings.UserTrackingUsageLocalizationEnabled;
+                   && (!settings.ConsentFlowEnabled || !settings.UserTrackingUsageLocalizationEnabled);
         }
 
         private static void AddSwiftSupport(string buildPath, PBXProject project, string unityFrameworkTargetGuid, string unityMainTargetGuid)

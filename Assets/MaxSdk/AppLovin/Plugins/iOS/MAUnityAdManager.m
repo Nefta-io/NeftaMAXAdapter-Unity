@@ -5,7 +5,7 @@
 
 #import "MAUnityAdManager.h"
 
-#define VERSION @"6.1.2"
+#define VERSION @"6.2.1"
 
 #define KEY_WINDOW [UIApplication sharedApplication].keyWindow
 #define DEVICE_SPECIFIC_ADVIEW_AD_FORMAT ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) ? MAAdFormat.leader : MAAdFormat.banner
@@ -59,8 +59,6 @@ extern "C" {
 @property (nonatomic, strong) NSMutableDictionary<NSString *, NSString *> *adViewPositions;
 @property (nonatomic, strong) NSMutableDictionary<NSString *, NSValue *> *adViewOffsets;
 @property (nonatomic, strong) NSMutableDictionary<NSString *, NSNumber *> *adViewWidths;
-@property (nonatomic, strong) NSMutableDictionary<NSString *, NSNumber *> *crossPromoAdViewHeights;
-@property (nonatomic, strong) NSMutableDictionary<NSString *, NSNumber *> *crossPromoAdViewRotations;
 @property (nonatomic, strong) NSMutableDictionary<NSString *, MAAdFormat *> *verticalAdViewFormats;
 @property (nonatomic, strong) NSMutableDictionary<NSString *, NSArray<NSLayoutConstraint *> *> *adViewConstraints;
 @property (nonatomic, strong) NSMutableDictionary<NSString *, NSMutableDictionary<NSString *, NSString *> *> *adViewExtraParametersToSetAfterCreate;
@@ -117,8 +115,6 @@ static ALUnityBackgroundCallback backgroundCallback;
         self.adViewPositions = [NSMutableDictionary dictionaryWithCapacity: 2];
         self.adViewOffsets = [NSMutableDictionary dictionaryWithCapacity: 2];
         self.adViewWidths = [NSMutableDictionary dictionaryWithCapacity: 2];
-        self.crossPromoAdViewHeights = [NSMutableDictionary dictionaryWithCapacity: 2];
-        self.crossPromoAdViewRotations = [NSMutableDictionary dictionaryWithCapacity: 2];
         self.verticalAdViewFormats = [NSMutableDictionary dictionaryWithCapacity: 2];
         self.adViewConstraints = [NSMutableDictionary dictionaryWithCapacity: 2];
         self.adViewExtraParametersToSetAfterCreate = [NSMutableDictionary dictionaryWithCapacity: 1];
@@ -387,49 +383,6 @@ static ALUnityBackgroundCallback backgroundCallback;
     return [self adViewLayoutForAdUnitIdentifier: adUnitIdentifier adFormat: MAAdFormat.mrec];
 }
 
-#pragma mark - Cross Promo Ads
-
-- (void)createCrossPromoAdWithAdUnitIdentifier:(nullable NSString *)adUnitIdentifier x:(CGFloat)xOffset y:(CGFloat)yOffset width:(CGFloat)width height:(CGFloat)height rotation:(CGFloat)rotation
-{
-    self.adViewWidths[adUnitIdentifier] = @(width);
-    self.crossPromoAdViewHeights[adUnitIdentifier] = @(height);
-    self.crossPromoAdViewRotations[adUnitIdentifier] = @(rotation);
-    [self createAdViewWithAdUnitIdentifier: adUnitIdentifier adFormat: MAAdFormat.crossPromo atPosition: DEFAULT_AD_VIEW_POSITION withOffset: CGPointMake(xOffset, yOffset)];
-}
-
-- (void)setCrossPromoAdPlacement:(nullable NSString *)placement forAdUnitIdentifier:(nullable NSString *)adUnitIdentifier
-{
-    [self setAdViewPlacement: placement forAdUnitIdentifier: adUnitIdentifier adFormat: MAAdFormat.crossPromo];
-}
-
-- (void)updateCrossPromoAdPositionForAdUnitIdentifier:(nullable NSString *)adUnitIdentifier x:(CGFloat)xOffset y:(CGFloat)yOffset width:(CGFloat)width height:(CGFloat)height rotation:(CGFloat)rotation
-{
-    self.adViewWidths[adUnitIdentifier] = @(width);
-    self.crossPromoAdViewHeights[adUnitIdentifier] = @(height);
-    self.crossPromoAdViewRotations[adUnitIdentifier] = @(rotation);
-    [self updateAdViewPosition: DEFAULT_AD_VIEW_POSITION withOffset: CGPointMake(xOffset, yOffset) forAdUnitIdentifier: adUnitIdentifier adFormat: MAAdFormat.crossPromo];
-}
-
-- (void)showCrossPromoAdWithAdUnitIdentifier:(nullable NSString *)adUnitIdentifier
-{
-    [self showAdViewWithAdUnitIdentifier: adUnitIdentifier adFormat: MAAdFormat.crossPromo];
-}
-
-- (void)destroyCrossPromoAdWithAdUnitIdentifier:(nullable NSString *)adUnitIdentifier
-{
-    [self destroyAdViewWithAdUnitIdentifier: adUnitIdentifier adFormat: MAAdFormat.crossPromo];
-}
-
-- (void)hideCrossPromoAdWithAdUnitIdentifier:(nullable NSString *)adUnitIdentifier
-{
-    [self hideAdViewWithAdUnitIdentifier: adUnitIdentifier adFormat: MAAdFormat.crossPromo];
-}
-
-- (NSString *)crossPromoAdLayoutForAdUnitIdentifier:(nullable NSString *)adUnitIdentifier
-{
-    return [self adViewLayoutForAdUnitIdentifier: adUnitIdentifier adFormat: MAAdFormat.crossPromo];
-}
-
 #pragma mark - Interstitials
 
 - (void)loadInterstitialWithAdUnitIdentifier:(nullable NSString *)adUnitIdentifier
@@ -594,7 +547,7 @@ static ALUnityBackgroundCallback backgroundCallback;
 
 - (NSString *)adInfoForAdUnitIdentifier:(nullable NSString *)adUnitIdentifier
 {
-    if ( [adUnitIdentifier al_isValidString] ) return @"";
+    if ( ![adUnitIdentifier al_isValidString] ) return @"";
     
     MAAd *ad = [self adWithAdUnitIdentifier: adUnitIdentifier];
     if ( !ad ) return @"";
@@ -708,10 +661,6 @@ static ALUnityBackgroundCallback backgroundCallback;
         {
             name = @"OnMRecAdLoadedEvent";
         }
-        else if ( MAAdFormat.crossPromo == adFormat )
-        {
-            name = @"OnCrossPromoAdLoadedEvent";
-        }
         else
         {
             name = @"OnBannerAdLoadedEvent";
@@ -772,10 +721,6 @@ static ALUnityBackgroundCallback backgroundCallback;
         {
             name = @"OnMRecAdLoadFailedEvent";
         }
-        else if ( MAAdFormat.crossPromo == adFormat )
-        {
-            name = @"OnCrossPromoAdLoadFailedEvent";
-        }
         else
         {
             name = @"OnBannerAdLoadFailedEvent";
@@ -827,10 +772,6 @@ static ALUnityBackgroundCallback backgroundCallback;
     else if ( MAAdFormat.mrec == adFormat )
     {
         name = @"OnMRecAdClickedEvent";
-    }
-    else if ( MAAdFormat.crossPromo == adFormat )
-    {
-        name = @"OnCrossPromoAdClickedEvent";
     }
     else if ( MAAdFormat.interstitial == adFormat )
     {
@@ -973,10 +914,6 @@ static ALUnityBackgroundCallback backgroundCallback;
     {
         name = @"OnMRecAdExpandedEvent";
     }
-    else if ( MAAdFormat.crossPromo == adFormat )
-    {
-        name = @"OnCrossPromoAdExpandedEvent";
-    }
     else
     {
         name = @"OnBannerAdExpandedEvent";
@@ -1003,10 +940,6 @@ static ALUnityBackgroundCallback backgroundCallback;
     if ( MAAdFormat.mrec == adFormat )
     {
         name = @"OnMRecAdCollapsedEvent";
-    }
-    else if ( MAAdFormat.crossPromo == adFormat )
-    {
-        name = @"OnCrossPromoAdCollapsedEvent";
     }
     else
     {
@@ -1060,10 +993,6 @@ static ALUnityBackgroundCallback backgroundCallback;
     else if ( MAAdFormat.mrec == adFormat )
     {
         name = @"OnMRecAdRevenuePaidEvent";
-    }
-    else if ( MAAdFormat.crossPromo == adFormat )
-    {
-        name = @"OnCrossPromoAdRevenuePaidEvent";
     }
     else if ( MAAdFormat.interstitial == adFormat )
     {
@@ -1537,8 +1466,6 @@ static ALUnityBackgroundCallback backgroundCallback;
         [self.adViewPositions removeObjectForKey: adUnitIdentifier];
         [self.adViewOffsets removeObjectForKey: adUnitIdentifier];
         [self.adViewWidths removeObjectForKey: adUnitIdentifier];
-        [self.crossPromoAdViewHeights removeObjectForKey: adUnitIdentifier];
-        [self.crossPromoAdViewRotations removeObjectForKey: adUnitIdentifier];
         [self.verticalAdViewFormats removeObjectForKey: adUnitIdentifier];
         [self.disabledAdaptiveBannerAdUnitIdentifiers removeObject: adUnitIdentifier];
     });
@@ -1678,8 +1605,6 @@ static ALUnityBackgroundCallback backgroundCallback;
         CGPoint adViewOffset = [adViewPositionValue CGPointValue];
         BOOL isAdaptiveBannerDisabled = [self.disabledAdaptiveBannerAdUnitIdentifiers containsObject: adUnitIdentifier];
         BOOL isWidthPtsOverridden = self.adViewWidths[adUnitIdentifier] != nil;
-        BOOL isCrossPromoHeightPtsOverridden = self.crossPromoAdViewHeights[adUnitIdentifier] != nil;
-        BOOL isCrossPromoRotationOverridden = self.crossPromoAdViewRotations[adUnitIdentifier] != nil;
         
         UIView *superview = adView.superview;
         if ( !superview ) return;
@@ -1727,11 +1652,7 @@ static ALUnityBackgroundCallback backgroundCallback;
         //
         CGFloat adViewHeight;
         
-        if ( isCrossPromoHeightPtsOverridden )
-        {
-            adViewHeight = self.crossPromoAdViewHeights[adUnitIdentifier].floatValue;
-        }
-        else if ( (adFormat == MAAdFormat.banner || adFormat == MAAdFormat.leader) && !isAdaptiveBannerDisabled )
+        if ( (adFormat == MAAdFormat.banner || adFormat == MAAdFormat.leader) && !isAdaptiveBannerDisabled )
         {
             adViewHeight = [adFormat adaptiveSizeForWidth: adViewWidth].height;
         }
@@ -1957,11 +1878,6 @@ static ALUnityBackgroundCallback backgroundCallback;
                 [constraints addObjectsFromArray: @[[adView.bottomAnchor constraintEqualToAnchor: layoutGuide.bottomAnchor],
                                                     [adView.rightAnchor constraintEqualToAnchor: superview.rightAnchor]]];
             }
-        }
-        
-        if ( isCrossPromoRotationOverridden )
-        {
-            adView.transform = CGAffineTransformRotate(CGAffineTransformIdentity, DEGREES_TO_RADIANS(self.crossPromoAdViewRotations[adUnitIdentifier].floatValue));
         }
         
         self.adViewConstraints[adUnitIdentifier] = constraints;

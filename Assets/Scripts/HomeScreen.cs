@@ -43,7 +43,12 @@ public class HomeScreen : MonoBehaviour
 
     void Start()
     {
-        NeftaAdapterEvents.Init("5070114386870272");
+        NeftaAdapterEvents.EnableLogging(true);
+        #if UNITY_IOS
+        NeftaAdapterEvents.Init("5661184053215232");
+        #else
+        NeftaAdapterEvents.Init("5643649824063488");
+        #endif
         NeftaAdapterEvents.Record(new ProgressionEvent()
         {
             _status = Status.Start,
@@ -76,6 +81,8 @@ public class HomeScreen : MonoBehaviour
             AdjustConfig adjustConfig = new AdjustConfig("YourAppToken", AdjustEnvironment.Sandbox);
             Adjust.start(adjustConfig);
         };
+        
+        
 
         MaxSdk.SetSdkKey(MaxSdkKey);
         MaxSdk.InitializeSdk();

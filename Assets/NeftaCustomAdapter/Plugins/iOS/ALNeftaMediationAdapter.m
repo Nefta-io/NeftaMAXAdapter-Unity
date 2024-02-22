@@ -23,6 +23,7 @@ static NSMutableDictionary<NSString *, id<MAAdapterDelegate>> *_listeners;
     } else {
         NSString *appId = parameters.serverParameters[@"app_id"];
         
+        [NeftaPlugin_iOS EnableLogging: true];
         _plugin = [NeftaPlugin_iOS InitWithAppId: appId];
         
         _listeners = [[NSMutableDictionary alloc] init];
@@ -40,9 +41,10 @@ static NSMutableDictionary<NSString *, id<MAAdapterDelegate>> *_listeners;
         _plugin.OnLoad = ^(Placement *placement) {
             id<MAAdapterDelegate> listener = _listeners[placement._id];
             if (placement._type == TypesBanner) {
-                WebPlacement *webPlacement = (WebPlacement *)placement;
-                [((id<MAAdViewAdapterDelegate>)listener) didLoadAdForAdView: webPlacement._bufferWebController];
-                [_plugin ShowWithId: placement._id];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [_plugin ShowMainWithId: placement._id];
+                    [((id<MAAdViewAdapterDelegate>)listener) didLoadAdForAdView: [_plugin GetViewForPlacement: placement]];
+                });
             } else if (placement._type == TypesInterstitial) {
                 [((id<MAInterstitialAdapterDelegate>)listener) didLoadInterstitialAd];
             } else if (placement._type == TypesRewardedVideo) {
@@ -101,7 +103,7 @@ static NSMutableDictionary<NSString *, id<MAAdapterDelegate>> *_listeners;
 
 - (NSString *)adapterVersion
 {
-    return @"1.0.8";
+    return @"1.1.0";
 }
 
 - (void)loadAdViewAdForParameters:(id<MAAdapterResponseParameters>)parameters adFormat:(MAAdFormat *)adFormat andNotify:(id<MAAdViewAdapterDelegate>)delegate {
@@ -117,6 +119,8 @@ static NSMutableDictionary<NSString *, id<MAAdapterDelegate>> *_listeners;
     NSString* placementId = parameters.thirdPartyAdPlacementIdentifier;
     _listeners[placementId] = delegate;
     
+    [ALNeftaMediationAdapter ApplyRenderer: parameters];
+    
     [_plugin LoadWithId: placementId];
 }
 
@@ -128,13 +132,13 @@ static NSMutableDictionary<NSString *, id<MAAdapterDelegate>> *_listeners;
         return;
     }
     
-    [ALNeftaMediationAdapter ApplyRenderer: parameters];
-    
     [_plugin ShowWithId: placementId];
 }
 
 - (void)loadRewardedAdForParameters:(id<MAAdapterResponseParameters>)parameters andNotify:(id<MARewardedAdapterDelegate>)delegate {
     NSString* placementId = parameters.thirdPartyAdPlacementIdentifier;
+    
+    [ALNeftaMediationAdapter ApplyRenderer: parameters];
     
     _listeners[placementId] = delegate;
     [_plugin LoadWithId: placementId];
@@ -147,8 +151,6 @@ static NSMutableDictionary<NSString *, id<MAAdapterDelegate>> *_listeners;
         [delegate didFailToLoadRewardedAdWithError: MAAdapterError.adNotReady];
         return;
     }
-    
-    [ALNeftaMediationAdapter ApplyRenderer: parameters];
 
     [_plugin ShowWithId: placementId];
 }

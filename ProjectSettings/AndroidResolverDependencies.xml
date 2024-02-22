@@ -1,14 +1,16 @@
 <dependencies>
   <packages>
     <package>androidx.lifecycle:lifecycle-process:2.4.1</package>
-    <package>com.applovin:applovin-sdk:12.1.0</package>
+    <package>com.applovin:applovin-sdk:12.2.0</package>
   </packages>
   <files>
     <file>Assets/Plugins/Android/androidx.annotation.annotation-1.2.0.jar</file>
     <file>Assets/Plugins/Android/androidx.arch.core.core-common-2.1.0.jar</file>
     <file>Assets/Plugins/Android/androidx.arch.core.core-runtime-2.1.0.aar</file>
     <file>Assets/Plugins/Android/androidx.asynclayoutinflater.asynclayoutinflater-1.0.0.aar</file>
-    <file>Assets/Plugins/Android/androidx.collection.collection-1.0.0.jar</file>
+    <file>Assets/Plugins/Android/androidx.browser.browser-1.4.0.aar</file>
+    <file>Assets/Plugins/Android/androidx.collection.collection-1.1.0.jar</file>
+    <file>Assets/Plugins/Android/androidx.concurrent.concurrent-futures-1.0.0.jar</file>
     <file>Assets/Plugins/Android/androidx.coordinatorlayout.coordinatorlayout-1.0.0.aar</file>
     <file>Assets/Plugins/Android/androidx.core.core-1.2.0.aar</file>
     <file>Assets/Plugins/Android/androidx.cursoradapter.cursoradapter-1.0.0.aar</file>
@@ -34,12 +36,13 @@
     <file>Assets/Plugins/Android/androidx.tracing.tracing-1.0.0.aar</file>
     <file>Assets/Plugins/Android/androidx.versionedparcelable.versionedparcelable-1.1.0.aar</file>
     <file>Assets/Plugins/Android/androidx.viewpager.viewpager-1.0.0.aar</file>
-    <file>Assets/Plugins/Android/com.applovin.applovin-sdk-12.1.0.aar</file>
+    <file>Assets/Plugins/Android/com.applovin.applovin-sdk-12.2.0.aar</file>
     <file>Assets/Plugins/Android/com.google.android.gms.play-services-ads-identifier-17.1.0.aar</file>
     <file>Assets/Plugins/Android/com.google.android.gms.play-services-appset-16.0.0.aar</file>
     <file>Assets/Plugins/Android/com.google.android.gms.play-services-base-17.6.0.aar</file>
     <file>Assets/Plugins/Android/com.google.android.gms.play-services-basement-17.6.0.aar</file>
     <file>Assets/Plugins/Android/com.google.android.gms.play-services-tasks-17.2.1.aar</file>
+    <file>Assets/Plugins/Android/com.google.guava.listenablefuture-1.0.jar</file>
   </files>
   <settings>
     <setting name="androidAbis" value="arm64-v8a" />
