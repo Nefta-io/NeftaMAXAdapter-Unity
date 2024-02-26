@@ -296,7 +296,6 @@ SWIFT_CLASS("_TtC8NeftaSDK11BidResponse")
 @property (nonatomic, copy) NSString * _Nullable _winNoticeUrl;
 @property (nonatomic, copy) NSString * _Nullable _adMarkup;
 @property (nonatomic) enum AdMarkupTypes _adMarkupType;
-@property (nonatomic, copy) NSArray<NSString *> * _Nullable _advertiserDomain;
 @property (nonatomic, copy) NSString * _Nullable _campaignId;
 @property (nonatomic) BOOL _creativeQualityCheck;
 @property (nonatomic, copy) NSString * _Nullable _trackingClickUrl;
@@ -840,7 +839,6 @@ SWIFT_CLASS("_TtC8NeftaSDK11BidResponse")
 @property (nonatomic, copy) NSString * _Nullable _winNoticeUrl;
 @property (nonatomic, copy) NSString * _Nullable _adMarkup;
 @property (nonatomic) enum AdMarkupTypes _adMarkupType;
-@property (nonatomic, copy) NSArray<NSString *> * _Nullable _advertiserDomain;
 @property (nonatomic, copy) NSString * _Nullable _campaignId;
 @property (nonatomic) BOOL _creativeQualityCheck;
 @property (nonatomic, copy) NSString * _Nullable _trackingClickUrl;

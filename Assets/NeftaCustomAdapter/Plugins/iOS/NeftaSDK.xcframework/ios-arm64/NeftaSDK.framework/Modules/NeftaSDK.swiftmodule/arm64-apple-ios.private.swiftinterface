@@ -204,11 +204,12 @@ import _StringProcessing
   @objc public var _winNoticeUrl: Swift.String?
   @objc public var _adMarkup: Swift.String?
   @objc public var _adMarkupType: NeftaSDK.BidResponse.AdMarkupTypes
-  @objc public var _advertiserDomain: [Swift.String]?
   @objc public var _campaignId: Swift.String?
   @objc public var _creativeQualityCheck: Swift.Bool
   @objc public var _trackingClickUrl: Swift.String?
   @objc public var _redirectClickUrl: Swift.String?
+  public var _mmpImpressionTrackingUrls: [Swift.String]?
+  public var _mmpClickTrackingUrls: [Swift.String]?
   @objc override dynamic public init()
   @objc deinit
 }
