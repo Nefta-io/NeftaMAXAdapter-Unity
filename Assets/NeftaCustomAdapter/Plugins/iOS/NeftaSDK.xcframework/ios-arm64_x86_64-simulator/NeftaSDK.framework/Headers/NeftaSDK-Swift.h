@@ -486,6 +486,7 @@ SWIFT_CLASS("_TtC8NeftaSDK9Placement")
 @property (nonatomic) NSUInteger _showTime;
 @property (nonatomic) NSUInteger _timeSinceFailedLoad;
 @property (nonatomic) BOOL _isHidden;
+@property (nonatomic) BOOL _isManualPosition;
 - (BOOL)IsBidding SWIFT_WARN_UNUSED_RESULT;
 - (BOOL)IsLoading SWIFT_WARN_UNUSED_RESULT;
 - (BOOL)IsShowing SWIFT_WARN_UNUSED_RESULT;
@@ -1029,6 +1030,7 @@ SWIFT_CLASS("_TtC8NeftaSDK9Placement")
 @property (nonatomic) NSUInteger _showTime;
 @property (nonatomic) NSUInteger _timeSinceFailedLoad;
 @property (nonatomic) BOOL _isHidden;
+@property (nonatomic) BOOL _isManualPosition;
 - (BOOL)IsBidding SWIFT_WARN_UNUSED_RESULT;
 - (BOOL)IsLoading SWIFT_WARN_UNUSED_RESULT;
 - (BOOL)IsShowing SWIFT_WARN_UNUSED_RESULT;

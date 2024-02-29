@@ -37,11 +37,13 @@ static NSMutableDictionary<NSString *, id<MAAdapterDelegate>> *_listeners;
             } else if (placement._type == TypesRewardedVideo) {
                 [((id<MARewardedAdapterDelegate>)listener) didFailToLoadRewardedAdWithError: MAAdapterError.unspecified];
             }
+            [_listeners removeObjectForKey: placement._id];
         };
         _plugin.OnLoad = ^(Placement *placement) {
             id<MAAdapterDelegate> listener = _listeners[placement._id];
             if (placement._type == TypesBanner) {
                 dispatch_async(dispatch_get_main_queue(), ^{
+                    placement._isManualPosition = true;
                     [_plugin ShowMainWithId: placement._id];
                     [((id<MAAdViewAdapterDelegate>)listener) didLoadAdForAdView: [_plugin GetViewForPlacement: placement]];
                 });
@@ -88,6 +90,7 @@ static NSMutableDictionary<NSString *, id<MAAdapterDelegate>> *_listeners;
             } else if (placement._type == TypesRewardedVideo) {
                 [((id<MARewardedAdapterDelegate>)listener) didHideRewardedAd];
             }
+            [_listeners removeObjectForKey: placement._id];
         };
         
         [_plugin EnableAds: true];
@@ -96,14 +99,16 @@ static NSMutableDictionary<NSString *, id<MAAdapterDelegate>> *_listeners;
     }
 }
 
-- (NSString *)SDKVersion
-{
+- (NSString *)SDKVersion {
     return NeftaPlugin_iOS.Version;
 }
 
-- (NSString *)adapterVersion
-{
-    return @"1.1.1";
+- (NSString *)adapterVersion {
+    return @"1.1.2";
+}
+
+- (void)destroy {
+    [_plugin Close];
 }
 
 - (void)loadAdViewAdForParameters:(id<MAAdapterResponseParameters>)parameters adFormat:(MAAdFormat *)adFormat andNotify:(id<MAAdViewAdapterDelegate>)delegate {

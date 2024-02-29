@@ -179,6 +179,7 @@ import _StringProcessing
   @objc public var _showTime: Swift.UInt
   @objc public var _timeSinceFailedLoad: Swift.UInt
   @objc public var _isHidden: Swift.Bool
+  @objc public var _isManualPosition: Swift.Bool
   @objc public func IsBidding() -> Swift.Bool
   @objc public func IsLoading() -> Swift.Bool
   @objc public func IsShowing() -> Swift.Bool
@@ -287,7 +288,7 @@ import _StringProcessing
   @_Concurrency.MainActor(unsafe) @objc public func webView(_ webView: WebKit.WKWebView, didFinish navigation: WebKit.WKNavigation!)
   @_Concurrency.MainActor(unsafe) @objc override dynamic public func observeValue(forKeyPath keyPath: Swift.String?, of object: Any?, change: [Foundation.NSKeyValueChangeKey : Any]?, context: Swift.UnsafeMutableRawPointer?)
   @_Concurrency.MainActor(unsafe) public func Dispose()
-  @_Concurrency.MainActor(unsafe) public func SetFrame(rect: CoreFoundation.CGRect)
+  @_Concurrency.MainActor(unsafe) public func SetFrame(adjustedScale: Swift.Float, rect: CoreFoundation.CGRect)
   @objc deinit
 }
 extension NeftaSDK.NeftaEvents.ProgressionType : Swift.RawRepresentable {}

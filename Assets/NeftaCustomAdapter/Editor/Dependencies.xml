@@ -2,8 +2,5 @@
 <dependencies>
     <androidPackages>
         <androidPackage spec="androidx.lifecycle:lifecycle-process:2.4.1" />
-        <androidPackage spec="com.google.errorprone:error_prone_annotations:2.18.0" />
-        <androidPackage spec="androidx.annotation:annotation:1.7.1" />
-        <androidPackage spec="com.google.guava:guava:30.1-jre" />
     </androidPackages>
 </dependencies>
