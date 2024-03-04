@@ -104,7 +104,7 @@ static NSMutableDictionary<NSString *, id<MAAdapterDelegate>> *_listeners;
 }
 
 - (NSString *)adapterVersion {
-    return @"1.1.2";
+    return @"1.1.3";
 }
 
 - (void)destroy {
