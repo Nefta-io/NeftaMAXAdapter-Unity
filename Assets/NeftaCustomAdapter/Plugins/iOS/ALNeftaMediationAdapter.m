@@ -43,7 +43,6 @@ static NSMutableDictionary<NSString *, id<MAAdapterDelegate>> *_listeners;
             id<MAAdapterDelegate> listener = _listeners[placement._id];
             if (placement._type == TypesBanner) {
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    placement._isManualPosition = true;
                     [_plugin ShowMainWithId: placement._id];
                     [((id<MAAdViewAdapterDelegate>)listener) didLoadAdForAdView: [_plugin GetViewForPlacement: placement]];
                 });
@@ -104,7 +103,7 @@ static NSMutableDictionary<NSString *, id<MAAdapterDelegate>> *_listeners;
 }
 
 - (NSString *)adapterVersion {
-    return @"1.1.3";
+    return @"1.1.4";
 }
 
 - (void)destroy {
