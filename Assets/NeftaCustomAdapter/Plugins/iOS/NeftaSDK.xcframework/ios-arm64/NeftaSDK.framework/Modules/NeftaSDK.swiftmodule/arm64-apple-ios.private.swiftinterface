@@ -182,6 +182,7 @@ import _SwiftConcurrencyShims
   @objc public var _showTime: Swift.UInt
   @objc public var _timeSinceFailedLoad: Swift.UInt
   @objc public var _isHidden: Swift.Bool
+  @objc public var _isManualPosition: Swift.Bool
   @objc public func IsBidding() -> Swift.Bool
   @objc public func IsLoading() -> Swift.Bool
   @objc public func IsShowing() -> Swift.Bool
@@ -274,7 +275,7 @@ import _SwiftConcurrencyShims
   @objc public func Close(id: Swift.String)
   @objc public func Mute(_ mute: Swift.Bool)
   @objc public func ShowNuid() -> Swift.String
-  @objc(GetViewForPlacement:) public func GetViewForPlacement(placement: NeftaSDK.Placement) -> UIKit.UIView?
+  @objc(GetViewForPlacement:show:) public func GetViewForPlacement(placement: NeftaSDK.Placement, show: Swift.Bool) -> UIKit.UIView?
   @objc deinit
 }
 @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc public class NeftaPlugin_iOS : NeftaSDK.NeftaPlugin {
@@ -282,13 +283,13 @@ import _SwiftConcurrencyShims
   @objc(EnableLogging:) public static func EnableLogging(enable: Swift.Bool)
   @objc public static func Init(appId: Swift.String?) -> NeftaSDK.NeftaPlugin_iOS
   @objc public func PrepareRenderer(viewController: UIKit.UIViewController)
-  @objc public func PrepareRenderer(view: UIKit.UIView)
   @objc override public func Mute(_ mute: Swift.Bool)
-  @objc(GetViewForPlacement:) override public func GetViewForPlacement(placement: NeftaSDK.Placement) -> UIKit.UIView?
+  @objc(GetViewForPlacement:show:) override public func GetViewForPlacement(placement: NeftaSDK.Placement, show: Swift.Bool) -> UIKit.UIView?
   @objc deinit
 }
 @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc @_Concurrency.MainActor(unsafe) public class WebController : UIKit.UIView, WebKit.WKNavigationDelegate {
   @_Concurrency.MainActor(unsafe) @objc override dynamic public func layoutSubviews()
+  @_Concurrency.MainActor(unsafe) @objc override dynamic public func didMoveToSuperview()
   @_Concurrency.MainActor(unsafe) @objc public func webView(_ webView: WebKit.WKWebView, didFail navigation: WebKit.WKNavigation!, withError error: any Swift.Error)
   @_Concurrency.MainActor(unsafe) @objc public func webView(_ webView: WebKit.WKWebView, didFailProvisionalNavigation navigation: WebKit.WKNavigation!, withError error: any Swift.Error)
   @_Concurrency.MainActor(unsafe) @objc public func webView(_ webView: WebKit.WKWebView, didFinish navigation: WebKit.WKNavigation!)

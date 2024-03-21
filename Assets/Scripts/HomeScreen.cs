@@ -43,8 +43,8 @@ public class HomeScreen : MonoBehaviour
 
     void Start()
     {
-        NeftaAdapterEvents.EnableLogging(true);
         #if UNITY_IOS
+        NeftaAdapterEvents.EnableLogging(true);
         NeftaAdapterEvents.Init("5661184053215232");
         #else
         NeftaAdapterEvents.Init("5643649824063488");
@@ -82,8 +82,6 @@ public class HomeScreen : MonoBehaviour
             Adjust.start(adjustConfig);
         };
         
-        
-
         MaxSdk.SetSdkKey(MaxSdkKey);
         MaxSdk.InitializeSdk();
     }
@@ -476,6 +474,11 @@ public class HomeScreen : MonoBehaviour
 
         // MRECs are automatically sized to 300x250.
         //MaxSdk.CreateMRec(MRecAdUnitId, MaxSdkBase.AdViewPosition.BottomCenter);
+    }
+
+    private void OnApplicationPause(bool pauseStatus)
+    {
+        Debug.Log($"jojoj OnApplicationPause {pauseStatus}");
     }
 
     private void ToggleMRecVisibility()

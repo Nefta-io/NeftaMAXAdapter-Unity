@@ -5,7 +5,7 @@
 //  Created by Tomaz Treven on 09/11/2023.
 //
 
-#import <ALNeftaMediationAdapter.h>
+#import "ALNeftaMediationAdapter.h"
 #import <AppLovinSDK/MAAdapterDelegate.h>
 
 @interface ALNeftaMediationAdapter ()
@@ -16,6 +16,8 @@
 
 static NeftaPlugin_iOS *_plugin;
 static NSMutableDictionary<NSString *, id<MAAdapterDelegate>> *_listeners;
+
+NSString* _placementId;
 
 - (void)initializeWithParameters:(id<MAAdapterInitializationParameters>)parameters completionHandler:(void (^)(MAAdapterInitializationStatus, NSString *_Nullable))completionHandler {
     if (_plugin != nil) {
@@ -43,8 +45,9 @@ static NSMutableDictionary<NSString *, id<MAAdapterDelegate>> *_listeners;
             id<MAAdapterDelegate> listener = _listeners[placement._id];
             if (placement._type == TypesBanner) {
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    [_plugin ShowMainWithId: placement._id];
-                    [((id<MAAdViewAdapterDelegate>)listener) didLoadAdForAdView: [_plugin GetViewForPlacement: placement]];
+                    placement._isManualPosition = true;
+                    UIView *v = [_plugin GetViewForPlacement: placement show: true];
+                    [((id<MAAdViewAdapterDelegate>)listener) didLoadAdForAdView: v];
                 });
             } else if (placement._type == TypesInterstitial) {
                 [((id<MAInterstitialAdapterDelegate>)listener) didLoadInterstitialAd];
@@ -103,60 +106,58 @@ static NSMutableDictionary<NSString *, id<MAAdapterDelegate>> *_listeners;
 }
 
 - (NSString *)adapterVersion {
-    return @"1.1.4";
+    return @"1.1.5";
 }
 
 - (void)destroy {
-    [_plugin Close];
+    if (_placementId != nil) {
+        [_plugin CloseWithId: _placementId];
+        _placementId = nil;
+    }
 }
 
 - (void)loadAdViewAdForParameters:(id<MAAdapterResponseParameters>)parameters adFormat:(MAAdFormat *)adFormat andNotify:(id<MAAdViewAdapterDelegate>)delegate {
-    NSString* placementId = parameters.thirdPartyAdPlacementIdentifier;
-    _listeners[placementId] = delegate;
-    
+    NSString *pid = parameters.thirdPartyAdPlacementIdentifier;
+    _listeners[pid] = delegate;
     [ALNeftaMediationAdapter ApplyRenderer: parameters];
     
-    [_plugin LoadWithId: placementId];
+    [_plugin LoadWithId: pid];
 }
 
 - (void)loadInterstitialAdForParameters:(id<MAAdapterResponseParameters>)parameters andNotify:(id<MAInterstitialAdapterDelegate>)delegate {
-    NSString* placementId = parameters.thirdPartyAdPlacementIdentifier;
-    _listeners[placementId] = delegate;
-    
+    NSString *pid = parameters.thirdPartyAdPlacementIdentifier;
+    _listeners[pid] = delegate;
     [ALNeftaMediationAdapter ApplyRenderer: parameters];
     
-    [_plugin LoadWithId: placementId];
+    [_plugin LoadWithId: pid];
 }
 
 - (void)showInterstitialAdForParameters:(id<MAAdapterResponseParameters>)parameters andNotify:(id<MAInterstitialAdapterDelegate>)delegate {
-    NSString* placementId = parameters.thirdPartyAdPlacementIdentifier;
-    
-    if (![_plugin IsReadyWithId: placementId]) {
+    _placementId = parameters.thirdPartyAdPlacementIdentifier;
+    if (![_plugin IsReadyWithId: _placementId]) {
         [delegate didFailToDisplayInterstitialAdWithError: MAAdapterError.adNotReady];
         return;
     }
     
-    [_plugin ShowWithId: placementId];
+    [_plugin ShowWithId: _placementId];
 }
 
 - (void)loadRewardedAdForParameters:(id<MAAdapterResponseParameters>)parameters andNotify:(id<MARewardedAdapterDelegate>)delegate {
-    NSString* placementId = parameters.thirdPartyAdPlacementIdentifier;
-    
+    NSString *pid = parameters.thirdPartyAdPlacementIdentifier;
     [ALNeftaMediationAdapter ApplyRenderer: parameters];
     
-    _listeners[placementId] = delegate;
-    [_plugin LoadWithId: placementId];
+    _listeners[pid] = delegate;
+    [_plugin LoadWithId: pid];
 }
 
 - (void)showRewardedAdForParameters:(id<MAAdapterResponseParameters>)parameters andNotify:(id<MARewardedAdapterDelegate>)delegate {
-    NSString* placementId = parameters.thirdPartyAdPlacementIdentifier;
-    
-    if (![_plugin IsReadyWithId: placementId]) {
+    _placementId = parameters.thirdPartyAdPlacementIdentifier;
+    if (![_plugin IsReadyWithId: _placementId]) {
         [delegate didFailToLoadRewardedAdWithError: MAAdapterError.adNotReady];
         return;
     }
 
-    [_plugin ShowWithId: placementId];
+    [_plugin ShowWithId: _placementId];
 }
 
 + (void)ApplyRenderer:(id<MAAdapterResponseParameters>)parameters {

@@ -475,7 +475,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable OnLog)
 - (void)CloseWithId:(NSString * _Nonnull)id;
 - (void)Mute:(BOOL)mute;
 - (NSString * _Nonnull)ShowNuid SWIFT_WARN_UNUSED_RESULT;
-- (UIView * _Nullable)GetViewForPlacement:(Placement * _Nonnull)placement SWIFT_WARN_UNUSED_RESULT;
+- (UIView * _Nullable)GetViewForPlacement:(Placement * _Nonnull)placement show:(BOOL)show SWIFT_WARN_UNUSED_RESULT;
 @end
 
 @class UIViewController;
@@ -488,9 +488,8 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NeftaPlugin_iOS * _Nul
 + (void)EnableLogging:(BOOL)enable;
 + (NeftaPlugin_iOS * _Nonnull)InitWithAppId:(NSString * _Nullable)appId SWIFT_WARN_UNUSED_RESULT;
 - (void)PrepareRendererWithViewController:(UIViewController * _Nonnull)viewController;
-- (void)PrepareRendererWithView:(UIView * _Nonnull)view;
 - (void)Mute:(BOOL)mute;
-- (UIView * _Nullable)GetViewForPlacement:(Placement * _Nonnull)placement SWIFT_WARN_UNUSED_RESULT;
+- (UIView * _Nullable)GetViewForPlacement:(Placement * _Nonnull)placement show:(BOOL)show SWIFT_WARN_UNUSED_RESULT;
 @end
 
 
@@ -509,6 +508,7 @@ SWIFT_CLASS("_TtC8NeftaSDK9Placement")
 @property (nonatomic) NSUInteger _showTime;
 @property (nonatomic) NSUInteger _timeSinceFailedLoad;
 @property (nonatomic) BOOL _isHidden;
+@property (nonatomic) BOOL _isManualPosition;
 - (BOOL)IsBidding SWIFT_WARN_UNUSED_RESULT;
 - (BOOL)IsLoading SWIFT_WARN_UNUSED_RESULT;
 - (BOOL)IsShowing SWIFT_WARN_UNUSED_RESULT;
@@ -547,6 +547,7 @@ SWIFT_CLASS("_TtC8NeftaSDK13WebController")
 - (nonnull instancetype)initWithFrame:(CGRect)frame SWIFT_UNAVAILABLE;
 - (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)aDecoder SWIFT_UNAVAILABLE;
 - (void)layoutSubviews;
+- (void)didMoveToSuperview;
 - (void)webView:(WKWebView * _Nonnull)webView didFailNavigation:(WKNavigation * _Null_unspecified)navigation withError:(NSError * _Nonnull)error;
 - (void)webView:(WKWebView * _Nonnull)webView didFailProvisionalNavigation:(WKNavigation * _Null_unspecified)navigation withError:(NSError * _Nonnull)error;
 - (void)webView:(WKWebView * _Nonnull)webView didFinishNavigation:(WKNavigation * _Null_unspecified)navigation;
@@ -1043,7 +1044,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable OnLog)
 - (void)CloseWithId:(NSString * _Nonnull)id;
 - (void)Mute:(BOOL)mute;
 - (NSString * _Nonnull)ShowNuid SWIFT_WARN_UNUSED_RESULT;
-- (UIView * _Nullable)GetViewForPlacement:(Placement * _Nonnull)placement SWIFT_WARN_UNUSED_RESULT;
+- (UIView * _Nullable)GetViewForPlacement:(Placement * _Nonnull)placement show:(BOOL)show SWIFT_WARN_UNUSED_RESULT;
 @end
 
 @class UIViewController;
@@ -1056,9 +1057,8 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NeftaPlugin_iOS * _Nul
 + (void)EnableLogging:(BOOL)enable;
 + (NeftaPlugin_iOS * _Nonnull)InitWithAppId:(NSString * _Nullable)appId SWIFT_WARN_UNUSED_RESULT;
 - (void)PrepareRendererWithViewController:(UIViewController * _Nonnull)viewController;
-- (void)PrepareRendererWithView:(UIView * _Nonnull)view;
 - (void)Mute:(BOOL)mute;
-- (UIView * _Nullable)GetViewForPlacement:(Placement * _Nonnull)placement SWIFT_WARN_UNUSED_RESULT;
+- (UIView * _Nullable)GetViewForPlacement:(Placement * _Nonnull)placement show:(BOOL)show SWIFT_WARN_UNUSED_RESULT;
 @end
 
 
@@ -1077,6 +1077,7 @@ SWIFT_CLASS("_TtC8NeftaSDK9Placement")
 @property (nonatomic) NSUInteger _showTime;
 @property (nonatomic) NSUInteger _timeSinceFailedLoad;
 @property (nonatomic) BOOL _isHidden;
+@property (nonatomic) BOOL _isManualPosition;
 - (BOOL)IsBidding SWIFT_WARN_UNUSED_RESULT;
 - (BOOL)IsLoading SWIFT_WARN_UNUSED_RESULT;
 - (BOOL)IsShowing SWIFT_WARN_UNUSED_RESULT;
@@ -1115,6 +1116,7 @@ SWIFT_CLASS("_TtC8NeftaSDK13WebController")
 - (nonnull instancetype)initWithFrame:(CGRect)frame SWIFT_UNAVAILABLE;
 - (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)aDecoder SWIFT_UNAVAILABLE;
 - (void)layoutSubviews;
+- (void)didMoveToSuperview;
 - (void)webView:(WKWebView * _Nonnull)webView didFailNavigation:(WKNavigation * _Null_unspecified)navigation withError:(NSError * _Nonnull)error;
 - (void)webView:(WKWebView * _Nonnull)webView didFailProvisionalNavigation:(WKNavigation * _Null_unspecified)navigation withError:(NSError * _Nonnull)error;
 - (void)webView:(WKWebView * _Nonnull)webView didFinishNavigation:(WKNavigation * _Null_unspecified)navigation;
