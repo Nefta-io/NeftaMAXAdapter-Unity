@@ -14,7 +14,7 @@
 		</data>
 		<key>Headers/NeftaSDK-Swift.h</key>
 		<data>
-		pdXpd8p48CaphfAurrKOO4Eqcf0=
+		2SJGeUyJbuTCsHF/QfyYNiFxFgw=
 		</data>
 		<key>Info.plist</key>
 		<data>
@@ -22,11 +22,11 @@
 		</data>
 		<key>Modules/NeftaSDK.swiftmodule/arm64-apple-ios.abi.json</key>
 		<data>
-		Q/I8zqlaEiWwGB7fOmPn0z5xrAc=
+		wDqIj6ggui/qVCv17kekcfuzyd4=
 		</data>
 		<key>Modules/NeftaSDK.swiftmodule/arm64-apple-ios.private.swiftinterface</key>
 		<data>
-		+b9YttoZS50ybjczZ+nNE+pwZpw=
+		utzcdMkQD6+c5yAPZx4M2smNskQ=
 		</data>
 		<key>Modules/NeftaSDK.swiftmodule/arm64-apple-ios.swiftdoc</key>
 		<data>
@@ -34,15 +34,19 @@
 		</data>
 		<key>Modules/NeftaSDK.swiftmodule/arm64-apple-ios.swiftinterface</key>
 		<data>
-		+b9YttoZS50ybjczZ+nNE+pwZpw=
+		utzcdMkQD6+c5yAPZx4M2smNskQ=
 		</data>
 		<key>Modules/NeftaSDK.swiftmodule/arm64-apple-ios.swiftmodule</key>
 		<data>
-		YCWDIcwMwdj2QPbz+4W7HZXzMEM=
+		AZHr2HQBGCp5Nxqdtx0MrEbAWws=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
 		1wJ2euo2cCQXhm9sPPnDs0nAOEo=
+		</data>
+		<key>PrivacyInfo.xcprivacy</key>
+		<data>
+		XsQ9g40kqXXgaroOyuDec5daloo=
 		</data>
 	</dict>
 	<key>files2</key>
@@ -65,21 +69,21 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			y9Fb7XFLiWppGUXd9OxjNoXeMa29J5UzeN61zbuZGlQ=
+			bazsb8tOnoXQCdgZnUmrGB9VfYFpcdV9CxjCsDspO40=
 			</data>
 		</dict>
 		<key>Modules/NeftaSDK.swiftmodule/arm64-apple-ios.abi.json</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			7ZdZAdRoNuSJ1sSaU3CECmFlqZd00yyvpJP1nYtPuiw=
+			L8LswQCN0+v+bM8Bh9F1SNIHYtc36GpeMT9nhU/dqYE=
 			</data>
 		</dict>
 		<key>Modules/NeftaSDK.swiftmodule/arm64-apple-ios.private.swiftinterface</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			tZ9rD/grUSzya60RC6R9/Y3wOTeoWuph+mEvw9UlIEM=
+			2KH8DTQTwzGng1HlmglC9teR29Xaq83jAcB+/6PnV/Y=
 			</data>
 		</dict>
 		<key>Modules/NeftaSDK.swiftmodule/arm64-apple-ios.swiftdoc</key>
@@ -93,14 +97,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			tZ9rD/grUSzya60RC6R9/Y3wOTeoWuph+mEvw9UlIEM=
+			2KH8DTQTwzGng1HlmglC9teR29Xaq83jAcB+/6PnV/Y=
 			</data>
 		</dict>
 		<key>Modules/NeftaSDK.swiftmodule/arm64-apple-ios.swiftmodule</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			zMqnBo9kYxWWVD5JspgIBdz0mpSVFq5C2uZI6Xx93Xc=
+			dOFSQXHcE9R4saJOiMqUoBRDRmFvA0qplbWVSQPh2PQ=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>
@@ -108,6 +112,13 @@
 			<key>hash2</key>
 			<data>
 			PwPXqGYjX1qHXSrWpK9HbgP8440tgqtUNbdh3YioyeI=
+			</data>
+		</dict>
+		<key>PrivacyInfo.xcprivacy</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			Ya4W8v9ef3T/FJBHUjs6Gp7IwZCIBAysSMrfvHwLES8=
 			</data>
 		</dict>
 	</dict>

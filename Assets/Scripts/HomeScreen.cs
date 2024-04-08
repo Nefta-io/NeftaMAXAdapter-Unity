@@ -476,11 +476,6 @@ public class HomeScreen : MonoBehaviour
         //MaxSdk.CreateMRec(MRecAdUnitId, MaxSdkBase.AdViewPosition.BottomCenter);
     }
 
-    private void OnApplicationPause(bool pauseStatus)
-    {
-        Debug.Log($"jojoj OnApplicationPause {pauseStatus}");
-    }
-
     private void ToggleMRecVisibility()
     {
         if (!isMRecShowing)

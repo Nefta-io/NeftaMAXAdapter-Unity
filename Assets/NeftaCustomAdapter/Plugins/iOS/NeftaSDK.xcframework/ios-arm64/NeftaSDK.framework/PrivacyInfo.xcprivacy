@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSPrivacyCollectedDataTypePurposes</key>
+	<dict>
+		<key>NSPrivacyCollectedDataTypePurposeThirdPartyAdvertising</key>
+		<string></string>
+		<key>NSPrivacyCollectedDataTypePurposeAnalytics</key>
+		<string></string>
+	</dict>
+	<key>NSPrivacyCollectionDataTypes</key>
+	<dict>
+		<key>NSPrivacyCollectedDataTypeGameplayContent</key>
+		<string></string>
+		<key>NSPrivacyCollectedDataTypeProductInteraction</key>
+		<string></string>
+		<key>NSPrivacyCollectedDataTypeAdvertisingData</key>
+		<string></string>
+		<key>NSPrivacyCollectedDataTypeOtherUsageData</key>
+		<string></string>
+	</dict>
+</dict>
+</plist>

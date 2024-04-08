@@ -15,6 +15,7 @@ import WebKit
 import _Concurrency
 import _StringProcessing
 import _SwiftConcurrencyShims
+import os
 @_hasMissingDesignatedInitializers @objc public class NeftaEvents : ObjectiveC.NSObject {
   @objc public enum ProgressionType : Swift.Int, Swift.Hashable {
     case Achievement
@@ -122,8 +123,10 @@ import _SwiftConcurrencyShims
   @objc public func AddSpendEvent(category: NeftaSDK.NeftaEvents.ResourceCategory, method: NeftaSDK.NeftaEvents.SpendMethod, name: Swift.String?, quantity: Swift.Int)
   @objc public func AddSpendEvent(category: NeftaSDK.NeftaEvents.ResourceCategory, method: NeftaSDK.NeftaEvents.SpendMethod, name: Swift.String?, quantity: Swift.Int, customPayload: Swift.String?)
   @objc public enum SessionCategory : Swift.Int {
+    case SessionStart
     case AccountConnected
     case AccountUpgraded
+    case Heartbeat
     public var _value: Swift.String? {
       get
     }
@@ -179,7 +182,6 @@ import _SwiftConcurrencyShims
   @objc public var _bidTime: Swift.UInt
   @objc public var _loadTime: Swift.UInt
   @objc public var _showTime: Swift.UInt
-  @objc public var _timeSinceFailedLoad: Swift.UInt
   @objc public var _isHidden: Swift.Bool
   @objc public var _isManualPosition: Swift.Bool
   @objc public func IsBidding() -> Swift.Bool

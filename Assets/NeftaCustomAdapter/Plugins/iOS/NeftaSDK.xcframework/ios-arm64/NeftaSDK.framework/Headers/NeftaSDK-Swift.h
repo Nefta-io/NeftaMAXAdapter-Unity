@@ -413,8 +413,10 @@ typedef SWIFT_ENUM(NSInteger, SpendMethod, open) {
 };
 
 typedef SWIFT_ENUM(NSInteger, SessionCategory, open) {
-  SessionCategoryAccountConnected = 0,
-  SessionCategoryAccountUpgraded = 1,
+  SessionCategorySessionStart = 0,
+  SessionCategoryAccountConnected = 1,
+  SessionCategoryAccountUpgraded = 2,
+  SessionCategoryHeartbeat = 3,
 };
 
 @class Placement;
@@ -506,7 +508,6 @@ SWIFT_CLASS("_TtC8NeftaSDK9Placement")
 @property (nonatomic) NSUInteger _bidTime;
 @property (nonatomic) NSUInteger _loadTime;
 @property (nonatomic) NSUInteger _showTime;
-@property (nonatomic) NSUInteger _timeSinceFailedLoad;
 @property (nonatomic) BOOL _isHidden;
 @property (nonatomic) BOOL _isManualPosition;
 - (BOOL)IsBidding SWIFT_WARN_UNUSED_RESULT;
