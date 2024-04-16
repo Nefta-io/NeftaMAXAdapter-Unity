@@ -155,7 +155,7 @@ NSString* _placementId;
 }
 
 - (NSString *)adapterVersion {
-    return @"1.1.7";
+    return @"1.1.8";
 }
 
 - (void)destroy {

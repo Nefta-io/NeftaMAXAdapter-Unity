@@ -25,7 +25,7 @@ namespace NeftaCustomAdapter
         private static extern void NeftaPlugin_Record(IntPtr instance, string recordedEvent);
 
         [DllImport ("__Internal")]
-        private static extern string NeftaPlugin_ShowNuid(IntPtr instance);
+        private static extern string NeftaPlugin_GetNuid(IntPtr instance, bool present);
 
         private static IntPtr _plugin;
 #elif UNITY_ANDROID
@@ -93,14 +93,14 @@ namespace NeftaCustomAdapter
 #endif
         }
         
-        public static string ShowNuid()
+        public static string GetNuid(bool present)
         {
             string nuid = null;
 #if UNITY_EDITOR
 #elif UNITY_IOS
-            nuid = NeftaPlugin_ShowNuid(_plugin);
+            nuid = NeftaPlugin_GetNuid(_plugin, present);
 #elif UNITY_ANDROID
-            nuid = _plugin.Call<string>("ShowNuid");
+            nuid = _plugin.Call<string>("GetNuid", present);
 #endif
             return nuid;
         }

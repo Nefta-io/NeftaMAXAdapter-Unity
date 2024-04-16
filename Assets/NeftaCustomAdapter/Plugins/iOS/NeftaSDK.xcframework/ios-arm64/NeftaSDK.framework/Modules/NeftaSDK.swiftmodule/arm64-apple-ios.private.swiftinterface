@@ -253,9 +253,6 @@ import os
   @objc public var IOnClick: NeftaSDK.NeftaPlugin.IOnChangeBlock?
   @objc public var IOnClose: NeftaSDK.NeftaPlugin.IOnChangeBlock?
   @objc public var IOnReward: NeftaSDK.NeftaPlugin.IOnChangeBlock?
-  @objc public func GetToolboxUser() -> Swift.String?
-  @objc public func SetToolboxUser(json: Swift.String)
-  @objc(SetCustomBatchSize:) public func SetCustomBatchSize(newBatchSize: Swift.Int)
   @objc public func Record(event: Swift.String)
   @objc(EnableAds:) public func EnableAds(enable: Swift.Bool)
   @objc public func EnableBanner(enable: Swift.Bool)
@@ -275,7 +272,7 @@ import os
   @objc public func Close()
   @objc public func Close(id: Swift.String)
   @objc public func Mute(_ mute: Swift.Bool)
-  @objc public func ShowNuid() -> Swift.String
+  @objc public func GetNuid(present: Swift.Bool) -> Swift.String
   @objc(GetViewForPlacement:show:) public func GetViewForPlacement(placement: NeftaSDK.Placement, show: Swift.Bool) -> UIKit.UIView?
   @objc deinit
 }

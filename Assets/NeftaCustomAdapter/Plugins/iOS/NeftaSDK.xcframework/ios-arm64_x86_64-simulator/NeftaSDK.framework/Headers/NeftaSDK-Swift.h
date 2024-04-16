@@ -454,9 +454,6 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable OnLog)
 @property (nonatomic, copy) void (^ _Nullable IOnReward)(NSString * _Nonnull);
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
-- (NSString * _Nullable)GetToolboxUser SWIFT_WARN_UNUSED_RESULT;
-- (void)SetToolboxUserWithJson:(NSString * _Nonnull)json;
-- (void)SetCustomBatchSize:(NSInteger)newBatchSize;
 - (void)RecordWithEvent:(NSString * _Nonnull)event;
 - (void)EnableAds:(BOOL)enable;
 - (void)EnableBannerWithEnable:(BOOL)enable;
@@ -476,7 +473,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable OnLog)
 - (void)Close;
 - (void)CloseWithId:(NSString * _Nonnull)id;
 - (void)Mute:(BOOL)mute;
-- (NSString * _Nonnull)ShowNuid SWIFT_WARN_UNUSED_RESULT;
+- (NSString * _Nonnull)GetNuidWithPresent:(BOOL)present SWIFT_WARN_UNUSED_RESULT;
 - (UIView * _Nullable)GetViewForPlacement:(Placement * _Nonnull)placement show:(BOOL)show SWIFT_WARN_UNUSED_RESULT;
 @end
 
@@ -1024,9 +1021,6 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable OnLog)
 @property (nonatomic, copy) void (^ _Nullable IOnReward)(NSString * _Nonnull);
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
-- (NSString * _Nullable)GetToolboxUser SWIFT_WARN_UNUSED_RESULT;
-- (void)SetToolboxUserWithJson:(NSString * _Nonnull)json;
-- (void)SetCustomBatchSize:(NSInteger)newBatchSize;
 - (void)RecordWithEvent:(NSString * _Nonnull)event;
 - (void)EnableAds:(BOOL)enable;
 - (void)EnableBannerWithEnable:(BOOL)enable;
@@ -1046,7 +1040,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable OnLog)
 - (void)Close;
 - (void)CloseWithId:(NSString * _Nonnull)id;
 - (void)Mute:(BOOL)mute;
-- (NSString * _Nonnull)ShowNuid SWIFT_WARN_UNUSED_RESULT;
+- (NSString * _Nonnull)GetNuidWithPresent:(BOOL)present SWIFT_WARN_UNUSED_RESULT;
 - (UIView * _Nullable)GetViewForPlacement:(Placement * _Nonnull)placement show:(BOOL)show SWIFT_WARN_UNUSED_RESULT;
 @end
 
