@@ -1,6 +1,10 @@
 using System;
+using System.IO;
+using System.IO.Compression;
+using System.Xml;
 using UnityEditor;
 using UnityEngine;
+using UnityEditor.iOS.Xcode;
 
 namespace NeftaCustomAdapter.Editor
 {
@@ -9,6 +13,12 @@ namespace NeftaCustomAdapter.Editor
     {
         private NeftaConfiguration _configuration;
         private bool _isLoggingEnabled;
+
+        private string _error;
+        private string _androidAdapterVersion;
+        private string _androidVersion;
+        private string _iosAdapterVersion;
+        private string _iosVersion;
         
         private static PluginImporter GetImporter(bool debug)
         {
@@ -29,6 +39,10 @@ namespace NeftaCustomAdapter.Editor
                 EditorUtility.SetDirty(_configuration);
                 AssetDatabase.SaveAssetIfDirty(_configuration);
             }
+            
+            _error = null;
+            GetAndroidVersions();
+            GetIosVersions();
         }
 
         public void OnDisable()
@@ -38,6 +52,26 @@ namespace NeftaCustomAdapter.Editor
         
         public override void OnInspectorGUI()
         {
+            if (_error != null)
+            {
+                EditorGUILayout.LabelField(_error, EditorStyles.helpBox);
+                return;
+            }
+            
+            if (_androidAdapterVersion != _iosAdapterVersion)
+            {
+                DrawVersion("Nefta MAX Android Custom Adapter version", _androidAdapterVersion);
+                DrawVersion("Nefta SDK Android version", _androidVersion);
+                EditorGUILayout.Space(5);
+                DrawVersion("Nefta MAX iOS Custom Adapter version", _iosAdapterVersion);
+                DrawVersion("Nefta SDK iOS version", _iosVersion);
+            }
+            else
+            {
+                DrawVersion("Nefta MAX Custom Adapter version", _androidAdapterVersion);
+                DrawVersion("Nefta SDK version", _androidVersion);
+            }
+            
             base.OnInspectorGUI();
             if (_isLoggingEnabled != _configuration._isLoggingEnabled)
             {
@@ -108,6 +142,104 @@ namespace NeftaCustomAdapter.Editor
                 Debug.LogError($"Error exporting {packageName}: {e.Message}");   
             }
         }
-        
+
+        private static void DrawVersion(string label, string version)
+        {
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField(label); 
+            EditorGUILayout.LabelField(version, EditorStyles.boldLabel, GUILayout.Width(60)); 
+            EditorGUILayout.EndHorizontal();
+        }
+
+        private void GetAndroidVersions()
+        {
+            var guids = AssetDatabase.FindAssets("NeftaMaxAdapter");
+            if (guids.Length == 0)
+            {
+                _error = "NeftaMaxAdapter AARs not found in project";
+                return;
+            }
+            if (guids.Length > 2)
+            {
+                _error = "Multiple instances of NeftaMaxAdapter AARs found in project";
+                return;
+            }
+            var aarPath = AssetDatabase.GUIDToAssetPath(guids[0]);
+            using ZipArchive aar = ZipFile.OpenRead(aarPath);
+            ZipArchiveEntry manifestEntry = aar.GetEntry("AndroidManifest.xml");
+            if (manifestEntry == null)
+            {
+                _error = "Nefta SDK AAR seems to be corrupted";
+                return;
+            }
+            using Stream manifestStream = manifestEntry.Open();
+            XmlDocument manifest = new XmlDocument();
+            manifest.Load(manifestStream);
+            var root = manifest.DocumentElement;
+            if (root == null)
+            {
+                _error = "Nefta SDK AAR seems to be corrupted";
+                return;
+            }
+            _androidAdapterVersion = root.Attributes["android:versionName"].Value;
+            var metaNodes = root.SelectNodes("/manifest/application/meta-data");
+            foreach (XmlNode metaNode in metaNodes)
+            {
+                var name = metaNode.Attributes["android:name"];
+                if (name.Value == "NeftaSDKVersion")
+                {
+                    _androidVersion = metaNode.Attributes["android:value"].Value;
+                    break;
+                }
+            }
+        }
+
+        private void GetIosVersions()
+        {
+            var guids = AssetDatabase.FindAssets("ALNeftaMediationAdapter");
+            if (guids.Length == 0)
+            {
+                _error = "ALNeftaMediationAdapter not found in project";
+                return;
+            }
+            if (guids.Length > 2)
+            {
+                _error = "Multiple instances of ALNeftaMediationAdapter found in project";
+                return;
+            }
+            var wrapperPath = AssetDatabase.GUIDToAssetPath(guids[0]);
+            if (wrapperPath.EndsWith(".h"))
+            {
+                wrapperPath = AssetDatabase.GUIDToAssetPath(guids[1]);
+            }
+            using StreamReader reader = new StreamReader(wrapperPath);
+            string line;
+            while ((line = reader.ReadLine()) != null)
+            {
+                if (line.Contains("return @\""))
+                {
+                    var start = line.IndexOf('"') + 1;
+                    var end = line.LastIndexOf('"');
+                    _iosAdapterVersion = line.Substring(start, end - start);
+                    break;
+                }
+            }
+            
+            guids = AssetDatabase.FindAssets("NeftaSDK.xcframework");
+            if (guids.Length == 0)
+            {
+                _error = "NeftaSDK.xcframework not found in project";
+                return;
+            }
+            if (guids.Length > 1)
+            {
+                _error = "Multiple instances of NeftaSDK.xcframework found in project";
+                return;
+            }
+            var frameworkPath = AssetDatabase.GUIDToAssetPath(guids[0]);
+            var plist = new PlistDocument();
+            plist.ReadFromFile(frameworkPath + "/Info.plist");
+            _iosVersion = plist.root["Version"].AsString();
+        }
     }
 }

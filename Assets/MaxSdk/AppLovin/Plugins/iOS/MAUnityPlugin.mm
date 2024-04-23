@@ -15,13 +15,13 @@
 @property (assign, readonly, getter=al_isValidString) BOOL al_validString;
 @end
 
-UIView* UnityGetGLView();
-
 // When native code plugin is implemented in .mm / .cpp file, then functions
 // should be surrounded with extern "C" block to conform C function naming rules
 extern "C"
 {
     static NSString *const TAG = @"MAUnityPlugin";
+
+    UIView* UnityGetGLView();
     
     static ALSdk *_sdk;
     static MAUnityAdManager *_adManager;
@@ -1193,6 +1193,13 @@ extern "C"
                 _extraParametersToSet[stringKey] = NSSTRING(value);
             }
         }
+    }
+
+    int * _MaxGetSafeAreaInsets()
+    {
+        UIEdgeInsets safeAreaInsets = UnityGetGLView().safeAreaInsets;
+        static int insets[4] = {(int) safeAreaInsets.left, (int) safeAreaInsets.top, (int) safeAreaInsets.right, (int) safeAreaInsets.bottom};
+        return insets;
     }
     
     void _MaxShowCmpForExistingUser()
