@@ -36,12 +36,8 @@ namespace Nefta.Core.Events
         /// </summary>
         public SpendMethod _method;
         
-        public override RecordedEvent GetRecordedEvent()
-        {
-            var spendEvent = base.GetRecordedEvent();
-            spendEvent._type = "spend";
-            spendEvent._subCategory = MethodToString[_method];
-            return spendEvent;
-        }
+        internal override string _eventType => "spend";
+        
+        internal override string _subCategory => MethodToString[_method];
     }
 }

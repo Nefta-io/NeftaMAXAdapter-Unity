@@ -35,13 +35,9 @@ namespace Nefta.Core.Events
         /// The method how or where the player received resources
         /// </summary>
         public ReceiveMethod _method;
+
+        internal override string _eventType => "receive";
         
-        public override RecordedEvent GetRecordedEvent()
-        {
-            var receiveEvent = base.GetRecordedEvent();
-            receiveEvent._type = "receive";
-            receiveEvent._subCategory = MethodToString[_method];
-            return receiveEvent;
-        }
+        internal override string _subCategory => MethodToString[_method];
     }
 }

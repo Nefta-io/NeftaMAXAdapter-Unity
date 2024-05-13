@@ -1,7 +1,6 @@
 // swift-interface-format-version: 1.0
-// swift-compiler-version: Apple Swift version 5.9.2 (swiftlang-5.9.2.2.56 clang-1500.1.0.2.5)
-// swift-module-flags: -target x86_64-apple-ios11.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -Onone -module-name NeftaSDK
-// swift-module-flags-ignorable: -enable-bare-slash-regex
+// swift-compiler-version: Apple Swift version 5.10 (swiftlang-5.10.0.13 clang-1500.3.9.4)
+// swift-module-flags: -target x86_64-apple-ios11.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -Onone -enable-bare-slash-regex -module-name NeftaSDK
 import AVKit
 import CoreTelephony
 import DeveloperToolsSupport
@@ -137,13 +136,7 @@ import os
     }
   }
   @objc public func AddSessionEvent(category: NeftaSDK.NeftaEvents.SessionCategory)
-  @objc public func AddSessionEvent(category: NeftaSDK.NeftaEvents.SessionCategory, name: Swift.String?, value: Swift.Int, customPayload: Swift.String?)
-  @objc deinit
-}
-@_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc public class WebPlacement : NeftaSDK.Placement {
-  @objc deinit
-}
-@_hasMissingDesignatedInitializers @objc public class VideoPlacement : NeftaSDK.Placement {
+  @objc public func AddSessionEvent(category: NeftaSDK.NeftaEvents.SessionCategory, name: Swift.String?, value: Swift.Int, customPayload: Swift.String?, log: Swift.Bool)
   @objc deinit
 }
 @_hasMissingDesignatedInitializers @objc public class Placement : ObjectiveC.NSObject {
@@ -274,6 +267,7 @@ import os
   @objc public func Mute(_ mute: Swift.Bool)
   @objc public func GetNuid(present: Swift.Bool) -> Swift.String
   @objc(GetViewForPlacement:show:) public func GetViewForPlacement(placement: NeftaSDK.Placement, show: Swift.Bool) -> UIKit.UIView?
+  @objc public func SetOverride(url: Swift.String)
   @objc deinit
 }
 @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc public class NeftaPlugin_iOS : NeftaSDK.NeftaPlugin {
@@ -285,7 +279,7 @@ import os
   @objc(GetViewForPlacement:show:) override public func GetViewForPlacement(placement: NeftaSDK.Placement, show: Swift.Bool) -> UIKit.UIView?
   @objc deinit
 }
-@_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc @_Concurrency.MainActor(unsafe) public class WebController : UIKit.UIView, WebKit.WKNavigationDelegate {
+@_hasMissingDesignatedInitializers @objc @_Concurrency.MainActor(unsafe) public class WebController : UIKit.UIView, WebKit.WKNavigationDelegate {
   @_Concurrency.MainActor(unsafe) @objc override dynamic public func layoutSubviews()
   @_Concurrency.MainActor(unsafe) @objc override dynamic public func didMoveToSuperview()
   @_Concurrency.MainActor(unsafe) @objc public func webView(_ webView: WebKit.WKWebView, didFail navigation: WebKit.WKNavigation!, withError error: any Swift.Error)

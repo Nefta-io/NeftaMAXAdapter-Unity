@@ -13,7 +13,10 @@
 #import <NeftaSDK/NeftaSDK-Swift.h>
 
 @interface ALNeftaMediationAdapter : ALMediationAdapter <MAAdViewAdapter, MAInterstitialAdapter, MARewardedAdapter>
-
+@property(nonatomic, strong) id<MAAdViewAdapterDelegate> bL;
+@property(nonatomic, strong) NSString* placementId;
+@property(nonatomic) int state;
+@property(nonatomic, strong) id<MAAdapterDelegate> listener;
 + (void)ApplyRenderer:(id<MAAdapterResponseParameters>)parameters;
 @end
 

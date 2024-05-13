@@ -8,35 +8,14 @@
 #import "ALNeftaMediationAdapter.h"
 #import <AppLovinSDK/MAAdapterDelegate.h>
 
-@interface MListener : NSObject
-@property (nonatomic, strong) NSString* placementId;
-@property (nonatomic) int state;
-@property (nonatomic, strong) id<MAAdapterDelegate> listener;
--(instancetype)initWithId:(NSString *)placementId listener:(id<MAAdapterDelegate>)listener;
-@end
-@implementation MListener
--(instancetype)initWithId:(NSString *)placementId listener:(id<MAAdapterDelegate>)listener {
-    self = [super init];
-    if (self) {
-        _placementId = placementId;
-        _state = 0;
-        _listener = listener;
-    }
-    return self;
-}
-@end
-
 @interface ALNeftaMediationAdapter ()
 
 @end
 @implementation ALNeftaMediationAdapter
 
 static NeftaPlugin_iOS *_plugin;
-static NSMutableArray *_listeners;
+static NSMutableArray *_adapters;
 static ALNeftaMediationAdapter *_lastBanner;
-
-id<MAAdViewAdapterDelegate> _bL;
-NSString* _placementId;
 
 - (void)initializeWithParameters:(id<MAAdapterInitializationParameters>)parameters completionHandler:(void (^)(MAAdapterInitializationStatus, NSString *_Nullable))completionHandler {
     if (_plugin != nil) {
@@ -46,99 +25,99 @@ NSString* _placementId;
         
         _plugin = [NeftaPlugin_iOS InitWithAppId: appId];
         
-        _listeners = [NSMutableArray array];
+        _adapters = [NSMutableArray array];
         
         _plugin.OnLoadFail = ^(Placement *placement, NSString *error) {
-            for (int i = 0; i < _listeners.count; i++) {
-                MListener *ml = _listeners[i];
-                if ([ml.placementId isEqualToString: placement._id] && ml.state == 0) {
+            for (int i = 0; i < _adapters.count; i++) {
+                ALNeftaMediationAdapter *a = _adapters[i];
+                if ([a.placementId isEqualToString: placement._id] && a.state == 0) {
                     if (placement._type == TypesBanner) {
-                        [((id<MAAdViewAdapterDelegate>)ml.listener) didFailToLoadAdViewAdWithError: MAAdapterError.unspecified];
+                        [((id<MAAdViewAdapterDelegate>)a.listener) didFailToLoadAdViewAdWithError: MAAdapterError.unspecified];
                     } else if (placement._type == TypesInterstitial) {
-                        [((id<MAInterstitialAdapterDelegate>)ml.listener) didFailToLoadInterstitialAdWithError: MAAdapterError.unspecified];
+                        [((id<MAInterstitialAdapterDelegate>)a.listener) didFailToLoadInterstitialAdWithError: MAAdapterError.unspecified];
                     } else if (placement._type == TypesRewardedVideo) {
-                        [((id<MARewardedAdapterDelegate>)ml.listener) didFailToLoadRewardedAdWithError: MAAdapterError.unspecified];
+                        [((id<MARewardedAdapterDelegate>)a.listener) didFailToLoadRewardedAdWithError: MAAdapterError.unspecified];
                     }
-                    [_listeners removeObject:ml];
+                    [_adapters removeObject:a];
                     return;
                 }
             }
         };
         _plugin.OnLoad = ^(Placement *placement) {
-            for (int i = 0; i < _listeners.count; i++) {
-                MListener *ml = _listeners[i];
-                if ([ml.placementId isEqualToString: placement._id] && ml.state == 0) {
-                    ml.state = 1;
-                    MListener *ml = _listeners[i];
+            for (int i = 0; i < _adapters.count; i++) {
+                ALNeftaMediationAdapter *a = _adapters[i];
+                if ([a.placementId isEqualToString: placement._id] && a.state == 0) {
+                    a.state = 1;
+                    ALNeftaMediationAdapter *a = _adapters[i];
                     if (placement._type == TypesBanner) {
                         placement._isManualPosition = true;
                         UIView *v = [_plugin GetViewForPlacement: placement show: true];
-                        [((id<MAAdViewAdapterDelegate>)ml.listener) didLoadAdForAdView: v];
+                        [((id<MAAdViewAdapterDelegate>)a.listener) didLoadAdForAdView: v];
                     } else if (placement._type == TypesInterstitial) {
-                        [((id<MAInterstitialAdapterDelegate>)ml.listener) didLoadInterstitialAd];
+                        [((id<MAInterstitialAdapterDelegate>)a.listener) didLoadInterstitialAd];
                     } else if (placement._type == TypesRewardedVideo) {
-                        [((id<MARewardedAdapterDelegate>)ml.listener) didLoadRewardedAd];
+                        [((id<MARewardedAdapterDelegate>)a.listener) didLoadRewardedAd];
                     }
                     return;
                 }
             }
         };
         _plugin.OnShow = ^(Placement *placement, NSInteger width, NSInteger height) {
-            for (int i = 0; i < _listeners.count; i++) {
-                MListener *ml = _listeners[i];
-                if ([ml.placementId isEqualToString: placement._id] && ml.state == 1) {
-                    ml.state = 2;
+            for (int i = 0; i < _adapters.count; i++) {
+                ALNeftaMediationAdapter *a = _adapters[i];
+                if ([a.placementId isEqualToString: placement._id] && a.state == 1) {
+                    a.state = 2;
                     if (placement._type == TypesBanner) {
-                        [((id<MAAdViewAdapterDelegate>)ml.listener) didDisplayAdViewAd];
+                        [((id<MAAdViewAdapterDelegate>)a.listener) didDisplayAdViewAd];
                     } else if (placement._type == TypesInterstitial) {
-                        [((id<MAInterstitialAdapterDelegate>)ml.listener) didDisplayInterstitialAd];
+                        [((id<MAInterstitialAdapterDelegate>)a.listener) didDisplayInterstitialAd];
                     } else if (placement._type == TypesRewardedVideo) {
-                        [((id<MARewardedAdapterDelegate>)ml.listener) didDisplayRewardedAd];
-                        [((id<MARewardedAdapterDelegate>)ml.listener) didStartRewardedAdVideo];
+                        [((id<MARewardedAdapterDelegate>)a.listener) didDisplayRewardedAd];
                     }
                     return;
                 }
             }
         };
         _plugin.OnClick = ^(Placement *placement) {
-            for (int i = 0; i < _listeners.count; i++) {
-                MListener *ml = _listeners[i];
-                if ([ml.placementId isEqualToString: placement._id] && ml.state == 2) {
+            for (int i = 0; i < _adapters.count; i++) {
+                ALNeftaMediationAdapter *a = _adapters[i];
+                if ([a.placementId isEqualToString: placement._id] && a.state == 2) {
                     if (placement._type == TypesBanner) {
-                        [((id<MAAdViewAdapterDelegate>) ml.listener) didClickAdViewAd];
+                        [((id<MAAdViewAdapterDelegate>) a.listener) didClickAdViewAd];
                     } else if (placement._type == TypesInterstitial) {
-                        [((id<MAInterstitialAdapterDelegate>) ml.listener) didClickInterstitialAd];
+                        [((id<MAInterstitialAdapterDelegate>) a.listener) didClickInterstitialAd];
                     } else if (placement._type == TypesRewardedVideo) {
-                        [((id<MARewardedAdapterDelegate>) ml.listener) didClickRewardedAd];
+                        [((id<MARewardedAdapterDelegate>) a.listener) didClickRewardedAd];
                     }
                     return;
                 }
             }
         };
         _plugin.OnReward = ^(Placement *placement) {
-            for (int i = 0; i < _listeners.count; i++) {
-                MListener *ml = _listeners[i];
-                if ([ml.placementId isEqualToString: placement._id] && ml.state == 2) {
-                    id<MARewardedAdapterDelegate> listener = (id<MARewardedAdapterDelegate>)ml.listener;
-                    [listener didCompleteRewardedAdVideo];
+            for (int i = 0; i < _adapters.count; i++) {
+                ALNeftaMediationAdapter *a = _adapters[i];
+                if ([a.placementId isEqualToString: placement._id] && a.state == 2) {
+                    id<MARewardedAdapterDelegate> listener = (id<MARewardedAdapterDelegate>)a.listener;
+                    MAReward *reward = [MAReward rewardWithAmount:MAReward.defaultAmount label: MAReward.defaultLabel];
+                    [listener didRewardUserWithReward: reward];
                     return;
                 }
             }
         };
         _plugin.OnClose = ^(Placement *placement) {
-            for (int i = 0; i < _listeners.count; i++) {
-                MListener *ml = _listeners[i];
-                if ([ml.placementId isEqualToString: placement._id] && ml.state == 2) {
+            for (int i = 0; i < _adapters.count; i++) {
+                ALNeftaMediationAdapter *a = _adapters[i];
+                if ([a.placementId isEqualToString: placement._id] && a.state == 2) {
                     if (placement._type == TypesBanner) {
-                        id<MAAdViewAdapterDelegate> bannerListener = (id<MAAdViewAdapterDelegate>)ml.listener;
+                        id<MAAdViewAdapterDelegate> bannerListener = (id<MAAdViewAdapterDelegate>)a.listener;
                         [bannerListener didCollapseAdViewAd];
                         [bannerListener didHideAdViewAd];
                     } else if (placement._type == TypesInterstitial) {
-                        [((id<MAInterstitialAdapterDelegate>)ml.listener) didHideInterstitialAd];
+                        [((id<MAInterstitialAdapterDelegate>)a.listener) didHideInterstitialAd];
                     } else if (placement._type == TypesRewardedVideo) {
-                        [((id<MARewardedAdapterDelegate>)ml.listener) didHideRewardedAd];
+                        [((id<MARewardedAdapterDelegate>)a.listener) didHideRewardedAd];
                     }
-                    [_listeners removeObject: ml];
+                    [_adapters removeObject: a];
                     return;
                 }
             }
@@ -155,7 +134,7 @@ NSString* _placementId;
 }
 
 - (NSString *)adapterVersion {
-    return @"1.1.9";
+    return @"1.2.0";
 }
 
 - (void)destroy {
@@ -173,21 +152,25 @@ NSString* _placementId;
 
 - (void)loadAdViewAdForParameters:(id<MAAdapterResponseParameters>)parameters adFormat:(MAAdFormat *)adFormat andNotify:(id<MAAdViewAdapterDelegate>)delegate {
     _placementId = parameters.thirdPartyAdPlacementIdentifier;
-    [ALNeftaMediationAdapter ApplyRenderer: parameters];
+    _state = 0;
+    _listener = delegate;
     
-    _bL = delegate;
+    [ALNeftaMediationAdapter ApplyRenderer: parameters];
+
     _lastBanner = self;
-    MListener *listener = [[MListener alloc] initWithId: _placementId listener: delegate];
-    [_listeners addObject: listener];
+
+    [_adapters addObject: self];
     [_plugin LoadWithId: _placementId];
 }
 
 - (void)loadInterstitialAdForParameters:(id<MAAdapterResponseParameters>)parameters andNotify:(id<MAInterstitialAdapterDelegate>)delegate {
     _placementId = parameters.thirdPartyAdPlacementIdentifier;
+    _state = 0;
+    _listener = delegate;
+    
     [ALNeftaMediationAdapter ApplyRenderer: parameters];
     
-    MListener *listener = [[MListener alloc] initWithId: _placementId listener: delegate];
-    [_listeners addObject: listener];
+    [_adapters addObject: self];
     [_plugin LoadWithId: _placementId];
 }
 
@@ -202,10 +185,12 @@ NSString* _placementId;
 
 - (void)loadRewardedAdForParameters:(id<MAAdapterResponseParameters>)parameters andNotify:(id<MARewardedAdapterDelegate>)delegate {
     _placementId = parameters.thirdPartyAdPlacementIdentifier;
+    _state = 0;
+    _listener = delegate;
+    
     [ALNeftaMediationAdapter ApplyRenderer: parameters];
     
-    MListener *listener = [[MListener alloc] initWithId: _placementId listener: delegate];
-    [_listeners addObject: listener];
+    [_adapters addObject: self];
     [_plugin LoadWithId: _placementId];
 }
 

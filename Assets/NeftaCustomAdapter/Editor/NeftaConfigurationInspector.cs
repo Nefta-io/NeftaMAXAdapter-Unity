@@ -41,7 +41,9 @@ namespace NeftaCustomAdapter.Editor
             }
             
             _error = null;
+#if UNITY_2021
             GetAndroidVersions();
+#endif
             GetIosVersions();
         }
 
@@ -57,7 +59,8 @@ namespace NeftaCustomAdapter.Editor
                 EditorGUILayout.LabelField(_error, EditorStyles.helpBox);
                 return;
             }
-            
+
+#if UNITY_2021
             if (_androidAdapterVersion != _iosAdapterVersion)
             {
                 DrawVersion("Nefta MAX Android Custom Adapter version", _androidAdapterVersion);
@@ -67,10 +70,12 @@ namespace NeftaCustomAdapter.Editor
                 DrawVersion("Nefta SDK iOS version", _iosVersion);
             }
             else
+#endif
             {
                 DrawVersion("Nefta MAX Custom Adapter version", _androidAdapterVersion);
                 DrawVersion("Nefta SDK version", _androidVersion);
             }
+            EditorGUILayout.Space(5);
             
             base.OnInspectorGUI();
             if (_isLoggingEnabled != _configuration._isLoggingEnabled)
@@ -150,7 +155,8 @@ namespace NeftaCustomAdapter.Editor
             EditorGUILayout.LabelField(version, EditorStyles.boldLabel, GUILayout.Width(60)); 
             EditorGUILayout.EndHorizontal();
         }
-
+        
+#if UNITY_2021
         private void GetAndroidVersions()
         {
             var guids = AssetDatabase.FindAssets("NeftaMaxAdapter");
@@ -164,6 +170,7 @@ namespace NeftaCustomAdapter.Editor
                 _error = "Multiple instances of NeftaMaxAdapter AARs found in project";
                 return;
             }
+
             var aarPath = AssetDatabase.GUIDToAssetPath(guids[0]);
             using ZipArchive aar = ZipFile.OpenRead(aarPath);
             ZipArchiveEntry manifestEntry = aar.GetEntry("AndroidManifest.xml");
@@ -193,6 +200,7 @@ namespace NeftaCustomAdapter.Editor
                 }
             }
         }
+#endif
 
         private void GetIosVersions()
         {

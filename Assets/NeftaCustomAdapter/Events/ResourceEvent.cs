@@ -16,7 +16,7 @@ namespace Nefta.Core.Events
         Other
     }
 
-    public class ResourceEvent : GameEvent
+    public abstract class ResourceEvent : GameEvent
     {
         private static readonly Dictionary<ResourceCategory, string> CategoryToString = new Dictionary<ResourceCategory, string>()
         {
@@ -31,41 +31,14 @@ namespace Nefta.Core.Events
             { ResourceCategory.Chest, "chest" },
             { ResourceCategory.Other, "other" }
         };
-
-        /// <summary>
-        /// The name of the resource
-        /// </summary>
-        public string _name;
             
         /// <summary>
         /// The category of the resource
         /// </summary>
         public ResourceCategory _resourceCategory;
         
-        /// <summary>
-        /// Quantity that player received
-        /// </summary>
-        public int _quantity;
-            
-        /// <summary>
-        /// Any other custom data you want to track
-        /// </summary>
-        public string _customString;
+        public long _quantity { get { return _value; } set { _value = value; } }
 
-        protected ResourceEvent()
-        {
-                
-        }
-
-        public override RecordedEvent GetRecordedEvent()
-        {
-            return new RecordedEvent()
-            {
-                _category = CategoryToString[_resourceCategory],
-                _itemName = _name,
-                _value = _quantity,
-                _customPayload = _customString,
-            };
-        }
+        internal override string _category => CategoryToString[_resourceCategory];
     }
 }

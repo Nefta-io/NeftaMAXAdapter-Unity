@@ -121,33 +121,11 @@ namespace Nefta.Core.Events
         /// Source content of progression
         /// </summary>
         public Source _source;
+
+        internal override string _eventType => "progression";
+
+        internal override string _category => ProgressionToString[_type][_status];
         
-        /// <summary>
-        /// The name of the progression in which the player progressed
-        /// </summary>
-        public string _name;
-
-        /// <summary>
-        /// Quantifiable progress number
-        /// </summary>
-        public int _value;
-
-        /// <summary>
-        /// Any custom data you might want to record
-        /// </summary>
-        public string _customString;
-
-        public override RecordedEvent GetRecordedEvent()
-        {
-            return new RecordedEvent()
-            {
-                _type = "progression",
-                _category = ProgressionToString[_type][_status],
-                _subCategory = ProgressionSourceToString[_source],
-                _itemName = _name,
-                _value = _value,
-                _customPayload = _customString,
-            };
-        }
+        internal override string _subCategory => ProgressionSourceToString[_source];
     }
 }
