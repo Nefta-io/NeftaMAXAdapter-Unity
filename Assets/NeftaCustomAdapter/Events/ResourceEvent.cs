@@ -4,7 +4,7 @@ namespace Nefta.Core.Events
 {
     public enum ResourceCategory
     {
-        Undefined,
+        Other,
         SoftCurrency,
         PremiumCurrency,
         Resource,
@@ -12,15 +12,14 @@ namespace Nefta.Core.Events
         CosmeticItem,
         Consumable,
         Experience,
-        Chest,
-        Other
+        Chest
     }
 
     public abstract class ResourceEvent : GameEvent
     {
         private static readonly Dictionary<ResourceCategory, string> CategoryToString = new Dictionary<ResourceCategory, string>()
         {
-            { ResourceCategory.Undefined, null },
+            { ResourceCategory.Other, "other" },
             { ResourceCategory.SoftCurrency, "soft_currency" },
             { ResourceCategory.PremiumCurrency, "premium_currency" },
             { ResourceCategory.Resource, "resource" },
@@ -28,8 +27,7 @@ namespace Nefta.Core.Events
             { ResourceCategory.CosmeticItem, "cosmetic_item" },
             { ResourceCategory.Consumable, "consumable" },
             { ResourceCategory.Experience, "experience" },
-            { ResourceCategory.Chest, "chest" },
-            { ResourceCategory.Other, "other" }
+            { ResourceCategory.Chest, "chest" }
         };
             
         /// <summary>
@@ -40,5 +38,10 @@ namespace Nefta.Core.Events
         public long _quantity { get { return _value; } set { _value = value; } }
 
         internal override string _category => CategoryToString[_resourceCategory];
+        
+        protected ResourceEvent(ResourceCategory category)
+        {
+            _resourceCategory = category;
+        }
     }
 }

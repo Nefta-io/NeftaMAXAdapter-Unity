@@ -39,5 +39,9 @@ namespace Nefta.Core.Events
         internal override string _eventType => "receive";
         
         internal override string _subCategory => MethodToString[_method];
+        
+        public ReceiveEvent(ResourceCategory category) : base(category)
+        {
+        }
     }
 }

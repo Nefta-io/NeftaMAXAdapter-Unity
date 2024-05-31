@@ -121,6 +121,7 @@ namespace NeftaCustomAdapter.Editor
                 AssetDatabase.Refresh();
             }
             Selection.objects = new UnityEngine.Object[] { configuration };
+            EditorUtility.FocusProjectWindow();
         }
         
         [MenuItem("AppLovin/Export Nefta Custom Adapter SDK", false, int.MaxValue)]

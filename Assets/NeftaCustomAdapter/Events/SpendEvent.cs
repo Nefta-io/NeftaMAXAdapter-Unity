@@ -39,5 +39,9 @@ namespace Nefta.Core.Events
         internal override string _eventType => "spend";
         
         internal override string _subCategory => MethodToString[_method];
+        
+        protected SpendEvent(ResourceCategory category) : base(category)
+        {
+        }
     }
 }

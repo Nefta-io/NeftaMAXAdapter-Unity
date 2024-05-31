@@ -22,13 +22,12 @@ namespace Nefta.Core.Events
     
     public enum Source
     {
-        Undefined,
+        Other,
         CoreContent,
         OptionalContent,
         Boss,
         Social,
-        SpecialEvent,
-        Other
+        SpecialEvent
     }
     
     /// <summary>
@@ -98,13 +97,12 @@ namespace Nefta.Core.Events
 
         private static readonly Dictionary<Source, string> ProgressionSourceToString = new Dictionary<Source, string>()
         {
-            { Source.Undefined, null },
+            { Source.Other, "other" },
             { Source.CoreContent, "core-content" },
             { Source.OptionalContent, "optional_content" },
             { Source.Boss, "boss" },
             { Source.Social, "social" },
-            { Source.SpecialEvent, "special_event" },
-            { Source.Other, "other" },
+            { Source.SpecialEvent, "special_event" }
         };
         
         /// <summary>
@@ -127,5 +125,11 @@ namespace Nefta.Core.Events
         internal override string _category => ProgressionToString[_type][_status];
         
         internal override string _subCategory => ProgressionSourceToString[_source];
+        
+        public ProgressionEvent(Type type, Status status)
+        {
+            _type = type;
+            _status = status;
+        }
     }
 }

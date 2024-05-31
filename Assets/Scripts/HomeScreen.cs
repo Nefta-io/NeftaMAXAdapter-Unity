@@ -49,14 +49,20 @@ public class HomeScreen : MonoBehaviour
         #else
         NeftaAdapterEvents.Init("5643649824063488");
         #endif
-        NeftaAdapterEvents.Record(new ProgressionEvent()
+        NeftaAdapterEvents.Record(new ProgressionEvent(Type.Achievement, Status.Start)
         {
-            _status = Status.Start,
-            _type = Type.Achievement,
             _source = Source.OptionalContent,
             _name = "area-69",
             _value = 23,
             _customString = "abc"
+        });
+        
+        NeftaAdapterEvents.Record(new ReceiveEvent(ResourceCategory.CoreItem)
+        {
+            _method = ReceiveMethod.Reward,
+            _value = 1,
+            _name = "RewardedAds",
+            _customString = "RV"
         });
         
         showInterstitialButton.onClick.AddListener(ShowInterstitial);
