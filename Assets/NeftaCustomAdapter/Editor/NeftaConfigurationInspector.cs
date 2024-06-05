@@ -4,7 +4,6 @@ using System.IO.Compression;
 using System.Xml;
 using UnityEditor;
 using UnityEngine;
-using UnityEditor.iOS.Xcode;
 
 namespace NeftaCustomAdapter.Editor
 {
@@ -234,21 +233,18 @@ namespace NeftaCustomAdapter.Editor
                 }
             }
             
-            guids = AssetDatabase.FindAssets("NeftaSDK.xcframework");
-            if (guids.Length == 0)
+            var pluginPath = Path.GetDirectoryName(wrapperPath);
+            XmlDocument xmlDoc = new XmlDocument();
+            xmlDoc.Load(pluginPath + "/NeftaSDK.xcframework/Info.plist");
+            var dict = xmlDoc.ChildNodes[2].ChildNodes[0];
+            for (var i = 0; i < dict.ChildNodes.Count; i++)
             {
-                _error = "NeftaSDK.xcframework not found in project";
-                return;
+                if (dict.ChildNodes[i].InnerText == "Version")
+                {
+                    _iosVersion = dict.ChildNodes[i + 1].InnerText;
+                    break;
+                }
             }
-            if (guids.Length > 1)
-            {
-                _error = "Multiple instances of NeftaSDK.xcframework found in project";
-                return;
-            }
-            var frameworkPath = AssetDatabase.GUIDToAssetPath(guids[0]);
-            var plist = new PlistDocument();
-            plist.ReadFromFile(frameworkPath + "/Info.plist");
-            _iosVersion = plist.root["Version"].AsString();
         }
     }
 }
