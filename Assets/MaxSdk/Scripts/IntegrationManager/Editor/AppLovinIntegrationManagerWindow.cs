@@ -18,15 +18,13 @@ namespace AppLovinMax.Scripts.IntegrationManager.Editor
 {
     public class AppLovinIntegrationManagerWindow : EditorWindow
     {
-        private const string keyNewLocalizationsMarked = "com.applovin.new_localizations_marked_v0"; // Update the key version each time new localizations are added.
-
         private const string windowTitle = "AppLovin Integration Manager";
 
         private const string appLovinSdkKeyLink = "https://dash.applovin.com/o/account#keys";
 
         private const string userTrackingUsageDescriptionDocsLink = "https://developer.apple.com/documentation/bundleresources/information_property_list/nsusertrackingusagedescription";
-        private const string documentationTermsAndPrivacyPolicyFlow = "https://dash.applovin.com/documentation/mediation/ios/getting-started/terms-and-privacy-policy-flow";
-        private const string documentationAdaptersLink = "https://dash.applovin.com/documentation/mediation/unity/mediation-adapters";
+        private const string documentationTermsAndPrivacyPolicyFlow = "https://developers.applovin.com/en/unity/overview/terms-and-privacy-policy-flow";
+        private const string documentationAdaptersLink = "https://developers.applovin.com/en/unity/preparing-mediated-networks";
         private const string documentationNote = "Please ensure that integration instructions (e.g. permissions, ATS settings, etc) specific to each network are implemented as well. Click the link below for more info:";
         private const string uninstallIconExportPath = "MaxSdk/Resources/Images/uninstall_icon.png";
         private const string alertIconExportPath = "MaxSdk/Resources/Images/alert_icon.png";
@@ -899,7 +897,7 @@ namespace AppLovinMax.Scripts.IntegrationManager.Editor
                 GUILayout.Space(5);
                 AppLovinSettings.Instance.AddApsSkAdNetworkIds = DrawOtherSettingsToggle(AppLovinSettings.Instance.AddApsSkAdNetworkIds, "  Add Amazon Publisher Services SKAdNetworkID's");
                 GUILayout.Space(5);
-                var autoUpdateEnabled = DrawOtherSettingsToggle(EditorPrefs.GetBool(AppLovinAutoUpdater.KeyAutoUpdateEnabled, true), "  Enable Auto Update");
+                var autoUpdateEnabled = DrawOtherSettingsToggle(EditorPrefs.GetBool(AppLovinAutoUpdater.KeyAutoUpdateEnabled, true), "  Enable Auto Update", "Checks for AppLovin MAX plugin updates and notifies you when an update is available.");
                 EditorPrefs.SetBool(AppLovinAutoUpdater.KeyAutoUpdateEnabled, autoUpdateEnabled);
                 GUILayout.Space(5);
                 var verboseLoggingEnabled = DrawOtherSettingsToggle(EditorPrefs.GetBool(MaxSdkLogger.KeyVerboseLoggingEnabled, false), "  Enable Verbose Logging");
@@ -914,12 +912,13 @@ namespace AppLovinMax.Scripts.IntegrationManager.Editor
             GUILayout.EndHorizontal();
         }
 
-        private bool DrawOtherSettingsToggle(bool value, string text)
+        private bool DrawOtherSettingsToggle(bool value, string text, string tooltip = "")
         {
             using (new EditorGUILayout.HorizontalScope())
             {
                 GUILayout.Space(4);
-                var toggleValue = GUILayout.Toggle(value, text);
+                var content = MaxSdkUtils.IsValidString(tooltip) ? new GUIContent(text, tooltip) : new GUIContent(text);
+                var toggleValue = GUILayout.Toggle(value, content);
                 GUILayout.Space(4);
 
                 return toggleValue;

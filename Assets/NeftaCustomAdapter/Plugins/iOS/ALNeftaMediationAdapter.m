@@ -8,9 +8,6 @@
 #import "ALNeftaMediationAdapter.h"
 #import <AppLovinSDK/MAAdapterDelegate.h>
 
-@interface ALNeftaMediationAdapter ()
-
-@end
 @implementation ALNeftaMediationAdapter
 
 static NeftaPlugin_iOS *_plugin;
@@ -43,7 +40,7 @@ static ALNeftaMediationAdapter *_lastBanner;
                 }
             }
         };
-        _plugin.OnLoad = ^(Placement *placement) {
+        _plugin.OnLoad = ^(Placement *placement, NSInteger width, NSInteger height) {
             for (int i = 0; i < _adapters.count; i++) {
                 ALNeftaMediationAdapter *a = _adapters[i];
                 if ([a.placementId isEqualToString: placement._id] && a.state == 0) {
@@ -62,7 +59,7 @@ static ALNeftaMediationAdapter *_lastBanner;
                 }
             }
         };
-        _plugin.OnShow = ^(Placement *placement, NSInteger width, NSInteger height) {
+        _plugin.OnShow = ^(Placement *placement) {
             for (int i = 0; i < _adapters.count; i++) {
                 ALNeftaMediationAdapter *a = _adapters[i];
                 if ([a.placementId isEqualToString: placement._id] && a.state == 1) {
@@ -134,44 +131,29 @@ static ALNeftaMediationAdapter *_lastBanner;
 }
 
 - (NSString *)adapterVersion {
-    return @"1.2.0";
+    return @"1.2.1";
 }
 
 - (void)destroy {
     bool isLastBanner = _lastBanner == self;
-    if (_bL == nil || isLastBanner) {
+    if (![_listener conformsToProtocol:@protocol(MAAdViewAdapterDelegate)] || isLastBanner) {
         [_plugin CloseWithId: _placementId];
         if (isLastBanner) {
             _lastBanner = nil;
         }
     } else {
-        [_bL didCollapseAdViewAd];
-        [_bL didHideAdViewAd];
+        [((id<MAAdViewAdapterDelegate>) _listener) didCollapseAdViewAd];
+        [((id<MAAdViewAdapterDelegate>) _listener) didHideAdViewAd];
     }
 }
 
 - (void)loadAdViewAdForParameters:(id<MAAdapterResponseParameters>)parameters adFormat:(MAAdFormat *)adFormat andNotify:(id<MAAdViewAdapterDelegate>)delegate {
-    _placementId = parameters.thirdPartyAdPlacementIdentifier;
-    _state = 0;
-    _listener = delegate;
-    
-    [ALNeftaMediationAdapter ApplyRenderer: parameters];
-
     _lastBanner = self;
-
-    [_adapters addObject: self];
-    [_plugin LoadWithId: _placementId];
+    [self Load: parameters andNotify: delegate];
 }
 
 - (void)loadInterstitialAdForParameters:(id<MAAdapterResponseParameters>)parameters andNotify:(id<MAInterstitialAdapterDelegate>)delegate {
-    _placementId = parameters.thirdPartyAdPlacementIdentifier;
-    _state = 0;
-    _listener = delegate;
-    
-    [ALNeftaMediationAdapter ApplyRenderer: parameters];
-    
-    [_adapters addObject: self];
-    [_plugin LoadWithId: _placementId];
+    [self Load: parameters andNotify: delegate];
 }
 
 - (void)showInterstitialAdForParameters:(id<MAAdapterResponseParameters>)parameters andNotify:(id<MAInterstitialAdapterDelegate>)delegate {
@@ -184,14 +166,7 @@ static ALNeftaMediationAdapter *_lastBanner;
 }
 
 - (void)loadRewardedAdForParameters:(id<MAAdapterResponseParameters>)parameters andNotify:(id<MARewardedAdapterDelegate>)delegate {
-    _placementId = parameters.thirdPartyAdPlacementIdentifier;
-    _state = 0;
-    _listener = delegate;
-    
-    [ALNeftaMediationAdapter ApplyRenderer: parameters];
-    
-    [_adapters addObject: self];
-    [_plugin LoadWithId: _placementId];
+    [self Load: parameters andNotify: delegate];
 }
 
 - (void)showRewardedAdForParameters:(id<MAAdapterResponseParameters>)parameters andNotify:(id<MARewardedAdapterDelegate>)delegate {
@@ -203,7 +178,11 @@ static ALNeftaMediationAdapter *_lastBanner;
     [_plugin ShowWithId: _placementId];
 }
 
-+ (void)ApplyRenderer:(id<MAAdapterResponseParameters>)parameters {
+- (void)Load:(id<MAAdapterResponseParameters>)parameters andNotify:(id<MAAdapterDelegate>)delegate {
+    _placementId = parameters.thirdPartyAdPlacementIdentifier;
+    _state = 0;
+    _listener = delegate;
+    
     UIViewController *viewController;
     if (ALSdk.versionCode >= 11020199) {
         viewController = parameters.presentingViewController ?: [ALUtils topViewControllerFromKeyWindow];
@@ -211,5 +190,21 @@ static ALNeftaMediationAdapter *_lastBanner;
         viewController = [ALUtils topViewControllerFromKeyWindow];
     }
     [_plugin PrepareRendererWithViewController: viewController];
+    
+    [_adapters addObject: self];
+    
+    if (parameters.customParameters != nil && [parameters.customParameters count] > 0) {
+        NSError *error;
+        NSData *jsonData = [NSJSONSerialization dataWithJSONObject:parameters.customParameters options:0 error:&error];
+        if (!jsonData) {
+            NSLog(@"Error converting dictionary to JSON: %@", error.localizedDescription);
+        } else {
+            NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+            [_plugin SetCustomParameterWithId: _placementId key: @"provider" value: @"applovin-max"];
+            [_plugin SetCustomParameterWithId: _placementId key: @"value" value: jsonString];
+        }
+    }
+    
+    [_plugin LoadWithId: _placementId];
 }
 @end
