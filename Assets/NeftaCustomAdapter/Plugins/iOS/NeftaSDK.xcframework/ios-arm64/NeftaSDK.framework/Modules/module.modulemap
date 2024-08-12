@@ -1,4 +1,11 @@
 framework module NeftaSDK {
+  umbrella header "NeftaSDK.h"
+  export *
+
+  module * { export * }
+}
+
+module NeftaSDK.Swift {
   header "NeftaSDK-Swift.h"
   requires objc
 }

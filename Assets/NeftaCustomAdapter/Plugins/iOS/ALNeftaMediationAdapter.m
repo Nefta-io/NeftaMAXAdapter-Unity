@@ -10,7 +10,7 @@
 
 @implementation ALNeftaMediationAdapter
 
-static NeftaPlugin_iOS *_plugin;
+static NeftaPlugin *_plugin;
 static NSMutableArray *_adapters;
 static ALNeftaMediationAdapter *_lastBanner;
 
@@ -20,7 +20,7 @@ static ALNeftaMediationAdapter *_lastBanner;
     } else {
         NSString *appId = parameters.serverParameters[@"app_id"];
         
-        _plugin = [NeftaPlugin_iOS InitWithAppId: appId];
+        _plugin = [NeftaPlugin InitWithAppId: appId];
         
         _adapters = [NSMutableArray array];
         
@@ -127,11 +127,11 @@ static ALNeftaMediationAdapter *_lastBanner;
 }
 
 - (NSString *)SDKVersion {
-    return NeftaPlugin_iOS.Version;
+    return NeftaPlugin.Version;
 }
 
 - (NSString *)adapterVersion {
-    return @"1.2.1";
+    return @"1.2.2";
 }
 
 - (void)destroy {
@@ -200,8 +200,7 @@ static ALNeftaMediationAdapter *_lastBanner;
             NSLog(@"Error converting dictionary to JSON: %@", error.localizedDescription);
         } else {
             NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-            [_plugin SetCustomParameterWithId: _placementId key: @"provider" value: @"applovin-max"];
-            [_plugin SetCustomParameterWithId: _placementId key: @"value" value: jsonString];
+            [_plugin SetCustomParameterWithId: _placementId provider: @"applovin-max" value: jsonString];
         }
     }
     

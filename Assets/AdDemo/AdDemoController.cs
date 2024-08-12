@@ -44,7 +44,7 @@ namespace AdDemo
             NeftaAdapterEvents.Record(new ReceiveEvent(ResourceCategory.CoreItem)
             {
                 _method = ReceiveMethod.Reward,
-                _value = 1,
+                _value = long.MaxValue,
                 _name = "RewardedAds",
                 _customString = "RV"
             });

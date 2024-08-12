@@ -331,7 +331,7 @@ SWIFT_CLASS("_TtC8NeftaSDK11NeftaEvents")
 - (void)AddSpendEventWithCategory:(enum ResourceCategory)category method:(enum SpendMethod)method name:(NSString * _Nullable)name quantity:(NSInteger)quantity;
 - (void)AddSpendEventWithCategory:(enum ResourceCategory)category method:(enum SpendMethod)method name:(NSString * _Nullable)name quantity:(NSInteger)quantity customPayload:(NSString * _Nullable)customPayload;
 - (void)AddSessionEventWithCategory:(enum SessionCategory)category;
-- (void)AddSessionEventWithCategory:(enum SessionCategory)category name:(NSString * _Nullable)name value:(NSInteger)value customPayload:(NSString * _Nullable)customPayload log:(BOOL)log;
+- (void)AddSessionEventWithCategory:(enum SessionCategory)category name:(NSString * _Nullable)name value:(NSInteger)value customPayload:(NSString * _Nullable)customPayload log:(BOOL)log trySend:(BOOL)trySend;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
@@ -398,14 +398,17 @@ typedef SWIFT_ENUM(NSInteger, SpendMethod, open) {
 
 typedef SWIFT_ENUM(NSInteger, SessionCategory, open) {
   SessionCategorySessionStart = 0,
-  SessionCategoryAccountConnected = 1,
-  SessionCategoryAccountUpgraded = 2,
-  SessionCategoryHeartbeat = 3,
+  SessionCategorySessionPause = 1,
+  SessionCategoryAccountConnected = 2,
+  SessionCategoryAccountUpgraded = 3,
+  SessionCategoryHeartbeat = 4,
 };
 
 @class Placement;
+@class UIViewController;
 enum Position : NSInteger;
 enum Modes : NSInteger;
+@class NSData;
 @class UIView;
 
 SWIFT_CLASS("_TtC8NeftaSDK11NeftaPlugin")
@@ -434,17 +437,27 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable OnLog)
 @property (nonatomic, copy) void (^ _Nullable IOnClick)(NSString * _Nonnull);
 @property (nonatomic, copy) void (^ _Nullable IOnClose)(NSString * _Nonnull);
 @property (nonatomic, copy) void (^ _Nullable IOnReward)(NSString * _Nonnull);
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NeftaPlugin * _Null_unspecified _instance;)
++ (NeftaPlugin * _Null_unspecified)_instance SWIFT_WARN_UNUSED_RESULT;
++ (void)set_instance:(NeftaPlugin * _Null_unspecified)value;
++ (void)EnableLogging:(BOOL)enable;
++ (NeftaPlugin * _Nonnull)InitWithAppId:(NSString * _Nullable)appId SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
+- (void)PrepareRendererWithViewController:(UIViewController * _Nonnull)viewController;
 - (void)RecordWithEvent:(NSString * _Nonnull)event;
 - (void)EnableAds:(BOOL)enable;
 - (void)EnableBannerWithId:(NSString * _Nonnull)id enable:(BOOL)enable;
 - (void)SetPublisherUserIdWithId:(NSString * _Nonnull)id;
 - (void)SetPlacementPositionWithId:(NSString * _Nonnull)id position:(enum Position)position;
 - (void)SetPlacementModeWithId:(NSString * _Nonnull)id mode:(enum Modes)mode;
-- (void)SetCustomParameterWithId:(NSString * _Nonnull)id key:(NSString * _Nonnull)key value:(id _Nonnull)value;
+- (void)SetFloorPriceWithId:(NSString * _Nonnull)id floorPrice:(float)floorPrice;
+- (void)SetCustomParameterWithId:(NSString * _Nonnull)id provider:(NSString * _Nonnull)provider value:(NSString * _Nonnull)value;
+- (NSDictionary<NSString *, id> * _Nullable)GetPartialBidRequest:(NSString * _Nonnull)id SWIFT_WARN_UNUSED_RESULT;
+- (NSString * _Nullable)GetPartialBidRequestAsString:(NSString * _Nonnull)id SWIFT_WARN_UNUSED_RESULT;
 - (void)BidWithId:(NSString * _Nonnull)id;
 - (void)LoadWithId:(NSString * _Nonnull)id;
+- (void)LoadWithBidResponseWithId:(NSString * _Nonnull)id bidResponse:(NSData * _Nonnull)bidResponse;
 - (BOOL)IsReadyWithId:(NSString * _Nonnull)id SWIFT_WARN_UNUSED_RESULT;
 - (void)ShowWithId:(NSString * _Nonnull)id;
 - (void)ShowMainWithId:(NSString * _Nonnull)id;
@@ -454,20 +467,6 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable OnLog)
 - (NSString * _Nonnull)GetNuidWithPresent:(BOOL)present SWIFT_WARN_UNUSED_RESULT;
 - (UIView * _Nullable)GetViewForPlacement:(Placement * _Nonnull)placement show:(BOOL)show SWIFT_WARN_UNUSED_RESULT;
 - (void)SetOverrideWithUrl:(NSString * _Nonnull)url;
-@end
-
-@class UIViewController;
-
-SWIFT_CLASS("_TtC8NeftaSDK15NeftaPlugin_iOS")
-@interface NeftaPlugin_iOS : NeftaPlugin
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NeftaPlugin_iOS * _Null_unspecified _instance;)
-+ (NeftaPlugin_iOS * _Null_unspecified)_instance SWIFT_WARN_UNUSED_RESULT;
-+ (void)set_instance:(NeftaPlugin_iOS * _Null_unspecified)value;
-+ (void)EnableLogging:(BOOL)enable;
-+ (NeftaPlugin_iOS * _Nonnull)InitWithAppId:(NSString * _Nullable)appId SWIFT_WARN_UNUSED_RESULT;
-- (void)PrepareRendererWithViewController:(UIViewController * _Nonnull)viewController;
-- (void)Mute:(BOOL)mute;
-- (UIView * _Nullable)GetViewForPlacement:(Placement * _Nonnull)placement show:(BOOL)show SWIFT_WARN_UNUSED_RESULT;
 @end
 
 enum Types : NSInteger;

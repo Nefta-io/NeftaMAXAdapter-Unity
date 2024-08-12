@@ -20,14 +20,14 @@ extern "C" {
 }
 #endif
 
-NeftaPlugin_iOS *_plugin;
+NeftaPlugin *_plugin;
 
 void NeftaPlugin_EnableLogging(bool enable) {
-    [NeftaPlugin_iOS EnableLogging: enable];
+    [NeftaPlugin EnableLogging: enable];
 }
 
 void * NeftaPlugin_Init(const char *appId) {
-    _plugin = [NeftaPlugin_iOS InitWithAppId: [NSString stringWithUTF8String: appId]];
+    _plugin = [NeftaPlugin InitWithAppId: [NSString stringWithUTF8String: appId]];
     return (__bridge_retained void *)_plugin;
 }
 
