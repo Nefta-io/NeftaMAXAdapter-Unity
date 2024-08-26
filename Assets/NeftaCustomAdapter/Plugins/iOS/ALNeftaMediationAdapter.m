@@ -131,7 +131,7 @@ static ALNeftaMediationAdapter *_lastBanner;
 }
 
 - (NSString *)adapterVersion {
-    return @"1.2.2";
+    return @"1.2.3";
 }
 
 - (void)destroy {

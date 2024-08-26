@@ -16,6 +16,10 @@ import _Concurrency
 import _StringProcessing
 import _SwiftConcurrencyShims
 import os
+@objc @_hasMissingDesignatedInitializers public class Publisher : ObjectiveC.NSObject {
+  public var _placements: [Swift.String : NeftaSDK.Placement]
+  @objc deinit
+}
 @_hasMissingDesignatedInitializers @objc public class Placement : ObjectiveC.NSObject {
   @objc public enum Position : Swift.Int {
     case Top = 0
@@ -102,6 +106,7 @@ import os
   public typealias OnLogBlock = ((Swift.String) -> Swift.Void)
   @objc public static let Version: Swift.String
   @objc public var Events: NeftaSDK.NeftaEvents
+  public var _publisher: NeftaSDK.Publisher
   @objc public var OnReady: NeftaSDK.NeftaPlugin.OnReadyBlock?
   @objc public var OnBid: NeftaSDK.NeftaPlugin.OnBidBlock?
   @objc public var OnLoadStart: NeftaSDK.NeftaPlugin.OnChangeBlock?
@@ -125,6 +130,7 @@ import os
   @objc(EnableLogging:) public static func EnableLogging(enable: Swift.Bool)
   @objc public static func Init(appId: Swift.String?) -> NeftaSDK.NeftaPlugin
   @objc public func PrepareRenderer(viewController: UIKit.UIViewController)
+  public static func SetDebugTime(time: Swift.Double)
   @objc public func Record(event: Swift.String)
   @objc(EnableAds:) public func EnableAds(enable: Swift.Bool)
   @objc public func EnableBanner(id: Swift.String, enable: Swift.Bool)

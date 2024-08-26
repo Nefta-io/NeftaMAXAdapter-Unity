@@ -515,6 +515,13 @@ typedef SWIFT_ENUM(NSInteger, Modes, open) {
 };
 
 
+SWIFT_CLASS("_TtC8NeftaSDK9Publisher")
+@interface Publisher : NSObject
+- (nonnull instancetype)init SWIFT_UNAVAILABLE;
++ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
+@end
+
+
 
 @class NSCoder;
 @class WKWebView;
