@@ -2,7 +2,7 @@
   <packages>
     <package>androidx.cardview:cardview:1.0.0</package>
     <package>androidx.lifecycle:lifecycle-process:2.4.1</package>
-    <package>com.applovin:applovin-sdk:12.6.0</package>
+    <package>com.applovin:applovin-sdk:12.6.1</package>
   </packages>
   <files />
   <settings>

@@ -131,7 +131,7 @@ static ALNeftaMediationAdapter *_lastBanner;
 }
 
 - (NSString *)adapterVersion {
-    return @"1.2.3";
+    return @"1.3.0";
 }
 
 - (void)destroy {
@@ -157,8 +157,17 @@ static ALNeftaMediationAdapter *_lastBanner;
 }
 
 - (void)showInterstitialAdForParameters:(id<MAAdapterResponseParameters>)parameters andNotify:(id<MAInterstitialAdapterDelegate>)delegate {
-    if (![_plugin IsReadyWithId: _placementId]) {
+    int readyStatus = (int)[_plugin IsReadyWithId: _placementId];
+    if (readyStatus == NeftaPlugin.PlacementLoading) {
         [delegate didFailToDisplayInterstitialAdWithError: MAAdapterError.adNotReady];
+        return;
+    }
+    if (readyStatus == NeftaPlugin.PlacementExpired) {
+        [delegate didFailToDisplayInterstitialAdWithError: MAAdapterError.adExpiredError];
+        return;
+    }
+    if (readyStatus != NeftaPlugin.PlacementReady) {
+        [delegate didFailToDisplayInterstitialAdWithError: MAAdapterError.unspecified];
         return;
     }
     
@@ -170,8 +179,17 @@ static ALNeftaMediationAdapter *_lastBanner;
 }
 
 - (void)showRewardedAdForParameters:(id<MAAdapterResponseParameters>)parameters andNotify:(id<MARewardedAdapterDelegate>)delegate {
-    if (![_plugin IsReadyWithId: _placementId]) {
+    int readyStatus = (int)[_plugin IsReadyWithId: _placementId];
+    if (readyStatus == NeftaPlugin.PlacementLoading) {
         [delegate didFailToLoadRewardedAdWithError: MAAdapterError.adNotReady];
+        return;
+    }
+    if (readyStatus == NeftaPlugin.PlacementExpired) {
+        [delegate didFailToLoadRewardedAdWithError: MAAdapterError.adExpiredError];
+        return;
+    }
+    if (readyStatus != NeftaPlugin.PlacementReady) {
+        [delegate didFailToLoadRewardedAdWithError: MAAdapterError.unspecified];
         return;
     }
 

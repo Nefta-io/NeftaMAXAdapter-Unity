@@ -70,9 +70,10 @@ import os
   @objc public var _isManualPosition: Swift.Bool
   @objc public func IsBidding() -> Swift.Bool
   @objc public func IsLoading() -> Swift.Bool
+  @objc public func IsExpired() -> Swift.Bool
   @objc public func IsShowing() -> Swift.Bool
   @objc public func CanLoad() -> Swift.Bool
-  @objc public func CanShow() -> Swift.Bool
+  @objc public func CanShow() -> Swift.Int
   @objc deinit
 }
 @_inheritsConvenienceInitializers @objc public class BidResponse : ObjectiveC.NSObject {
@@ -89,6 +90,7 @@ import os
   }
   @objc public var _id: Swift.String!
   @objc public var _price: Swift.Float
+  @objc public func IsExpired() -> Swift.Bool
   @objc override dynamic public init()
   @objc deinit
 }
@@ -99,7 +101,7 @@ import os
   public typealias OnLoadBlock = ((NeftaSDK.Placement, Swift.Int, Swift.Int) -> Swift.Void)
   public typealias OnChangeBlock = ((NeftaSDK.Placement) -> Swift.Void)
   public typealias IOnReadyBlock = ((Swift.String) -> Swift.Void)
-  public typealias IOnBidBlock = ((Swift.String, Swift.Float) -> Swift.Void)
+  public typealias IOnBidBlock = ((Swift.String, Swift.Float, Swift.Int) -> Swift.Void)
   public typealias IOnLoadFailBlock = ((Swift.String, Swift.String?) -> Swift.Void)
   public typealias IOnLoadBlock = ((Swift.String, Swift.Int, Swift.Int) -> Swift.Void)
   public typealias IOnChangeBlock = ((Swift.String) -> Swift.Void)
@@ -144,7 +146,13 @@ import os
   @objc public func Bid(id: Swift.String)
   @objc public func Load(id: Swift.String)
   @objc public func LoadWithBidResponse(id: Swift.String, bidResponse: Foundation.Data)
-  @objc public func IsReady(id: Swift.String) -> Swift.Bool
+  @objc public static let PlacementReady: Swift.Int
+  @objc public static let PlacementNotExists: Swift.Int
+  @objc public static let PlacementLoading: Swift.Int
+  @objc public static let PlacementExpired: Swift.Int
+  @objc public static let PlacementShowing: Swift.Int
+  @objc public static let PlacementNotReady: Swift.Int
+  @objc public func IsReady(id: Swift.String) -> Swift.Int
   @objc public func Show(id: Swift.String)
   @objc public func ShowMain(id: Swift.String)
   @objc public func Close()
@@ -280,12 +288,15 @@ import os
   @objc public func AddSessionEvent(category: NeftaSDK.NeftaEvents.SessionCategory, name: Swift.String?, value: Swift.Int, customPayload: Swift.String?, log: Swift.Bool, trySend: Swift.Bool)
   @objc deinit
 }
-@_hasMissingDesignatedInitializers @objc @_Concurrency.MainActor(unsafe) public class WebController : UIKit.UIView, WebKit.WKNavigationDelegate {
+@_hasMissingDesignatedInitializers @objc @_Concurrency.MainActor(unsafe) public class WebController : UIKit.UIView, WebKit.WKNavigationDelegate, WebKit.WKUIDelegate, WebKit.WKScriptMessageHandler, UIKit.UIGestureRecognizerDelegate {
   @_Concurrency.MainActor(unsafe) @objc override dynamic public func didMoveToSuperview()
   @_Concurrency.MainActor(unsafe) @objc public func webView(_ webView: WebKit.WKWebView, didFail navigation: WebKit.WKNavigation!, withError error: any Swift.Error)
   @_Concurrency.MainActor(unsafe) @objc public func webView(_ webView: WebKit.WKWebView, didFailProvisionalNavigation navigation: WebKit.WKNavigation!, withError error: any Swift.Error)
   @_Concurrency.MainActor(unsafe) @objc public func webView(_ webView: WebKit.WKWebView, didFinish navigation: WebKit.WKNavigation!)
   @_Concurrency.MainActor(unsafe) @objc public func webView(_ webView: WebKit.WKWebView, decidePolicyFor navigationAction: WebKit.WKNavigationAction, decisionHandler: @escaping (WebKit.WKNavigationActionPolicy) -> Swift.Void)
+  @_Concurrency.MainActor(unsafe) @objc public func webView(_ webView: WebKit.WKWebView, createWebViewWith configuration: WebKit.WKWebViewConfiguration, for navigationAction: WebKit.WKNavigationAction, windowFeatures: WebKit.WKWindowFeatures) -> WebKit.WKWebView?
+  @_Concurrency.MainActor(unsafe) @objc public func userContentController(_ userContentController: WebKit.WKUserContentController, didReceive message: WebKit.WKScriptMessage)
+  @_Concurrency.MainActor(unsafe) @objc public func gestureRecognizer(_ gestureRecognizer: UIKit.UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIKit.UIGestureRecognizer) -> Swift.Bool
   @objc deinit
 }
 extension NeftaSDK.Placement.Position : Swift.Equatable {}

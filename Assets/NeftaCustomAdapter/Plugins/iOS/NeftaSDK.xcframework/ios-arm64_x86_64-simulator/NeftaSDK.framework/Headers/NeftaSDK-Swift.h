@@ -308,6 +308,7 @@ SWIFT_CLASS("_TtC8NeftaSDK11BidResponse")
 @interface BidResponse : NSObject
 @property (nonatomic, copy) NSString * _Null_unspecified _id;
 @property (nonatomic) float _price;
+- (BOOL)IsExpired SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
@@ -429,7 +430,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable OnLog)
 + (void (^ _Nullable)(NSString * _Nonnull))OnLog SWIFT_WARN_UNUSED_RESULT;
 + (void)setOnLog:(void (^ _Nullable)(NSString * _Nonnull))value;
 @property (nonatomic, copy) void (^ _Nullable IOnReady)(NSString * _Nonnull);
-@property (nonatomic, copy) void (^ _Nullable IOnBid)(NSString * _Nonnull, float);
+@property (nonatomic, copy) void (^ _Nullable IOnBid)(NSString * _Nonnull, float, NSInteger);
 @property (nonatomic, copy) void (^ _Nullable IOnLoadStart)(NSString * _Nonnull);
 @property (nonatomic, copy) void (^ _Nullable IOnLoadFail)(NSString * _Nonnull, NSString * _Nullable);
 @property (nonatomic, copy) void (^ _Nullable IOnLoad)(NSString * _Nonnull, NSInteger, NSInteger);
@@ -458,7 +459,19 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NeftaPlugin * _Null_un
 - (void)BidWithId:(NSString * _Nonnull)id;
 - (void)LoadWithId:(NSString * _Nonnull)id;
 - (void)LoadWithBidResponseWithId:(NSString * _Nonnull)id bidResponse:(NSData * _Nonnull)bidResponse;
-- (BOOL)IsReadyWithId:(NSString * _Nonnull)id SWIFT_WARN_UNUSED_RESULT;
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger PlacementReady;)
++ (NSInteger)PlacementReady SWIFT_WARN_UNUSED_RESULT;
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger PlacementNotExists;)
++ (NSInteger)PlacementNotExists SWIFT_WARN_UNUSED_RESULT;
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger PlacementLoading;)
++ (NSInteger)PlacementLoading SWIFT_WARN_UNUSED_RESULT;
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger PlacementExpired;)
++ (NSInteger)PlacementExpired SWIFT_WARN_UNUSED_RESULT;
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger PlacementShowing;)
++ (NSInteger)PlacementShowing SWIFT_WARN_UNUSED_RESULT;
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger PlacementNotReady;)
++ (NSInteger)PlacementNotReady SWIFT_WARN_UNUSED_RESULT;
+- (NSInteger)IsReadyWithId:(NSString * _Nonnull)id SWIFT_WARN_UNUSED_RESULT;
 - (void)ShowWithId:(NSString * _Nonnull)id;
 - (void)ShowMainWithId:(NSString * _Nonnull)id;
 - (void)Close;
@@ -489,9 +502,10 @@ SWIFT_CLASS("_TtC8NeftaSDK9Placement")
 @property (nonatomic) BOOL _isManualPosition;
 - (BOOL)IsBidding SWIFT_WARN_UNUSED_RESULT;
 - (BOOL)IsLoading SWIFT_WARN_UNUSED_RESULT;
+- (BOOL)IsExpired SWIFT_WARN_UNUSED_RESULT;
 - (BOOL)IsShowing SWIFT_WARN_UNUSED_RESULT;
 - (BOOL)CanLoad SWIFT_WARN_UNUSED_RESULT;
-- (BOOL)CanShow SWIFT_WARN_UNUSED_RESULT;
+- (NSInteger)CanShow SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
@@ -527,15 +541,23 @@ SWIFT_CLASS("_TtC8NeftaSDK9Publisher")
 @class WKWebView;
 @class WKNavigation;
 @class WKNavigationAction;
+@class WKWebViewConfiguration;
+@class WKWindowFeatures;
+@class WKUserContentController;
+@class WKScriptMessage;
+@class UIGestureRecognizer;
 
 SWIFT_CLASS("_TtC8NeftaSDK13WebController")
-@interface WebController : UIView <WKNavigationDelegate>
+@interface WebController : UIView <UIGestureRecognizerDelegate, WKNavigationDelegate, WKScriptMessageHandler, WKUIDelegate>
 - (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)aDecoder SWIFT_UNAVAILABLE;
 - (void)didMoveToSuperview;
 - (void)webView:(WKWebView * _Nonnull)webView didFailNavigation:(WKNavigation * _Null_unspecified)navigation withError:(NSError * _Nonnull)error;
 - (void)webView:(WKWebView * _Nonnull)webView didFailProvisionalNavigation:(WKNavigation * _Null_unspecified)navigation withError:(NSError * _Nonnull)error;
 - (void)webView:(WKWebView * _Nonnull)webView didFinishNavigation:(WKNavigation * _Null_unspecified)navigation;
 - (void)webView:(WKWebView * _Nonnull)webView decidePolicyForNavigationAction:(WKNavigationAction * _Nonnull)navigationAction decisionHandler:(void (^ _Nonnull)(WKNavigationActionPolicy))decisionHandler;
+- (WKWebView * _Nullable)webView:(WKWebView * _Nonnull)webView createWebViewWithConfiguration:(WKWebViewConfiguration * _Nonnull)configuration forNavigationAction:(WKNavigationAction * _Nonnull)navigationAction windowFeatures:(WKWindowFeatures * _Nonnull)windowFeatures SWIFT_WARN_UNUSED_RESULT;
+- (void)userContentController:(WKUserContentController * _Nonnull)userContentController didReceiveScriptMessage:(WKScriptMessage * _Nonnull)message;
+- (BOOL)gestureRecognizer:(UIGestureRecognizer * _Nonnull)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer * _Nonnull)otherGestureRecognizer SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)initWithFrame:(CGRect)frame SWIFT_UNAVAILABLE;
 @end
 
@@ -857,6 +879,7 @@ SWIFT_CLASS("_TtC8NeftaSDK11BidResponse")
 @interface BidResponse : NSObject
 @property (nonatomic, copy) NSString * _Null_unspecified _id;
 @property (nonatomic) float _price;
+- (BOOL)IsExpired SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
@@ -978,7 +1001,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable OnLog)
 + (void (^ _Nullable)(NSString * _Nonnull))OnLog SWIFT_WARN_UNUSED_RESULT;
 + (void)setOnLog:(void (^ _Nullable)(NSString * _Nonnull))value;
 @property (nonatomic, copy) void (^ _Nullable IOnReady)(NSString * _Nonnull);
-@property (nonatomic, copy) void (^ _Nullable IOnBid)(NSString * _Nonnull, float);
+@property (nonatomic, copy) void (^ _Nullable IOnBid)(NSString * _Nonnull, float, NSInteger);
 @property (nonatomic, copy) void (^ _Nullable IOnLoadStart)(NSString * _Nonnull);
 @property (nonatomic, copy) void (^ _Nullable IOnLoadFail)(NSString * _Nonnull, NSString * _Nullable);
 @property (nonatomic, copy) void (^ _Nullable IOnLoad)(NSString * _Nonnull, NSInteger, NSInteger);
@@ -1007,7 +1030,19 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NeftaPlugin * _Null_un
 - (void)BidWithId:(NSString * _Nonnull)id;
 - (void)LoadWithId:(NSString * _Nonnull)id;
 - (void)LoadWithBidResponseWithId:(NSString * _Nonnull)id bidResponse:(NSData * _Nonnull)bidResponse;
-- (BOOL)IsReadyWithId:(NSString * _Nonnull)id SWIFT_WARN_UNUSED_RESULT;
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger PlacementReady;)
++ (NSInteger)PlacementReady SWIFT_WARN_UNUSED_RESULT;
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger PlacementNotExists;)
++ (NSInteger)PlacementNotExists SWIFT_WARN_UNUSED_RESULT;
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger PlacementLoading;)
++ (NSInteger)PlacementLoading SWIFT_WARN_UNUSED_RESULT;
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger PlacementExpired;)
++ (NSInteger)PlacementExpired SWIFT_WARN_UNUSED_RESULT;
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger PlacementShowing;)
++ (NSInteger)PlacementShowing SWIFT_WARN_UNUSED_RESULT;
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger PlacementNotReady;)
++ (NSInteger)PlacementNotReady SWIFT_WARN_UNUSED_RESULT;
+- (NSInteger)IsReadyWithId:(NSString * _Nonnull)id SWIFT_WARN_UNUSED_RESULT;
 - (void)ShowWithId:(NSString * _Nonnull)id;
 - (void)ShowMainWithId:(NSString * _Nonnull)id;
 - (void)Close;
@@ -1038,9 +1073,10 @@ SWIFT_CLASS("_TtC8NeftaSDK9Placement")
 @property (nonatomic) BOOL _isManualPosition;
 - (BOOL)IsBidding SWIFT_WARN_UNUSED_RESULT;
 - (BOOL)IsLoading SWIFT_WARN_UNUSED_RESULT;
+- (BOOL)IsExpired SWIFT_WARN_UNUSED_RESULT;
 - (BOOL)IsShowing SWIFT_WARN_UNUSED_RESULT;
 - (BOOL)CanLoad SWIFT_WARN_UNUSED_RESULT;
-- (BOOL)CanShow SWIFT_WARN_UNUSED_RESULT;
+- (NSInteger)CanShow SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
@@ -1076,15 +1112,23 @@ SWIFT_CLASS("_TtC8NeftaSDK9Publisher")
 @class WKWebView;
 @class WKNavigation;
 @class WKNavigationAction;
+@class WKWebViewConfiguration;
+@class WKWindowFeatures;
+@class WKUserContentController;
+@class WKScriptMessage;
+@class UIGestureRecognizer;
 
 SWIFT_CLASS("_TtC8NeftaSDK13WebController")
-@interface WebController : UIView <WKNavigationDelegate>
+@interface WebController : UIView <UIGestureRecognizerDelegate, WKNavigationDelegate, WKScriptMessageHandler, WKUIDelegate>
 - (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)aDecoder SWIFT_UNAVAILABLE;
 - (void)didMoveToSuperview;
 - (void)webView:(WKWebView * _Nonnull)webView didFailNavigation:(WKNavigation * _Null_unspecified)navigation withError:(NSError * _Nonnull)error;
 - (void)webView:(WKWebView * _Nonnull)webView didFailProvisionalNavigation:(WKNavigation * _Null_unspecified)navigation withError:(NSError * _Nonnull)error;
 - (void)webView:(WKWebView * _Nonnull)webView didFinishNavigation:(WKNavigation * _Null_unspecified)navigation;
 - (void)webView:(WKWebView * _Nonnull)webView decidePolicyForNavigationAction:(WKNavigationAction * _Nonnull)navigationAction decisionHandler:(void (^ _Nonnull)(WKNavigationActionPolicy))decisionHandler;
+- (WKWebView * _Nullable)webView:(WKWebView * _Nonnull)webView createWebViewWithConfiguration:(WKWebViewConfiguration * _Nonnull)configuration forNavigationAction:(WKNavigationAction * _Nonnull)navigationAction windowFeatures:(WKWindowFeatures * _Nonnull)windowFeatures SWIFT_WARN_UNUSED_RESULT;
+- (void)userContentController:(WKUserContentController * _Nonnull)userContentController didReceiveScriptMessage:(WKScriptMessage * _Nonnull)message;
+- (BOOL)gestureRecognizer:(UIGestureRecognizer * _Nonnull)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer * _Nonnull)otherGestureRecognizer SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)initWithFrame:(CGRect)frame SWIFT_UNAVAILABLE;
 @end
 
