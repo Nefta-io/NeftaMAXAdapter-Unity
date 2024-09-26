@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using Nefta.Core.Events;
+using NeftaCustomAdapter;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -34,6 +36,11 @@ namespace AdDemo
 
         private void OnLoadClick()
         {
+            var category = (ResourceCategory) Random.Range(0, 9);
+            var method = (ReceiveMethod)Random.Range(0, 8);
+            var value = Random.Range(0, 101);
+            NeftaAdapterEvents.Record(new ReceiveEvent(category) { _method = method, _name = $"receive_{category} {method} {value}", _value = value });
+            
             SetStatus("Loading...");
             MaxSdk.LoadInterstitial(_adUnitId);
         }

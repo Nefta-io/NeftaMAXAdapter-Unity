@@ -1,17 +1,15 @@
-using System.Collections.Generic;
-
 namespace Nefta.Core.Events
 {
     public enum ReceiveMethod
     {
-        Undefined,
-        LevelEnd,
-        Reward,
-        Loot,
-        Shop,
-        IAP,
-        Create,
-        Other
+        Undefined = 0,
+        LevelEnd = 1,
+        Reward = 2,
+        Loot = 3,
+        Shop = 4,
+        IAP = 5,
+        Create = 6,
+        Other = 7
     }
     
     /// <summary>
@@ -19,26 +17,15 @@ namespace Nefta.Core.Events
     /// </summary>
     public class ReceiveEvent : ResourceEvent
     {
-        private static readonly Dictionary<ReceiveMethod, string> MethodToString = new Dictionary<ReceiveMethod, string>()
-        {
-            { ReceiveMethod.Undefined, null },
-            { ReceiveMethod.LevelEnd, "level_end" },
-            { ReceiveMethod.Reward, "reward" },
-            { ReceiveMethod.Loot, "loot" },
-            { ReceiveMethod.Shop, "shop" },
-            { ReceiveMethod.IAP, "iap" },
-            { ReceiveMethod.Create, "create" },
-            { ReceiveMethod.Other, "other" }
-        };
-        
         /// <summary>
         /// The method how or where the player received resources
         /// </summary>
         public ReceiveMethod _method;
 
-        internal override string _eventType => "receive";
+        internal override int _eventType => 2;
         
-        internal override string _subCategory => MethodToString[_method];
+        internal override int _subCategory => (int) _method;
+
         
         public ReceiveEvent(ResourceCategory category) : base(category)
         {

@@ -1,3 +1,5 @@
+using Nefta.Core.Events;
+using NeftaCustomAdapter;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -31,6 +33,13 @@ namespace AdDemo
         
         private void OnShowClick()
         {
+            var type = (Type) Random.Range(0, 7);
+            var status = (Status)Random.Range(0, 3);
+            var source = (Source)Random.Range(0, 7);
+            var value = Random.Range(0, 101);
+            NeftaAdapterEvents.Record(new ProgressionEvent(type, status)
+                { _source = source, _name = $"progression_{type}_{status} {source} {value}", _value = value });
+            
             MaxSdk.ShowBanner(_adUnitId);
             _hide.interactable = true;
         }

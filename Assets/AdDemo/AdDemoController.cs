@@ -33,21 +33,6 @@ namespace AdDemo
 #else
             NeftaAdapterEvents.Init("5643649824063488");
 #endif
-            NeftaAdapterEvents.Record(new ProgressionEvent(Type.Achievement, Status.Start)
-            {
-                _source = Source.OptionalContent,
-                _name = "area-69",
-                _value = 23,
-                _customString = "abc"
-            });
-        
-            NeftaAdapterEvents.Record(new ReceiveEvent(ResourceCategory.CoreItem)
-            {
-                _method = ReceiveMethod.Reward,
-                _value = long.MaxValue,
-                _name = "RewardedAds",
-                _customString = "RV"
-            });
             
             MaxSdkCallbacks.OnSdkInitializedEvent += sdkConfiguration =>
             {
