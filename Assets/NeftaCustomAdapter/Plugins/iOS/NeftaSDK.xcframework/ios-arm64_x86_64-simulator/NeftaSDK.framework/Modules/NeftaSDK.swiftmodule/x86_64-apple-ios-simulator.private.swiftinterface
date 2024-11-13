@@ -17,24 +17,49 @@ import _Concurrency
 import _StringProcessing
 import _SwiftConcurrencyShims
 import os
-@objc @_hasMissingDesignatedInitializers public class Publisher : ObjectiveC.NSObject {
-  public var _placements: [Swift.String : NeftaSDK.Placement]
+@objc public class UnityWrapper : ObjectiveC.NSObject {
+  public typealias IOnReadyBlock = ((Swift.String) -> Swift.Void)
+  public typealias IOnBidBlock = ((Swift.String, Swift.Float, Swift.Int) -> Swift.Void)
+  public typealias IOnFailBlock = ((Swift.String, Swift.Int, Swift.String?) -> Swift.Void)
+  public typealias IOnLoadBlock = ((Swift.String, Swift.Int, Swift.Int) -> Swift.Void)
+  public typealias IOnChangeBlock = ((Swift.String) -> Swift.Void)
+  @objc public var IOnReady: NeftaSDK.UnityWrapper.IOnReadyBlock?
+  @objc public var IOnBid: NeftaSDK.UnityWrapper.IOnBidBlock?
+  @objc public var IOnLoadStart: NeftaSDK.UnityWrapper.IOnChangeBlock?
+  @objc public var IOnLoadFail: NeftaSDK.UnityWrapper.IOnFailBlock?
+  @objc public var IOnLoad: NeftaSDK.UnityWrapper.IOnLoadBlock?
+  @objc public var IOnShowFail: NeftaSDK.UnityWrapper.IOnFailBlock?
+  @objc public var IOnShow: NeftaSDK.UnityWrapper.IOnChangeBlock?
+  @objc public var IOnClick: NeftaSDK.UnityWrapper.IOnChangeBlock?
+  @objc public var IOnClose: NeftaSDK.UnityWrapper.IOnChangeBlock?
+  @objc public var IOnReward: NeftaSDK.UnityWrapper.IOnChangeBlock?
+  @objc final public let _plugin: NeftaSDK.NeftaPlugin
+  @objc public init(appId: Swift.String)
+  @objc public func SetFloorPrice(id: Swift.String, floorPrice: Swift.Float)
+  @objc public func SetCustomParameter(id: Swift.String, provider: Swift.String, value: Swift.String)
+  @objc public func Mute(id: Swift.String, mute: Swift.Bool)
+  @objc public func CreateBanner(id: Swift.String, position: Swift.Int, autoRefresh: Swift.Bool)
+  @objc public func Bid(id: Swift.String)
+  @objc(GetPartialBidRequestAsString:) public func GetPartialBidRequestAsString(id: Swift.String) -> Swift.String?
+  @objc public func Load(id: Swift.String)
+  @objc public func LoadWithBidResponse(id: Swift.String, bidResponse: Foundation.Data)
+  @objc public func CanShow(id: Swift.String) -> Swift.Int
+  @objc public func Show(id: Swift.String)
+  @objc public func Hide(id: Swift.String)
+  @objc public func Close(id: Swift.String)
+  @objc deinit
+}
+@_hasMissingDesignatedInitializers @objc public class NError : ObjectiveC.NSObject {
+  @objc final public let _code: Swift.Int
+  @objc final public let _message: Swift.String
   @objc deinit
 }
 @_hasMissingDesignatedInitializers @objc public class Placement : ObjectiveC.NSObject {
-  @objc public enum Position : Swift.Int {
-    case Top = 0
-    case Bottom = 1
-    public init?(rawValue: Swift.Int)
-    public typealias RawValue = Swift.Int
-    public var rawValue: Swift.Int {
-      get
-    }
-  }
   @objc public enum Types : Swift.Int, Swift.CustomStringConvertible {
-    case Banner = 0
-    case Interstitial = 1
-    case RewardedVideo = 2
+    case Uninitialized = 0
+    case Banner = 1
+    case Interstitial = 2
+    case Rewarded = 3
     public var description: Swift.String {
       get
     }
@@ -44,37 +69,55 @@ import os
       get
     }
   }
-  @objc public enum Modes : Swift.Int {
-    case Manual = 0
-    case ScheduledBid = 1
-    case ScheduledLoad = 2
-    case Continuous = 3
-    public init?(rawValue: Swift.Int)
-    public typealias RawValue = Swift.Int
-    public var rawValue: Swift.Int {
-      get
-    }
-  }
   @objc public var _id: Swift.String
   @objc public var _width: Swift.Int
   @objc public var _height: Swift.Int
-  @objc public var _position: NeftaSDK.Placement.Position
   @objc public var _type: NeftaSDK.Placement.Types
-  @objc public var _availableBid: NeftaSDK.BidResponse?
-  @objc public var _bufferBid: NeftaSDK.BidResponse?
-  @objc public var _renderedBid: NeftaSDK.BidResponse?
-  @objc public var _mode: NeftaSDK.Placement.Modes
-  @objc public var _bidTime: Swift.UInt
-  @objc public var _loadTime: Swift.UInt
-  @objc public var _showTime: Swift.UInt
-  @objc public var _isHidden: Swift.Bool
-  @objc public var _isManualPosition: Swift.Bool
-  @objc public func IsBidding() -> Swift.Bool
-  @objc public func IsLoading() -> Swift.Bool
-  @objc public func IsExpired() -> Swift.Bool
-  @objc public func IsShowing() -> Swift.Bool
-  @objc public func CanLoad() -> Swift.Bool
+  @objc deinit
+}
+@objc public protocol NAdListener : ObjectiveC.NSObjectProtocol {
+  @objc optional func OnBid(ad: NeftaSDK.NAd, bidResponse: NeftaSDK.BidResponse?, error: NeftaSDK.NError?)
+  @objc optional func OnLoadStart(ad: NeftaSDK.NAd)
+  @objc func OnLoadFail(ad: NeftaSDK.NAd, error: NeftaSDK.NError)
+  @objc func OnLoad(ad: NeftaSDK.NAd, width: Swift.Int, height: Swift.Int)
+  @objc func OnShowFail(ad: NeftaSDK.NAd, error: NeftaSDK.NError)
+  @objc func OnShow(ad: NeftaSDK.NAd)
+  @objc optional func OnClick(ad: NeftaSDK.NAd)
+  @objc func OnClose(ad: NeftaSDK.NAd)
+}
+@objc public class NAd : ObjectiveC.NSObject {
+  @objc public static let Request: Swift.Int
+  @objc public static let Initialized: Swift.Int
+  @objc public static let Bidding: Swift.Int
+  @objc public static let ReadyToLoad: Swift.Int
+  @objc public static let Loading: Swift.Int
+  @objc public static let Ready: Swift.Int
+  @objc public static let Showing: Swift.Int
+  @objc public static let Hidden: Swift.Int
+  @objc public static let Expired: Swift.Int
+  @objc public var _id: Swift.String
+  @objc public var _type: NeftaSDK.Placement.Types
+  @objc public var _placement: NeftaSDK.Placement?
+  @objc public var _bid: NeftaSDK.BidResponse?
+  @objc public var _state: Swift.Int
+  @objc public var _stateStart: Swift.UInt
+  @objc public var _listener: (any NeftaSDK.NAdListener)?
+  @objc public init(id: Swift.String)
   @objc public func CanShow() -> Swift.Int
+  @objc public func GetPartialBidRequest() -> [Swift.String : Any]?
+  @objc public func GetPartialBidRequestAsString() -> Swift.String?
+  @objc public func Bid()
+  @objc public func LoadWithBidResponse(bidResponse: Foundation.Data)
+  @objc public func Load()
+  @objc public func Show()
+  @objc public func Close()
+  @objc public func SetFloorPrice(floorPrice: Swift.Float)
+  @objc public func SetCustomParameter(provider: Swift.String, value: Swift.String)
+  @objc public func Mute(_ mute: Swift.Bool)
+  @objc deinit
+}
+@_inheritsConvenienceInitializers @objc public class NInterstitial : NeftaSDK.NAd {
+  @objc override public init(id: Swift.String)
   @objc deinit
 }
 @_inheritsConvenienceInitializers @objc public class BidResponse : ObjectiveC.NSObject {
@@ -99,70 +142,22 @@ import os
 }
 @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc public class NeftaPlugin : ObjectiveC.NSObject {
   public typealias OnReadyBlock = (([Swift.String : NeftaSDK.Placement]) -> Swift.Void)
-  public typealias OnBidBlock = ((NeftaSDK.Placement, NeftaSDK.BidResponse?) -> Swift.Void)
-  public typealias OnLoadFailBlock = ((NeftaSDK.Placement, Swift.String?) -> Swift.Void)
-  public typealias OnLoadBlock = ((NeftaSDK.Placement, Swift.Int, Swift.Int) -> Swift.Void)
-  public typealias OnChangeBlock = ((NeftaSDK.Placement) -> Swift.Void)
-  public typealias IOnReadyBlock = ((Swift.String) -> Swift.Void)
-  public typealias IOnBidBlock = ((Swift.String, Swift.Float, Swift.Int) -> Swift.Void)
-  public typealias IOnLoadFailBlock = ((Swift.String, Swift.String?) -> Swift.Void)
-  public typealias IOnLoadBlock = ((Swift.String, Swift.Int, Swift.Int) -> Swift.Void)
-  public typealias IOnChangeBlock = ((Swift.String) -> Swift.Void)
   public typealias OnLogBlock = ((Swift.String) -> Swift.Void)
   @objc public static let Version: Swift.String
   @objc public var Events: NeftaSDK.NeftaEvents
-  public var _publisher: NeftaSDK.Publisher
+  public var _placements: [Swift.String : NeftaSDK.Placement]!
+  public var _ads: [NeftaSDK.NAd]
   @objc public var OnReady: NeftaSDK.NeftaPlugin.OnReadyBlock?
-  @objc public var OnBid: NeftaSDK.NeftaPlugin.OnBidBlock?
-  @objc public var OnLoadStart: NeftaSDK.NeftaPlugin.OnChangeBlock?
-  @objc public var OnLoadFail: NeftaSDK.NeftaPlugin.OnLoadFailBlock?
-  @objc public var OnLoad: NeftaSDK.NeftaPlugin.OnLoadBlock?
-  @objc public var OnShow: NeftaSDK.NeftaPlugin.OnChangeBlock?
-  @objc public var OnClick: NeftaSDK.NeftaPlugin.OnChangeBlock?
-  @objc public var OnClose: NeftaSDK.NeftaPlugin.OnChangeBlock?
-  @objc public var OnReward: NeftaSDK.NeftaPlugin.OnChangeBlock?
   @objc public static var OnLog: NeftaSDK.NeftaPlugin.OnLogBlock?
-  @objc public var IOnReady: NeftaSDK.NeftaPlugin.IOnReadyBlock?
-  @objc public var IOnBid: NeftaSDK.NeftaPlugin.IOnBidBlock?
-  @objc public var IOnLoadStart: NeftaSDK.NeftaPlugin.IOnChangeBlock?
-  @objc public var IOnLoadFail: NeftaSDK.NeftaPlugin.IOnLoadFailBlock?
-  @objc public var IOnLoad: NeftaSDK.NeftaPlugin.IOnLoadBlock?
-  @objc public var IOnShow: NeftaSDK.NeftaPlugin.IOnChangeBlock?
-  @objc public var IOnClick: NeftaSDK.NeftaPlugin.IOnChangeBlock?
-  @objc public var IOnClose: NeftaSDK.NeftaPlugin.IOnChangeBlock?
-  @objc public var IOnReward: NeftaSDK.NeftaPlugin.IOnChangeBlock?
   @objc public static var _instance: NeftaSDK.NeftaPlugin!
   @objc(EnableLogging:) public static func EnableLogging(enable: Swift.Bool)
-  @objc public static func Init(appId: Swift.String?) -> NeftaSDK.NeftaPlugin
+  @objc public static func Init(appId: Swift.String) -> NeftaSDK.NeftaPlugin
   @objc public func PrepareRenderer(viewController: UIKit.UIViewController)
   public static func SetDebugTime(offset: Swift.Int)
   @objc public func Record(type: Swift.Int, category: Swift.Int, subCategory: Swift.Int, name: Swift.String?, value: Swift.Int, customPayload: Swift.String?)
   @objc(EnableAds:) public func EnableAds(enable: Swift.Bool)
-  @objc public func EnableBanner(id: Swift.String, enable: Swift.Bool)
   @objc public func SetPublisherUserId(id: Swift.String)
-  @objc public func SetPlacementPosition(id: Swift.String, position: NeftaSDK.Placement.Position)
-  @objc public func SetPlacementMode(id: Swift.String, mode: NeftaSDK.Placement.Modes)
-  @objc public func SetFloorPrice(id: Swift.String, floorPrice: Swift.Float)
-  @objc public func SetCustomParameter(id: Swift.String, provider: Swift.String, value: Swift.String)
-  @objc(GetPartialBidRequest:) public func GetPartialBidRequest(id: Swift.String) -> [Swift.String : Any]?
-  @objc(GetPartialBidRequestAsString:) public func GetPartialBidRequestAsString(id: Swift.String) -> Swift.String?
-  @objc public func Bid(id: Swift.String)
-  @objc public func Load(id: Swift.String)
-  @objc public func LoadWithBidResponse(id: Swift.String, bidResponse: Foundation.Data)
-  @objc public static let PlacementReady: Swift.Int
-  @objc public static let PlacementNotExists: Swift.Int
-  @objc public static let PlacementLoading: Swift.Int
-  @objc public static let PlacementExpired: Swift.Int
-  @objc public static let PlacementShowing: Swift.Int
-  @objc public static let PlacementNotReady: Swift.Int
-  @objc public func IsReady(id: Swift.String) -> Swift.Int
-  @objc public func Show(id: Swift.String)
-  @objc public func ShowMain(id: Swift.String)
-  @objc public func Close()
-  @objc public func Close(id: Swift.String)
-  @objc public func Mute(_ mute: Swift.Bool)
   @objc public func GetNuid(present: Swift.Bool) -> Swift.String
-  @objc(GetViewForPlacement:show:) public func GetViewForPlacement(placement: NeftaSDK.Placement, show: Swift.Bool) -> UIKit.UIView?
   @objc public func SetOverride(url: Swift.String)
   @objc deinit
 }
@@ -285,6 +280,13 @@ import os
   @objc public func AddSpendEvent(category: NeftaSDK.NeftaEvents.ResourceCategory, method: NeftaSDK.NeftaEvents.SpendMethod, name: Swift.String?, quantity: Swift.Int, customPayload: Swift.String?)
   @objc deinit
 }
+@objc public protocol NInterstitialListener : NeftaSDK.NAdListener {
+}
+@objc public protocol NRewardedListener : NeftaSDK.NAdListener {
+  @objc func OnReward(ad: NeftaSDK.NAd)
+  @objc func didStartRewardedVideoForAd(ad: NeftaSDK.NAd)
+  @objc func didCompleteRewardedVideoForAd(ad: NeftaSDK.NAd)
+}
 @_hasMissingDesignatedInitializers @objc @_Concurrency.MainActor @preconcurrency public class WebController : UIKit.UIView, WebKit.WKNavigationDelegate, WebKit.WKUIDelegate, WebKit.WKScriptMessageHandler, UIKit.UIGestureRecognizerDelegate {
   @_Concurrency.MainActor @preconcurrency @objc override dynamic public func didMoveToSuperview()
   @_Concurrency.MainActor @preconcurrency @objc public func webView(_ webView: WebKit.WKWebView, didFail navigation: WebKit.WKNavigation!, withError error: any Swift.Error)
@@ -296,15 +298,36 @@ import os
   @_Concurrency.MainActor @preconcurrency @objc public func gestureRecognizer(_ gestureRecognizer: UIKit.UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIKit.UIGestureRecognizer) -> Swift.Bool
   @objc deinit
 }
-extension NeftaSDK.Placement.Position : Swift.Equatable {}
-extension NeftaSDK.Placement.Position : Swift.Hashable {}
-extension NeftaSDK.Placement.Position : Swift.RawRepresentable {}
+@objc public protocol NBannerListener : NeftaSDK.NAdListener {
+}
+@_inheritsConvenienceInitializers @objc public class NRewarded : NeftaSDK.NAd {
+  @objc override public init(id: Swift.String)
+  @objc deinit
+}
+@objc public class NBanner : NeftaSDK.NAd {
+  @objc public enum Position : Swift.Int {
+    case None = 0
+    case Top = 1
+    case Bottom = 2
+    public init?(rawValue: Swift.Int)
+    public typealias RawValue = Swift.Int
+    public var rawValue: Swift.Int {
+      get
+    }
+  }
+  @objc public var _position: NeftaSDK.NBanner.Position
+  @objc public init(id: Swift.String, parent: UIKit.UIView)
+  @objc public init(id: Swift.String, position: NeftaSDK.NBanner.Position)
+  @objc(SetAutoRefresh:) public func SetAutoRefresh(autoRefresh: Swift.Bool)
+  @objc public func GracefulShow() -> UIKit.UIView
+  @objc public func GetView() -> UIKit.UIView
+  @objc override public func Show()
+  @objc public func Hide()
+  @objc deinit
+}
 extension NeftaSDK.Placement.Types : Swift.Equatable {}
 extension NeftaSDK.Placement.Types : Swift.Hashable {}
 extension NeftaSDK.Placement.Types : Swift.RawRepresentable {}
-extension NeftaSDK.Placement.Modes : Swift.Equatable {}
-extension NeftaSDK.Placement.Modes : Swift.Hashable {}
-extension NeftaSDK.Placement.Modes : Swift.RawRepresentable {}
 extension NeftaSDK.BidResponse.AdMarkupTypes : Swift.Equatable {}
 extension NeftaSDK.BidResponse.AdMarkupTypes : Swift.Hashable {}
 extension NeftaSDK.BidResponse.AdMarkupTypes : Swift.RawRepresentable {}
@@ -325,3 +348,6 @@ extension NeftaSDK.NeftaEvents.ReceiveMethod : Swift.RawRepresentable {}
 extension NeftaSDK.NeftaEvents.SpendMethod : Swift.Equatable {}
 extension NeftaSDK.NeftaEvents.SpendMethod : Swift.Hashable {}
 extension NeftaSDK.NeftaEvents.SpendMethod : Swift.RawRepresentable {}
+extension NeftaSDK.NBanner.Position : Swift.Equatable {}
+extension NeftaSDK.NBanner.Position : Swift.Hashable {}
+extension NeftaSDK.NBanner.Position : Swift.RawRepresentable {}
