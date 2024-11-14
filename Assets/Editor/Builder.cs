@@ -19,7 +19,7 @@ namespace Editor
                 scenes = scenes.ToArray(),
                 locationPathName = outPath,
                 target = target,
-                options = BuildOptions.Development | BuildOptions.StrictMode
+                options = BuildOptions.StrictMode
             };
             
             EditorUserBuildSettings.exportAsGoogleAndroidProject = false;
