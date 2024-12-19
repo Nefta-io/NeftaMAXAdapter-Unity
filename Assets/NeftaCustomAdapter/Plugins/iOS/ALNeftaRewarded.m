@@ -38,7 +38,7 @@
     [_listener didLoadRewardedAd];
 }
 - (void)OnShowFailWithAd:(NAd * _Nonnull)ad error:(NError * _Nonnull)error {
-
+    [_listener didFailToLoadRewardedAdWithError: MAAdapterError.adDisplayFailedError];
 }
 - (void)OnShowWithAd:(NAd * _Nonnull)ad {
     [_listener didDisplayRewardedAd];
@@ -47,15 +47,15 @@
     [_listener didClickRewardedAd];
 }
 - (void)OnRewardWithAd:(NAd * _Nonnull)ad {
-    MAReward *reward = [MAReward rewardWithAmount:MAReward.defaultAmount label: MAReward.defaultLabel];
-    [_listener didRewardUserWithReward: reward];
+    _giveReward = true;
+    if (_reward == nil) {
+        _reward = [MAReward rewardWithAmount: MAReward.defaultAmount label: MAReward.defaultLabel];
+    }
 }
 - (void)OnCloseWithAd:(NAd * _Nonnull)ad {
+    if (_giveReward) {
+        [_listener didRewardUserWithReward: _reward];
+    }
     [_listener didHideRewardedAd];
-}
-
-- (void)didCompleteRewardedVideoForAdWithAd:(NAd * _Nonnull)ad {
-}
-- (void)didStartRewardedVideoForAdWithAd:(NAd * _Nonnull)ad {
 }
 @end

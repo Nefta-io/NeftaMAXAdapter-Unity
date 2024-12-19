@@ -348,7 +348,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger Expired;)
 @property (nonatomic, strong) Placement * _Nullable _placement;
 @property (nonatomic, strong) BidResponse * _Nullable _bid;
 @property (nonatomic) NSInteger _state;
-@property (nonatomic) NSUInteger _stateStart;
+@property (nonatomic) NSInteger _stateStart;
 @property (nonatomic, strong) id <NAdListener> _Nullable _listener;
 - (nonnull instancetype)initWithId:(NSString * _Nonnull)id OBJC_DESIGNATED_INITIALIZER;
 - (NSInteger)CanShow SWIFT_WARN_UNUSED_RESULT;
@@ -393,8 +393,8 @@ SWIFT_CLASS("_TtC8NeftaSDK7NBanner")
 - (nonnull instancetype)initWithId:(NSString * _Nonnull)id parent:(UIView * _Nonnull)parent OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)initWithId:(NSString * _Nonnull)id position:(enum Position)position OBJC_DESIGNATED_INITIALIZER;
 - (void)SetAutoRefresh:(BOOL)autoRefresh;
-- (UIView * _Nonnull)GracefulShow SWIFT_WARN_UNUSED_RESULT;
-- (UIView * _Nonnull)GetView SWIFT_WARN_UNUSED_RESULT;
+- (UIView * _Nullable)GracefulShow SWIFT_WARN_UNUSED_RESULT;
+- (UIView * _Nullable)GetView SWIFT_WARN_UNUSED_RESULT;
 - (void)Show;
 - (void)Hide;
 - (nonnull instancetype)initWithId:(NSString * _Nonnull)id SWIFT_UNAVAILABLE;
@@ -441,8 +441,6 @@ SWIFT_CLASS("_TtC8NeftaSDK9NRewarded")
 SWIFT_PROTOCOL("_TtP8NeftaSDK17NRewardedListener_")
 @protocol NRewardedListener <NAdListener>
 - (void)OnRewardWithAd:(NAd * _Nonnull)ad;
-- (void)didStartRewardedVideoForAdWithAd:(NAd * _Nonnull)ad;
-- (void)didCompleteRewardedVideoForAdWithAd:(NAd * _Nonnull)ad;
 @end
 
 enum ProgressionStatus : NSInteger;
@@ -552,12 +550,13 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NeftaPlugin * _Null_un
 + (NeftaPlugin * _Nonnull)InitWithAppId:(NSString * _Nonnull)appId SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
+- (void)SetTrackingWithIsAuthorized:(BOOL)isAuthorized;
 - (void)PrepareRendererWithViewController:(UIViewController * _Nonnull)viewController;
 - (void)RecordWithType:(NSInteger)type category:(NSInteger)category subCategory:(NSInteger)subCategory name:(NSString * _Nullable)name value:(NSInteger)value customPayload:(NSString * _Nullable)customPayload;
 - (void)EnableAds:(BOOL)enable;
 - (void)SetPublisherUserIdWithId:(NSString * _Nonnull)id;
 - (NSString * _Nonnull)GetNuidWithPresent:(BOOL)present SWIFT_WARN_UNUSED_RESULT;
-- (void)SetOverrideWithUrl:(NSString * _Nonnull)url;
+- (void)SetOverrideWithUrl:(NSString * _Nullable)url;
 @end
 
 

@@ -32,7 +32,7 @@ static NeftaPlugin *_plugin;
 }
 
 - (NSString *)adapterVersion {
-    return @"2.0.0";
+    return @"2.0.1";
 }
 
 - (void)destroy {
@@ -87,6 +87,9 @@ static NeftaPlugin *_plugin;
         return;
     }
 
+    ALNeftaRewarded *rewarded = (ALNeftaRewarded *) _ad;
+    rewarded.reward = [self reward];
+    rewarded.giveReward = [self shouldAlwaysRewardUser];
     [_ad Show];
 }
 
