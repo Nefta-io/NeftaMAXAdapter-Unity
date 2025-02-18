@@ -4,7 +4,6 @@ apply plugin: 'com.android.library'
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 // Android Resolver Dependencies Start
-    implementation 'androidx.cardview:cardview:1.0.0' // Assets/NeftaCustomAdapter/Editor/Dependencies.xml:5
     implementation 'androidx.lifecycle:lifecycle-process:2.4.1' // Assets/NeftaCustomAdapter/Editor/Dependencies.xml:4
     implementation 'com.applovin:applovin-sdk:13.0.1' // Assets/MaxSdk/AppLovin/Editor/Dependencies.xml:4
 // Android Resolver Dependencies End

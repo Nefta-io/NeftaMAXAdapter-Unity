@@ -1,6 +1,7 @@
 #if UNITY_IOS
 using System.Runtime.InteropServices;
 #endif
+using System.Collections.Generic;
 using NeftaCustomAdapter;
 using UnityEngine;
 
@@ -15,12 +16,16 @@ namespace AdDemo
         private const string InterstitialAdUnitId = "c9acf50602329bfe";
         private const string RewardedAdUnitId = "08304643cb16df3b";
         
+        private const string NeftaId = "5661184053215232";
+        
         [DllImport("__Internal")]
         private static extern void CheckTrackingPermission();
 #else // UNITY_ANDROID
         private const string BannerAdUnitId = "6345b3fa80c73572";
         private const string InterstitialAdUnitId = "60bbc7cc56dfa329";
         private const string RewardedAdUnitId = "3082ee9199cf59f0";
+        
+        private const string NeftaId = "5643649824063488";
 #endif
         
         private bool _isBannerShown;
@@ -34,15 +39,42 @@ namespace AdDemo
         
         private void Awake()
         {
-#if UNITY_IOS
             NeftaAdapterEvents.EnableLogging(true);
-            NeftaAdapterEvents.Init("5661184053215232");
-#else
-            NeftaAdapterEvents.Init("5643649824063488");
+            NeftaAdapterEvents.Init(NeftaId);
+
+            NeftaAdapterEvents.BehaviourInsightCallback = OnBehaviourInsight;
+            NeftaAdapterEvents.GetBehaviourInsight(new string[] { "p_churn_14d"});
+            
+#if UNITY_EDITOR || !UNITY_IOS
+            InitAds();
 #endif
         }
         
-#if UNITY_IOS
+        private void OnBehaviourInsight(Dictionary<string, Insight> behaviourInsight)
+        {
+            foreach (var insight in behaviourInsight)
+            {
+                var insightValue = insight.Value;
+                Debug.Log($"BehaviourInsight {insight.Key} status:{insightValue._status} i:{insightValue._int} f:{insightValue._float} s:{insightValue._string}");
+            }
+        }
+
+        private void InitAds()
+        {
+            MaxSdkCallbacks.OnSdkInitializedEvent += sdkConfiguration =>
+            {
+                Debug.Log("MAX SDK Initialized");
+            };
+                    
+            MaxSdk.SetSdkKey(MaxSdkKey);
+            MaxSdk.InitializeSdk();
+
+            _banner.Init(BannerAdUnitId);
+            _interstitial.Init(InterstitialAdUnitId);
+            _rewarded.Init(RewardedAdUnitId);
+        }
+        
+#if !UNITY_EDITOR && UNITY_IOS
         private void Update()
         {
             if (!_permissionChecked)
@@ -54,17 +86,7 @@ namespace AdDemo
                     
                     CheckTrackingPermission();
                         
-                    MaxSdkCallbacks.OnSdkInitializedEvent += sdkConfiguration =>
-                    {
-                        Debug.Log("MAX SDK Initialized");
-                    };
-                    
-                    MaxSdk.SetSdkKey(MaxSdkKey);
-                    MaxSdk.InitializeSdk();
-
-                    _banner.Init(BannerAdUnitId);
-                    _interstitial.Init(InterstitialAdUnitId);
-                    _rewarded.Init(RewardedAdUnitId);
+                    InitAds();
                 }
             }
         }

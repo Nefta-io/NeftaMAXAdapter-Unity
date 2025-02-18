@@ -11,6 +11,8 @@
 #import "ALNeftaAd.h"
 
 @interface ALNeftaMediationAdapter : ALMediationAdapter <MAAdViewAdapter, MAInterstitialAdapter, MARewardedAdapter>
+@property (nonatomic, strong, readonly) NSString * _Nonnull _mediationProvider;
++ (void)OnExternalAdShown:(MAAd* _Nonnull)ad;
 @property ALNeftaAd * _Nullable ad;
 @end
 

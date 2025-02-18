@@ -7,6 +7,8 @@
 
 #import "ALNeftaInterstitial.h"
 
+#import "ALNeftaMediationAdapter.h"
+
 @implementation ALNeftaInterstitial
 
 - (instancetype)initWithId:(NSString *)id listener:(id<MAInterstitialAdapterDelegate>)listener {

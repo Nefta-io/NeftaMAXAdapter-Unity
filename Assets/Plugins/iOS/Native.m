@@ -16,10 +16,8 @@ void CheckTrackingPermission() {
     if (@available(iOS 14.5, *)) {
         [ATTrackingManager requestTrackingAuthorizationWithCompletionHandler:^(ATTrackingManagerAuthorizationStatus status) {
             [ALPrivacySettings setHasUserConsent: status == ATTrackingManagerAuthorizationStatusAuthorized];
-            [NeftaPlugin._instance SetTrackingWithIsAuthorized: status == ATTrackingManagerAuthorizationStatusAuthorized];
         }];
     } else {
         [ALPrivacySettings setHasUserConsent: canTrack];
-        [NeftaPlugin._instance SetTrackingWithIsAuthorized: canTrack];
     }
 }

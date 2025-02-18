@@ -10,9 +10,59 @@
 #import "ALNeftaInterstitial.h"
 #import "ALNeftaRewarded.h"
 
+NSString * const _mediationProvider = @"applovin-max";
+
 @implementation ALNeftaMediationAdapter
 
 static NeftaPlugin *_plugin;
+
++(void) OnExternalAdShown:(MAAd*)ad {
+    NSMutableDictionary *data = [NSMutableDictionary dictionary];
+    [data setObject: _mediationProvider forKey: @"mediation_provider"];
+    [data setObject: ad.format.label forKey: @"format"];
+    [data setObject: [NSString stringWithFormat:@"%dx%d", (int)ad.size.width, (int)ad.size.height] forKey: @"size"];
+    [data setObject: ad.adUnitIdentifier forKey: @"adUnit_id"];
+    [data setObject: ad.networkName forKey: @"network_name"];
+    if (ad.creativeIdentifier != nil) {
+        [data setObject: ad.creativeIdentifier forKey: @"creative_id"];
+    }
+    [data setObject: @(ad.revenue) forKey: @"revenue"];
+    [data setObject: ad.revenuePrecision forKey: @"revenue_precision"];
+    if (ad.placement != nil) {
+        [data setObject: ad.placement forKey: @"placement_name"];
+    }
+    [data setObject: @((NSInteger)(ad.requestLatency * 1000)) forKey: @"request_latency"];
+    if (ad.DSPName != nil) {
+        [data setObject: ad.DSPName forKey: @"dsp_name"];
+    }
+    if (ad.DSPIdentifier != nil) {
+        [data setObject: ad.DSPIdentifier forKey: @"dsp_id"];
+    }
+    MAAdWaterfallInfo* waterfall = ad.waterfall;
+    if (waterfall != nil) {
+        if (waterfall.name != nil) {
+            [data setObject: waterfall.name forKey: @"waterfall_name"];
+        }
+        if (waterfall.testName != nil) {
+            [data setObject: waterfall.testName forKey: @"waterfall_test_name"];
+        }
+        NSMutableArray *waterfalls = [NSMutableArray array];
+        for (MANetworkResponseInfo *other in waterfall.networkResponses) {
+            NSString *name = other.mediatedNetwork.name;
+            if (name == nil || [name length] == 0) {
+                id n = other.credentials[@"network_name"];
+                if ([n isKindOfClass:[NSString class]]) {
+                    name = (NSString *)n;
+                }
+            }
+            if (name != nil && [name length] > 0) {
+                [waterfalls addObject: name];
+            }
+        }
+        [data setObject: waterfalls forKey: @"waterfall"];
+    }
+    [NeftaPlugin OnExternalAdShown: @"max" data: data];
+}
 
 - (void)initializeWithParameters:(id<MAAdapterInitializationParameters>)parameters completionHandler:(void (^)(MAAdapterInitializationStatus, NSString *_Nullable))completionHandler {
     if (_plugin != nil) {
@@ -21,7 +71,9 @@ static NeftaPlugin *_plugin;
         NSString *appId = parameters.serverParameters[@"app_id"];
         
         _plugin = [NeftaPlugin InitWithAppId: appId];
-        [_plugin EnableAds: true];
+        NSNumber *hasConsent = [parameters hasUserConsent];
+        NSNumber *isDoNotSell = [parameters isDoNotSell];
+        [_plugin SetTrackingWithIsAuthorized: hasConsent != nil && hasConsent.longLongValue == 1 && (isDoNotSell == nil || isDoNotSell.longLongValue == 0)];
         
         completionHandler(MAAdapterInitializationStatusInitializedSuccess, nil);
     }
@@ -32,7 +84,7 @@ static NeftaPlugin *_plugin;
 }
 
 - (NSString *)adapterVersion {
-    return @"2.0.1";
+    return @"2.1.0";
 }
 
 - (void)destroy {
@@ -109,7 +161,7 @@ static NeftaPlugin *_plugin;
             NSLog(@"Error converting dictionary to JSON: %@", error.localizedDescription);
         } else {
             NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-            [_ad SetCustomParameterWithProvider: @"applovin-max" value: jsonString];
+            [_ad SetCustomParameterWithProvider: _mediationProvider value: jsonString];
         }
     }
     

@@ -2,6 +2,5 @@
 <dependencies>
     <androidPackages>
         <androidPackage spec="androidx.lifecycle:lifecycle-process:2.4.1" />
-        <androidPackage spec="androidx.cardview:cardview:1.0.0" />
     </androidPackages>
 </dependencies>

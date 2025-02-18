@@ -114,6 +114,11 @@ namespace AdDemo
         
         private void Update()
         {
+            if (_statusQueue == null)
+            {
+                return;
+            }
+            
             lock (_statusQueue)
             {
                 while (_statusQueue.Count > 0)

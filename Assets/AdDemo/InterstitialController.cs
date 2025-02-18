@@ -23,6 +23,7 @@ namespace AdDemo
             
             MaxSdkCallbacks.Interstitial.OnAdLoadedEvent += OnInterstitialLoadedEvent;
             MaxSdkCallbacks.Interstitial.OnAdLoadFailedEvent += OnInterstitialFailedEvent;
+            MaxSdkCallbacks.Interstitial.OnAdDisplayedEvent += OnInterstitialShowEvent;
             MaxSdkCallbacks.Interstitial.OnAdDisplayFailedEvent += InterstitialFailedToDisplayEvent;
             MaxSdkCallbacks.Interstitial.OnAdHiddenEvent += OnInterstitialHidden;
             MaxSdkCallbacks.Interstitial.OnAdRevenuePaidEvent += OnInterstitialRevenuePaidEvent;
@@ -69,6 +70,11 @@ namespace AdDemo
         {
             SetStatus("Load failed");
         }
+
+        private void OnInterstitialShowEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
+        {
+            SetStatus("Show");
+        }
         
         private void InterstitialFailedToDisplayEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo, MaxSdkBase.AdInfo adInfo)
         {
@@ -96,6 +102,11 @@ namespace AdDemo
         
         private void Update()
         {
+            if (_statusQueue == null)
+            {
+                return;
+            }
+            
             lock (_statusQueue)
             {
                 while (_statusQueue.Count > 0)

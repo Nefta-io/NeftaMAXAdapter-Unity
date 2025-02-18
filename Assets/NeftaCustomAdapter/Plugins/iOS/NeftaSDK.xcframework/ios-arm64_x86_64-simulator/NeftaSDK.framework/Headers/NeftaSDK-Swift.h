@@ -318,6 +318,17 @@ SWIFT_CLASS("_TtC8NeftaSDK11BidResponse")
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
+
+SWIFT_CLASS("_TtC8NeftaSDK7Insight")
+@interface Insight : NSObject
+@property (nonatomic, readonly, copy) NSString * _Nullable _status;
+@property (nonatomic, readonly) int64_t _int;
+@property (nonatomic, readonly) double _float;
+@property (nonatomic, readonly, copy) NSString * _Nullable _string;
+- (nonnull instancetype)init SWIFT_UNAVAILABLE;
++ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
+@end
+
 enum Types : NSInteger;
 @class Placement;
 @protocol NAdListener;
@@ -348,16 +359,18 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger Expired;)
 @property (nonatomic, strong) Placement * _Nullable _placement;
 @property (nonatomic, strong) BidResponse * _Nullable _bid;
 @property (nonatomic) NSInteger _state;
-@property (nonatomic) NSInteger _stateStart;
+@property (nonatomic) int64_t _stateStart;
 @property (nonatomic, strong) id <NAdListener> _Nullable _listener;
 - (nonnull instancetype)initWithId:(NSString * _Nonnull)id OBJC_DESIGNATED_INITIALIZER;
 - (NSInteger)CanShow SWIFT_WARN_UNUSED_RESULT;
-- (NSDictionary<NSString *, id> * _Nullable)GetPartialBidRequest SWIFT_WARN_UNUSED_RESULT;
-- (NSString * _Nullable)GetPartialBidRequestAsString SWIFT_WARN_UNUSED_RESULT;
+- (NSDictionary<NSString *, id> * _Nonnull)GetPartialBidRequest SWIFT_WARN_UNUSED_RESULT;
+- (NSString * _Nonnull)GetPartialBidRequestAsString SWIFT_WARN_UNUSED_RESULT;
 - (void)Bid;
 - (void)LoadWithBidResponseWithBidResponse:(NSData * _Nonnull)bidResponse;
 - (void)Load;
+- (void)ShowThreaded;
 - (void)Show;
+- (void)CloseThreaded;
 - (void)Close;
 - (void)SetFloorPriceWithFloorPrice:(float)floorPrice;
 - (void)SetCustomParameterWithProvider:(NSString * _Nonnull)provider value:(NSString * _Nonnull)value;
@@ -452,15 +465,146 @@ enum SpendMethod : NSInteger;
 
 SWIFT_CLASS("_TtC8NeftaSDK11NeftaEvents")
 @interface NeftaEvents : NSObject
+/// Record a progression event.
+/// \param status Defines the progression outcome.
+///
+/// \param type Defines the type of progression.
+///
+/// \param source Defines content type of progression.
+///
 - (void)AddProgressionEventWithStatus:(enum ProgressionStatus)status type:(enum ProgressionType)type source:(enum ProgressionSource)source;
-- (void)AddProgressionEventWithStatus:(enum ProgressionStatus)status type:(enum ProgressionType)type source:(enum ProgressionSource)source name:(NSString * _Nullable)name value:(NSInteger)value;
-- (void)AddProgressionEventWithStatus:(enum ProgressionStatus)status type:(enum ProgressionType)type source:(enum ProgressionSource)source name:(NSString * _Nullable)name value:(NSInteger)value customPayload:(NSString * _Nullable)customPayload;
+/// Record a progression event in full detail.
+/// <blockquote>
+/// Warning: value must be non negative.
+///
+/// </blockquote>
+/// \param status Defines the progression outcome.
+///
+/// \param type Defines the type of progression.
+///
+/// \param source Defines content type of progression.
+///
+/// \param name Defines the specific named content of progression.
+///
+/// \param value Quantifiable progression step. Must be non-negative number.
+///
+- (void)AddProgressionEventWithStatus:(enum ProgressionStatus)status type:(enum ProgressionType)type source:(enum ProgressionSource)source name:(NSString * _Nullable)name value:(int64_t)value;
+/// Record a progression event in full detail with custom data.
+/// <blockquote>
+/// Warning: value must be non negative.
+///
+/// </blockquote>
+/// \param status Defines the progression outcome.
+///
+/// \param type Defines the type of progression.
+///
+/// \param source Defines content type of progression.
+///
+/// \param name Defines the specific named content of progression.
+///
+/// \param value Quantifiable progression step.
+///
+/// \param customPayload Any other custom data. Must be non-negative number.
+///
+- (void)AddProgressionEventWithStatus:(enum ProgressionStatus)status type:(enum ProgressionType)type source:(enum ProgressionSource)source name:(NSString * _Nullable)name value:(int64_t)value customPayload:(NSString * _Nullable)customPayload;
+/// Record an event when the player receives any valuable.
+/// \param category Defines the category of valuable the player obtained.
+///
+/// \param method Defines the source of obtained valuable.
+///
 - (void)AddReceiveEventWithCategory:(enum ResourceCategory)category method:(enum ReceiveMethod)method;
-- (void)AddReceiveEventWithCategory:(enum ResourceCategory)category method:(enum ReceiveMethod)method name:(NSString * _Nullable)name quantity:(NSInteger)quantity;
-- (void)AddReceiveEventWithCategory:(enum ResourceCategory)category method:(enum ReceiveMethod)method name:(NSString * _Nullable)name quantity:(NSInteger)quantity customPayload:(NSString * _Nullable)customPayload;
+/// Record an event when the player receives any valuable in full detail.
+/// <blockquote>
+/// Warning: quantity must be non negative.
+///
+/// </blockquote>
+/// \param category Defines the category of valuable the player obtained.
+///
+/// \param method Defines the source of obtained valuable.
+///
+/// \param name The name of received valuable.
+///
+/// \param quantity Received quantity. Must be non-negative number.
+///
+- (void)AddReceiveEventWithCategory:(enum ResourceCategory)category method:(enum ReceiveMethod)method name:(NSString * _Nullable)name quantity:(int64_t)quantity;
+/// Record an event when the player receives any valuable in full detail with custom data.
+/// <blockquote>
+/// Warning: quantity must be non negative.
+///
+/// </blockquote>
+/// \param category Defines the category of valuable the player obtained.
+///
+/// \param method Defines the source of obtained valuable.
+///
+/// \param name The name of received valuable.
+///
+/// \param quantity Received quantity. Must be non-negative number.
+///
+/// \param customPayload Any other custom data.
+///
+- (void)AddReceiveEventWithCategory:(enum ResourceCategory)category method:(enum ReceiveMethod)method name:(NSString * _Nullable)name quantity:(int64_t)quantity customPayload:(NSString * _Nullable)customPayload;
+/// Record an event when the player spends any valuable.
+/// \param category Defines the category of valuable the player spend.
+///
+/// \param method Defines the source spending.
+///
 - (void)AddSpendEventWithCategory:(enum ResourceCategory)category method:(enum SpendMethod)method;
-- (void)AddSpendEventWithCategory:(enum ResourceCategory)category method:(enum SpendMethod)method name:(NSString * _Nullable)name quantity:(NSInteger)quantity;
-- (void)AddSpendEventWithCategory:(enum ResourceCategory)category method:(enum SpendMethod)method name:(NSString * _Nullable)name quantity:(NSInteger)quantity customPayload:(NSString * _Nullable)customPayload;
+/// Record an event when the player spends any valuable in full detail.
+/// <blockquote>
+/// Warning: quantity must be non negative.
+///
+/// </blockquote>
+/// \param category Defines the category of valuable the player spend.
+///
+/// \param method Defines the source spending.
+///
+/// \param name The name of spent valuable.
+///
+/// \param quantity Spend quantity. Must be non-negative number.
+///
+- (void)AddSpendEventWithCategory:(enum ResourceCategory)category method:(enum SpendMethod)method name:(NSString * _Nullable)name quantity:(int64_t)quantity;
+/// Record an event when the player spends any valuable in full detail with custom data.
+/// <blockquote>
+/// Warning: quantity must be non negative.
+///
+/// </blockquote>
+/// \param category Defines the category of valuable the player spend.
+///
+/// \param method Defines the source spending.
+///
+/// \param name The name of received valuable.
+///
+/// \param quantity Received quantity. Must be non-negative number.
+///
+/// \param customPayload Any other custom data.
+///
+- (void)AddSpendEventWithCategory:(enum ResourceCategory)category method:(enum SpendMethod)method name:(NSString * _Nullable)name quantity:(int64_t)quantity customPayload:(NSString * _Nullable)customPayload;
+/// Record an event when the player purchase an item with real world currency.
+/// <blockquote>
+/// Warning: price must be non negative.
+///
+/// </blockquote>
+/// \param name The name of purchased product.
+///
+/// \param price The local price of the purchased product.
+///
+/// \param currency The ISO 4217 3-letter currency code (USD, EUR, GBP, ..) of purchase.
+///
+- (void)AddPurchaseEventWithName:(NSString * _Nonnull)name price:(NSDecimal)price currency:(NSString * _Nonnull)currency;
+/// Record an event when the player purchase an item with real world currency with custom data.
+/// <blockquote>
+/// Warning: price must be non negative.
+///
+/// </blockquote>
+/// \param name The name of purchased product.
+///
+/// \param price The local price of the purchased product.
+///
+/// \param currency The ISO 4217 3-letter currency code (USD, EUR, GBP, ..) of purchase.
+///
+/// \param customPayload Any other custom data.
+///
+- (void)AddPurchaseEventWithName:(NSString * _Nonnull)name price:(NSDecimal)price currency:(NSString * _Nonnull)currency customPayload:(NSString * _Nullable)customPayload;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
@@ -533,6 +677,7 @@ typedef SWIFT_ENUM(NSInteger, SpendMethod, open) {
 };
 
 @class UIViewController;
+@class NSMutableDictionary;
 
 SWIFT_CLASS("_TtC8NeftaSDK11NeftaPlugin")
 @interface NeftaPlugin : NSObject
@@ -540,6 +685,8 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _No
 + (NSString * _Nonnull)Version SWIFT_WARN_UNUSED_RESULT;
 @property (nonatomic, strong) NeftaEvents * _Nonnull Events;
 @property (nonatomic, copy) void (^ _Nullable OnReady)(NSDictionary<NSString *, Placement *> * _Nonnull);
+@property (nonatomic, copy) void (^ _Nullable OnBehaviourInsight)(NSDictionary<NSString *, Insight *> * _Nonnull);
+@property (nonatomic, copy) void (^ _Nullable OnBehaviourInsightAsString)(NSString * _Nonnull);
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable OnLog)(NSString * _Nonnull);)
 + (void (^ _Nullable)(NSString * _Nonnull))OnLog SWIFT_WARN_UNUSED_RESULT;
 + (void)setOnLog:(void (^ _Nullable)(NSString * _Nonnull))value;
@@ -552,10 +699,13 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NeftaPlugin * _Null_un
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 - (void)SetTrackingWithIsAuthorized:(BOOL)isAuthorized;
 - (void)PrepareRendererWithViewController:(UIViewController * _Nonnull)viewController;
-- (void)RecordWithType:(NSInteger)type category:(NSInteger)category subCategory:(NSInteger)subCategory name:(NSString * _Nullable)name value:(NSInteger)value customPayload:(NSString * _Nullable)customPayload;
-- (void)EnableAds:(BOOL)enable;
+- (void)RecordWithType:(NSInteger)type category:(NSInteger)category subCategory:(NSInteger)subCategory name:(NSString * _Nullable)name value:(int64_t)value customPayload:(NSString * _Nullable)customPayload;
 - (void)SetPublisherUserIdWithId:(NSString * _Nonnull)id;
+- (void)GetBehaviourInsightWithString:(NSString * _Nonnull)string;
+- (void)GetBehaviourInsight:(NSArray<NSString *> * _Nonnull)insightList;
 - (NSString * _Nonnull)GetNuidWithPresent:(BOOL)present SWIFT_WARN_UNUSED_RESULT;
++ (void)OnExternalAdShown:(NSString * _Nonnull)path data:(NSMutableDictionary * _Nonnull)data;
++ (void)OnExternalAdShownAsString:(NSString * _Nonnull)path data:(NSString * _Nonnull)data;
 - (void)SetOverrideWithUrl:(NSString * _Nullable)url;
 @end
 
@@ -623,6 +773,7 @@ SWIFT_CLASS("_TtC8NeftaSDK12UnityWrapper")
 SWIFT_CLASS("_TtC8NeftaSDK13WebController")
 @interface WebController : UIView <UIGestureRecognizerDelegate, WKNavigationDelegate, WKScriptMessageHandler, WKUIDelegate>
 - (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)aDecoder SWIFT_UNAVAILABLE;
+- (void)layoutSubviews;
 - (void)didMoveToSuperview;
 - (void)webView:(WKWebView * _Nonnull)webView didFailNavigation:(WKNavigation * _Null_unspecified)navigation withError:(NSError * _Nonnull)error;
 - (void)webView:(WKWebView * _Nonnull)webView didFailProvisionalNavigation:(WKNavigation * _Null_unspecified)navigation withError:(NSError * _Nonnull)error;
@@ -962,6 +1113,17 @@ SWIFT_CLASS("_TtC8NeftaSDK11BidResponse")
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
+
+SWIFT_CLASS("_TtC8NeftaSDK7Insight")
+@interface Insight : NSObject
+@property (nonatomic, readonly, copy) NSString * _Nullable _status;
+@property (nonatomic, readonly) int64_t _int;
+@property (nonatomic, readonly) double _float;
+@property (nonatomic, readonly, copy) NSString * _Nullable _string;
+- (nonnull instancetype)init SWIFT_UNAVAILABLE;
++ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
+@end
+
 enum Types : NSInteger;
 @class Placement;
 @protocol NAdListener;
@@ -992,16 +1154,18 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger Expired;)
 @property (nonatomic, strong) Placement * _Nullable _placement;
 @property (nonatomic, strong) BidResponse * _Nullable _bid;
 @property (nonatomic) NSInteger _state;
-@property (nonatomic) NSInteger _stateStart;
+@property (nonatomic) int64_t _stateStart;
 @property (nonatomic, strong) id <NAdListener> _Nullable _listener;
 - (nonnull instancetype)initWithId:(NSString * _Nonnull)id OBJC_DESIGNATED_INITIALIZER;
 - (NSInteger)CanShow SWIFT_WARN_UNUSED_RESULT;
-- (NSDictionary<NSString *, id> * _Nullable)GetPartialBidRequest SWIFT_WARN_UNUSED_RESULT;
-- (NSString * _Nullable)GetPartialBidRequestAsString SWIFT_WARN_UNUSED_RESULT;
+- (NSDictionary<NSString *, id> * _Nonnull)GetPartialBidRequest SWIFT_WARN_UNUSED_RESULT;
+- (NSString * _Nonnull)GetPartialBidRequestAsString SWIFT_WARN_UNUSED_RESULT;
 - (void)Bid;
 - (void)LoadWithBidResponseWithBidResponse:(NSData * _Nonnull)bidResponse;
 - (void)Load;
+- (void)ShowThreaded;
 - (void)Show;
+- (void)CloseThreaded;
 - (void)Close;
 - (void)SetFloorPriceWithFloorPrice:(float)floorPrice;
 - (void)SetCustomParameterWithProvider:(NSString * _Nonnull)provider value:(NSString * _Nonnull)value;
@@ -1096,15 +1260,146 @@ enum SpendMethod : NSInteger;
 
 SWIFT_CLASS("_TtC8NeftaSDK11NeftaEvents")
 @interface NeftaEvents : NSObject
+/// Record a progression event.
+/// \param status Defines the progression outcome.
+///
+/// \param type Defines the type of progression.
+///
+/// \param source Defines content type of progression.
+///
 - (void)AddProgressionEventWithStatus:(enum ProgressionStatus)status type:(enum ProgressionType)type source:(enum ProgressionSource)source;
-- (void)AddProgressionEventWithStatus:(enum ProgressionStatus)status type:(enum ProgressionType)type source:(enum ProgressionSource)source name:(NSString * _Nullable)name value:(NSInteger)value;
-- (void)AddProgressionEventWithStatus:(enum ProgressionStatus)status type:(enum ProgressionType)type source:(enum ProgressionSource)source name:(NSString * _Nullable)name value:(NSInteger)value customPayload:(NSString * _Nullable)customPayload;
+/// Record a progression event in full detail.
+/// <blockquote>
+/// Warning: value must be non negative.
+///
+/// </blockquote>
+/// \param status Defines the progression outcome.
+///
+/// \param type Defines the type of progression.
+///
+/// \param source Defines content type of progression.
+///
+/// \param name Defines the specific named content of progression.
+///
+/// \param value Quantifiable progression step. Must be non-negative number.
+///
+- (void)AddProgressionEventWithStatus:(enum ProgressionStatus)status type:(enum ProgressionType)type source:(enum ProgressionSource)source name:(NSString * _Nullable)name value:(int64_t)value;
+/// Record a progression event in full detail with custom data.
+/// <blockquote>
+/// Warning: value must be non negative.
+///
+/// </blockquote>
+/// \param status Defines the progression outcome.
+///
+/// \param type Defines the type of progression.
+///
+/// \param source Defines content type of progression.
+///
+/// \param name Defines the specific named content of progression.
+///
+/// \param value Quantifiable progression step.
+///
+/// \param customPayload Any other custom data. Must be non-negative number.
+///
+- (void)AddProgressionEventWithStatus:(enum ProgressionStatus)status type:(enum ProgressionType)type source:(enum ProgressionSource)source name:(NSString * _Nullable)name value:(int64_t)value customPayload:(NSString * _Nullable)customPayload;
+/// Record an event when the player receives any valuable.
+/// \param category Defines the category of valuable the player obtained.
+///
+/// \param method Defines the source of obtained valuable.
+///
 - (void)AddReceiveEventWithCategory:(enum ResourceCategory)category method:(enum ReceiveMethod)method;
-- (void)AddReceiveEventWithCategory:(enum ResourceCategory)category method:(enum ReceiveMethod)method name:(NSString * _Nullable)name quantity:(NSInteger)quantity;
-- (void)AddReceiveEventWithCategory:(enum ResourceCategory)category method:(enum ReceiveMethod)method name:(NSString * _Nullable)name quantity:(NSInteger)quantity customPayload:(NSString * _Nullable)customPayload;
+/// Record an event when the player receives any valuable in full detail.
+/// <blockquote>
+/// Warning: quantity must be non negative.
+///
+/// </blockquote>
+/// \param category Defines the category of valuable the player obtained.
+///
+/// \param method Defines the source of obtained valuable.
+///
+/// \param name The name of received valuable.
+///
+/// \param quantity Received quantity. Must be non-negative number.
+///
+- (void)AddReceiveEventWithCategory:(enum ResourceCategory)category method:(enum ReceiveMethod)method name:(NSString * _Nullable)name quantity:(int64_t)quantity;
+/// Record an event when the player receives any valuable in full detail with custom data.
+/// <blockquote>
+/// Warning: quantity must be non negative.
+///
+/// </blockquote>
+/// \param category Defines the category of valuable the player obtained.
+///
+/// \param method Defines the source of obtained valuable.
+///
+/// \param name The name of received valuable.
+///
+/// \param quantity Received quantity. Must be non-negative number.
+///
+/// \param customPayload Any other custom data.
+///
+- (void)AddReceiveEventWithCategory:(enum ResourceCategory)category method:(enum ReceiveMethod)method name:(NSString * _Nullable)name quantity:(int64_t)quantity customPayload:(NSString * _Nullable)customPayload;
+/// Record an event when the player spends any valuable.
+/// \param category Defines the category of valuable the player spend.
+///
+/// \param method Defines the source spending.
+///
 - (void)AddSpendEventWithCategory:(enum ResourceCategory)category method:(enum SpendMethod)method;
-- (void)AddSpendEventWithCategory:(enum ResourceCategory)category method:(enum SpendMethod)method name:(NSString * _Nullable)name quantity:(NSInteger)quantity;
-- (void)AddSpendEventWithCategory:(enum ResourceCategory)category method:(enum SpendMethod)method name:(NSString * _Nullable)name quantity:(NSInteger)quantity customPayload:(NSString * _Nullable)customPayload;
+/// Record an event when the player spends any valuable in full detail.
+/// <blockquote>
+/// Warning: quantity must be non negative.
+///
+/// </blockquote>
+/// \param category Defines the category of valuable the player spend.
+///
+/// \param method Defines the source spending.
+///
+/// \param name The name of spent valuable.
+///
+/// \param quantity Spend quantity. Must be non-negative number.
+///
+- (void)AddSpendEventWithCategory:(enum ResourceCategory)category method:(enum SpendMethod)method name:(NSString * _Nullable)name quantity:(int64_t)quantity;
+/// Record an event when the player spends any valuable in full detail with custom data.
+/// <blockquote>
+/// Warning: quantity must be non negative.
+///
+/// </blockquote>
+/// \param category Defines the category of valuable the player spend.
+///
+/// \param method Defines the source spending.
+///
+/// \param name The name of received valuable.
+///
+/// \param quantity Received quantity. Must be non-negative number.
+///
+/// \param customPayload Any other custom data.
+///
+- (void)AddSpendEventWithCategory:(enum ResourceCategory)category method:(enum SpendMethod)method name:(NSString * _Nullable)name quantity:(int64_t)quantity customPayload:(NSString * _Nullable)customPayload;
+/// Record an event when the player purchase an item with real world currency.
+/// <blockquote>
+/// Warning: price must be non negative.
+///
+/// </blockquote>
+/// \param name The name of purchased product.
+///
+/// \param price The local price of the purchased product.
+///
+/// \param currency The ISO 4217 3-letter currency code (USD, EUR, GBP, ..) of purchase.
+///
+- (void)AddPurchaseEventWithName:(NSString * _Nonnull)name price:(NSDecimal)price currency:(NSString * _Nonnull)currency;
+/// Record an event when the player purchase an item with real world currency with custom data.
+/// <blockquote>
+/// Warning: price must be non negative.
+///
+/// </blockquote>
+/// \param name The name of purchased product.
+///
+/// \param price The local price of the purchased product.
+///
+/// \param currency The ISO 4217 3-letter currency code (USD, EUR, GBP, ..) of purchase.
+///
+/// \param customPayload Any other custom data.
+///
+- (void)AddPurchaseEventWithName:(NSString * _Nonnull)name price:(NSDecimal)price currency:(NSString * _Nonnull)currency customPayload:(NSString * _Nullable)customPayload;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
@@ -1177,6 +1472,7 @@ typedef SWIFT_ENUM(NSInteger, SpendMethod, open) {
 };
 
 @class UIViewController;
+@class NSMutableDictionary;
 
 SWIFT_CLASS("_TtC8NeftaSDK11NeftaPlugin")
 @interface NeftaPlugin : NSObject
@@ -1184,6 +1480,8 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _No
 + (NSString * _Nonnull)Version SWIFT_WARN_UNUSED_RESULT;
 @property (nonatomic, strong) NeftaEvents * _Nonnull Events;
 @property (nonatomic, copy) void (^ _Nullable OnReady)(NSDictionary<NSString *, Placement *> * _Nonnull);
+@property (nonatomic, copy) void (^ _Nullable OnBehaviourInsight)(NSDictionary<NSString *, Insight *> * _Nonnull);
+@property (nonatomic, copy) void (^ _Nullable OnBehaviourInsightAsString)(NSString * _Nonnull);
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable OnLog)(NSString * _Nonnull);)
 + (void (^ _Nullable)(NSString * _Nonnull))OnLog SWIFT_WARN_UNUSED_RESULT;
 + (void)setOnLog:(void (^ _Nullable)(NSString * _Nonnull))value;
@@ -1196,10 +1494,13 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NeftaPlugin * _Null_un
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 - (void)SetTrackingWithIsAuthorized:(BOOL)isAuthorized;
 - (void)PrepareRendererWithViewController:(UIViewController * _Nonnull)viewController;
-- (void)RecordWithType:(NSInteger)type category:(NSInteger)category subCategory:(NSInteger)subCategory name:(NSString * _Nullable)name value:(NSInteger)value customPayload:(NSString * _Nullable)customPayload;
-- (void)EnableAds:(BOOL)enable;
+- (void)RecordWithType:(NSInteger)type category:(NSInteger)category subCategory:(NSInteger)subCategory name:(NSString * _Nullable)name value:(int64_t)value customPayload:(NSString * _Nullable)customPayload;
 - (void)SetPublisherUserIdWithId:(NSString * _Nonnull)id;
+- (void)GetBehaviourInsightWithString:(NSString * _Nonnull)string;
+- (void)GetBehaviourInsight:(NSArray<NSString *> * _Nonnull)insightList;
 - (NSString * _Nonnull)GetNuidWithPresent:(BOOL)present SWIFT_WARN_UNUSED_RESULT;
++ (void)OnExternalAdShown:(NSString * _Nonnull)path data:(NSMutableDictionary * _Nonnull)data;
++ (void)OnExternalAdShownAsString:(NSString * _Nonnull)path data:(NSString * _Nonnull)data;
 - (void)SetOverrideWithUrl:(NSString * _Nullable)url;
 @end
 
@@ -1267,6 +1568,7 @@ SWIFT_CLASS("_TtC8NeftaSDK12UnityWrapper")
 SWIFT_CLASS("_TtC8NeftaSDK13WebController")
 @interface WebController : UIView <UIGestureRecognizerDelegate, WKNavigationDelegate, WKScriptMessageHandler, WKUIDelegate>
 - (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)aDecoder SWIFT_UNAVAILABLE;
+- (void)layoutSubviews;
 - (void)didMoveToSuperview;
 - (void)webView:(WKWebView * _Nonnull)webView didFailNavigation:(WKNavigation * _Null_unspecified)navigation withError:(NSError * _Nonnull)error;
 - (void)webView:(WKWebView * _Nonnull)webView didFailProvisionalNavigation:(WKNavigation * _Null_unspecified)navigation withError:(NSError * _Nonnull)error;
