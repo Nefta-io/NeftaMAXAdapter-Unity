@@ -53,11 +53,15 @@ namespace AdDemo
         private void OnBannerAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
             SetStatus($"Loaded {adInfo.NetworkName} {adInfo.NetworkPlacement}");
+            
+            NeftaAdapterEvents.OnExternalAdLoad(NeftaAdapterEvents.AdType.Banner, 0.3, 0.4);
         }
         
         private void OnBannerAdFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
         {
             SetStatus("Load failed");
+            
+            NeftaAdapterEvents.OnExternalAdFail(NeftaAdapterEvents.AdType.Banner, 0.5, 0.6, errorInfo);
         }
 
         private void OnBannerAdClickedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)

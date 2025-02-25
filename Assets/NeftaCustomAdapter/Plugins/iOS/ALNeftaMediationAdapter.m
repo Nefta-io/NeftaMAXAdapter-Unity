@@ -16,6 +16,18 @@ NSString * const _mediationProvider = @"applovin-max";
 
 static NeftaPlugin *_plugin;
 
++(void) OnExternalAdLoad:(AdType)adType unitFloorPrice:(double)unitFloorPrice calculatedFloorPrice:(double)calculatedFloorPrice {
+    [NeftaPlugin OnExternalAdLoad: @"max" adType: adType unitFloorPrice: unitFloorPrice calculatedFloorPrice: calculatedFloorPrice status: 1];
+}
+
++(void) OnExternalAdFail:(AdType)adType unitFloorPrice:(double)unitFloorPrice calculatedFloorPrice:(double)calculatedFloorPrice error:(MAError *)error {
+    int status = 0;
+    if (error.code == MAErrorCodeNoFill) {
+        status = 2;
+    }
+    [NeftaPlugin OnExternalAdLoad: @"max" adType: adType unitFloorPrice: unitFloorPrice calculatedFloorPrice: calculatedFloorPrice status: status];
+}
+
 +(void) OnExternalAdShown:(MAAd*)ad {
     NSMutableDictionary *data = [NSMutableDictionary dictionary];
     [data setObject: _mediationProvider forKey: @"mediation_provider"];
@@ -84,7 +96,7 @@ static NeftaPlugin *_plugin;
 }
 
 - (NSString *)adapterVersion {
-    return @"2.1.0";
+    return @"2.1.1";
 }
 
 - (void)destroy {

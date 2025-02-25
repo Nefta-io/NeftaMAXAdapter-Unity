@@ -41,7 +41,7 @@
     [_listener didLoadInterstitialAd];
 }
 - (void)OnShowFailWithAd:(NAd * _Nonnull)ad error:(NError * _Nonnull)error {
-
+    [_listener didFailToDisplayInterstitialAdWithError: MAAdapterError.adDisplayFailedError];
 }
 - (void)OnShowWithAd:(NAd * _Nonnull)ad {
     [_listener didDisplayInterstitialAd];

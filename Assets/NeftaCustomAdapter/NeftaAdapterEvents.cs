@@ -1,7 +1,6 @@
 #if UNITY_EDITOR
 using Nefta.Editor;
 #elif UNITY_IOS
-using System;
 using System.Runtime.InteropServices;
 using AOT;
 #endif
@@ -18,6 +17,14 @@ namespace NeftaCustomAdapter
     public class NeftaAdapterEvents
     {
         public delegate void OnBehaviourInsightCallback(Dictionary<string, Insight> insights);
+
+        public enum AdType
+        {
+            Other = 0,
+            Banner = 1,
+            Interstitial = 2,
+            Rewarded = 3
+        }
         
 #if UNITY_EDITOR
         private static NeftaPlugin _plugin;
@@ -37,6 +44,9 @@ namespace NeftaCustomAdapter
 
         [DllImport ("__Internal")]
         private static extern void NeftaPlugin_Record(int type, int category, int subCategory, string nameValue, long value, string customPayload);
+
+        [DllImport ("__Internal")]
+        private static extern void NeftaPlugin_OnExternalAdLoad(int adType, double unitFloorPrice, double calculatedFloorPrice, int status);
 
         [DllImport ("__Internal")]
         private static extern void NeftaPlugin_OnExternalAdShownAsString(string ss);
@@ -124,6 +134,27 @@ namespace NeftaCustomAdapter
             NeftaPlugin_Record(type, category, subCategory, name, value, customPayload);
 #elif UNITY_ANDROID
             _plugin.Call("Record", type, category, subCategory, name, value, customPayload);
+#endif
+        }
+        
+        public static void OnExternalAdLoad(AdType adType, double unitFloorPrice, double calculatedFloorPrice)
+        {
+            OnExternalAdLoad((int) adType, unitFloorPrice, calculatedFloorPrice, 1);
+        }
+
+        public static void OnExternalAdFail(AdType adType, double unitFloorPrice, double calculatedFloorPrice, MaxSdkBase.ErrorInfo errorInfo)
+        {
+            OnExternalAdLoad((int) adType, unitFloorPrice, calculatedFloorPrice, errorInfo.Code == MaxSdkBase.ErrorCode.NoFill ? 2 : 0);
+        }
+
+        private static void OnExternalAdLoad(int adType, double unitFloorPrice, double calculatedFloorPrice, int status)
+        {
+#if UNITY_EDITOR
+            _plugin.OnExternalAdLoad("max", adType, unitFloorPrice, calculatedFloorPrice, status);
+#elif UNITY_IOS
+            NeftaPlugin_OnExternalAdLoad(adType, unitFloorPrice, calculatedFloorPrice, status);
+#elif UNITY_ANDROID
+            _plugin.CallStatic("OnExternalAdLoad", "max", adType, unitFloorPrice, calculatedFloorPrice, status);
 #endif
         }
 

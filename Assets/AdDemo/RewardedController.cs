@@ -66,11 +66,15 @@ namespace AdDemo
         {
             SetStatus($"Loaded {adInfo.NetworkName} {adInfo.NetworkPlacement}");
             _show.interactable = true;
+            
+            NeftaAdapterEvents.OnExternalAdLoad(NeftaAdapterEvents.AdType.Rewarded, 0.3f, 0.4f);
         }
         
         private void OnRewardedAdFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
         {
             SetStatus("Load failed");
+                        
+            NeftaAdapterEvents.OnExternalAdFail(NeftaAdapterEvents.AdType.Rewarded, 0.3f, 0.4f, errorInfo);
         }
         
         private void OnRewardedAdFailedToDisplayEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo, MaxSdkBase.AdInfo adInfo)

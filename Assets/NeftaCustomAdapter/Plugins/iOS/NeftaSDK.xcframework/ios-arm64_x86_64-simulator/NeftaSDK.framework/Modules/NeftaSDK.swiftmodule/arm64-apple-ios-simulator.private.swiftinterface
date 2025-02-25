@@ -157,6 +157,7 @@ import os
   @objc public func GetBehaviourInsight(string: Swift.String)
   @objc public func GetBehaviourInsight(_ insightList: [Swift.String])
   @objc public func GetNuid(present: Swift.Bool) -> Swift.String
+  @objc public static func OnExternalAdLoad(_ provider: Swift.String, adType: Swift.Int, unitFloorPrice: Swift.Float64, calculatedFloorPrice: Swift.Float64, status: Swift.Int)
   @objc public static func OnExternalAdShown(_ path: Swift.String, data: Foundation.NSMutableDictionary)
   @objc public static func OnExternalAdShownAsString(_ path: Swift.String, data: Swift.String)
   @objc public func SetOverride(url: Swift.String?)

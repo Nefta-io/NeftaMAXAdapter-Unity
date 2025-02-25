@@ -704,6 +704,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NeftaPlugin * _Null_un
 - (void)GetBehaviourInsightWithString:(NSString * _Nonnull)string;
 - (void)GetBehaviourInsight:(NSArray<NSString *> * _Nonnull)insightList;
 - (NSString * _Nonnull)GetNuidWithPresent:(BOOL)present SWIFT_WARN_UNUSED_RESULT;
++ (void)OnExternalAdLoad:(NSString * _Nonnull)provider adType:(NSInteger)adType unitFloorPrice:(double)unitFloorPrice calculatedFloorPrice:(double)calculatedFloorPrice status:(NSInteger)status;
 + (void)OnExternalAdShown:(NSString * _Nonnull)path data:(NSMutableDictionary * _Nonnull)data;
 + (void)OnExternalAdShownAsString:(NSString * _Nonnull)path data:(NSString * _Nonnull)data;
 - (void)SetOverrideWithUrl:(NSString * _Nullable)url;

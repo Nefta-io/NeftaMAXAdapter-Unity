@@ -9,6 +9,25 @@ import AppLovinSDK
 import NeftaSDK
 
 class ALNeftaMediationAdapterSwift {
+    enum AdTypeSwift : Int{
+        case Other = 0
+        case Banner = 1
+        case Interstitial = 2
+        case Rewarded = 3
+    }
+    
+    static func OnExternalAdLoad(_ adType: AdTypeSwift, unitFloorPrice: Float64, calculatedFloorPrice: Float64) {
+        NeftaPlugin.OnExternalAdLoad("max", adType: adType.rawValue, unitFloorPrice: unitFloorPrice, calculatedFloorPrice: calculatedFloorPrice, status: 1)
+    }
+    
+    static func OnExternalAdFail(_ adType: AdTypeSwift, unitFloorPrice: Float64, calculatedFloorPrice: Float64, error: MAError) {
+        var status = 0
+        if (error.code == .noFill) {
+            status = 2
+        }
+        NeftaPlugin.OnExternalAdLoad("max", adType: adType.rawValue, unitFloorPrice: unitFloorPrice, calculatedFloorPrice: calculatedFloorPrice, status: status)
+    }
+                                 
     static func OnExternalAdShown(_ ad: MAAd) {
         let data = NSMutableDictionary()
         data["mediation_provider"] = "applovin-max"
