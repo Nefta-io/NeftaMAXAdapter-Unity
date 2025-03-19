@@ -333,6 +333,7 @@ enum Types : NSInteger;
 @class Placement;
 @protocol NAdListener;
 @class NSData;
+@class UIViewController;
 
 SWIFT_CLASS("_TtC8NeftaSDK3NAd")
 @interface NAd : NSObject
@@ -368,8 +369,8 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger Expired;)
 - (void)Bid;
 - (void)LoadWithBidResponseWithBidResponse:(NSData * _Nonnull)bidResponse;
 - (void)Load;
-- (void)ShowThreaded;
-- (void)Show;
+- (void)ShowThreaded:(UIViewController * _Nonnull)viewController;
+- (void)Show:(UIViewController * _Nullable)viewController;
 - (void)CloseThreaded;
 - (void)Close;
 - (void)SetFloorPriceWithFloorPrice:(float)floorPrice;
@@ -403,12 +404,14 @@ enum Position : NSInteger;
 SWIFT_CLASS("_TtC8NeftaSDK7NBanner")
 @interface NBanner : NAd
 @property (nonatomic) enum Position _position;
+@property (nonatomic, copy) void (^ _Nullable _onRemove)(NBanner * _Nonnull);
 - (nonnull instancetype)initWithId:(NSString * _Nonnull)id parent:(UIView * _Nonnull)parent OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)initWithId:(NSString * _Nonnull)id position:(enum Position)position OBJC_DESIGNATED_INITIALIZER;
 - (void)SetAutoRefresh:(BOOL)autoRefresh;
-- (UIView * _Nullable)GracefulShow SWIFT_WARN_UNUSED_RESULT;
+- (UIView * _Nullable)GracefulShow:(UIViewController * _Nullable)viewController SWIFT_WARN_UNUSED_RESULT;
 - (UIView * _Nullable)GetView SWIFT_WARN_UNUSED_RESULT;
-- (void)Show;
+- (void)Show:(UIViewController * _Nullable)viewController;
+- (void)Close;
 - (void)Hide;
 - (nonnull instancetype)initWithId:(NSString * _Nonnull)id SWIFT_UNAVAILABLE;
 @end
@@ -676,13 +679,22 @@ typedef SWIFT_ENUM(NSInteger, SpendMethod, open) {
   SpendMethodOther = 7,
 };
 
-@class UIViewController;
 @class NSMutableDictionary;
 
 SWIFT_CLASS("_TtC8NeftaSDK11NeftaPlugin")
 @interface NeftaPlugin : NSObject
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull Version;)
 + (NSString * _Nonnull)Version SWIFT_WARN_UNUSED_RESULT;
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ContentRating_Unspecified;)
++ (NSString * _Nonnull)ContentRating_Unspecified SWIFT_WARN_UNUSED_RESULT;
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ContentRating_General;)
++ (NSString * _Nonnull)ContentRating_General SWIFT_WARN_UNUSED_RESULT;
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ContentRating_ParentalGuidance;)
++ (NSString * _Nonnull)ContentRating_ParentalGuidance SWIFT_WARN_UNUSED_RESULT;
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ContentRating_Teen;)
++ (NSString * _Nonnull)ContentRating_Teen SWIFT_WARN_UNUSED_RESULT;
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ContentRating_MatureAudience;)
++ (NSString * _Nonnull)ContentRating_MatureAudience SWIFT_WARN_UNUSED_RESULT;
 @property (nonatomic, strong) NeftaEvents * _Nonnull Events;
 @property (nonatomic, copy) void (^ _Nullable OnReady)(NSDictionary<NSString *, Placement *> * _Nonnull);
 @property (nonatomic, copy) void (^ _Nullable OnBehaviourInsight)(NSDictionary<NSString *, Insight *> * _Nonnull);
@@ -697,17 +709,17 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NeftaPlugin * _Null_un
 + (NeftaPlugin * _Nonnull)InitWithAppId:(NSString * _Nonnull)appId SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
+- (void)SetContentRatingWithRating:(NSString * _Nonnull)rating;
 - (void)SetTrackingWithIsAuthorized:(BOOL)isAuthorized;
-- (void)PrepareRendererWithViewController:(UIViewController * _Nonnull)viewController;
 - (void)RecordWithType:(NSInteger)type category:(NSInteger)category subCategory:(NSInteger)subCategory name:(NSString * _Nullable)name value:(int64_t)value customPayload:(NSString * _Nullable)customPayload;
 - (void)SetPublisherUserIdWithId:(NSString * _Nonnull)id;
 - (void)GetBehaviourInsightWithString:(NSString * _Nonnull)string;
 - (void)GetBehaviourInsight:(NSArray<NSString *> * _Nonnull)insightList;
 - (NSString * _Nonnull)GetNuidWithPresent:(BOOL)present SWIFT_WARN_UNUSED_RESULT;
-+ (void)OnExternalAdLoad:(NSString * _Nonnull)provider adType:(NSInteger)adType unitFloorPrice:(double)unitFloorPrice calculatedFloorPrice:(double)calculatedFloorPrice status:(NSInteger)status;
-+ (void)OnExternalAdShown:(NSString * _Nonnull)path data:(NSMutableDictionary * _Nonnull)data;
-+ (void)OnExternalAdShownAsString:(NSString * _Nonnull)path data:(NSString * _Nonnull)data;
-- (void)SetOverrideWithUrl:(NSString * _Nullable)url;
++ (void)OnExternalMediationRequest:(NSString * _Nonnull)provider adType:(NSInteger)adType requestedFloorPrice:(double)requestedFloorPrice calculatedFloorPrice:(double)calculatedFloorPrice adUnitId:(NSString * _Nullable)adUnitId revenue:(double)revenue precision:(NSString * _Nullable)precision status:(NSInteger)status;
++ (void)OnExternalMediationImpression:(NSString * _Nonnull)path data:(NSMutableDictionary * _Nonnull)data;
++ (void)OnExternalMediationImpressionAsString:(NSString * _Nonnull)path data:(NSString * _Nonnull)data;
++ (void)SetOverrideWithUrl:(NSString * _Nullable)url;
 @end
 
 
@@ -744,7 +756,7 @@ SWIFT_CLASS("_TtC8NeftaSDK12UnityWrapper")
 @property (nonatomic, copy) void (^ _Nullable IOnClose)(NSString * _Nonnull);
 @property (nonatomic, copy) void (^ _Nullable IOnReward)(NSString * _Nonnull);
 @property (nonatomic, readonly, strong) NeftaPlugin * _Nonnull _plugin;
-- (nonnull instancetype)initWithAppId:(NSString * _Nonnull)appId OBJC_DESIGNATED_INITIALIZER;
+- (nonnull instancetype)initWithViewController:(UIViewController * _Nonnull)viewController appId:(NSString * _Nonnull)appId OBJC_DESIGNATED_INITIALIZER;
 - (void)SetFloorPriceWithId:(NSString * _Nonnull)id floorPrice:(float)floorPrice;
 - (void)SetCustomParameterWithId:(NSString * _Nonnull)id provider:(NSString * _Nonnull)provider value:(NSString * _Nonnull)value;
 - (void)MuteWithId:(NSString * _Nonnull)id mute:(BOOL)mute;
@@ -1129,6 +1141,7 @@ enum Types : NSInteger;
 @class Placement;
 @protocol NAdListener;
 @class NSData;
+@class UIViewController;
 
 SWIFT_CLASS("_TtC8NeftaSDK3NAd")
 @interface NAd : NSObject
@@ -1164,8 +1177,8 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger Expired;)
 - (void)Bid;
 - (void)LoadWithBidResponseWithBidResponse:(NSData * _Nonnull)bidResponse;
 - (void)Load;
-- (void)ShowThreaded;
-- (void)Show;
+- (void)ShowThreaded:(UIViewController * _Nonnull)viewController;
+- (void)Show:(UIViewController * _Nullable)viewController;
 - (void)CloseThreaded;
 - (void)Close;
 - (void)SetFloorPriceWithFloorPrice:(float)floorPrice;
@@ -1199,12 +1212,14 @@ enum Position : NSInteger;
 SWIFT_CLASS("_TtC8NeftaSDK7NBanner")
 @interface NBanner : NAd
 @property (nonatomic) enum Position _position;
+@property (nonatomic, copy) void (^ _Nullable _onRemove)(NBanner * _Nonnull);
 - (nonnull instancetype)initWithId:(NSString * _Nonnull)id parent:(UIView * _Nonnull)parent OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)initWithId:(NSString * _Nonnull)id position:(enum Position)position OBJC_DESIGNATED_INITIALIZER;
 - (void)SetAutoRefresh:(BOOL)autoRefresh;
-- (UIView * _Nullable)GracefulShow SWIFT_WARN_UNUSED_RESULT;
+- (UIView * _Nullable)GracefulShow:(UIViewController * _Nullable)viewController SWIFT_WARN_UNUSED_RESULT;
 - (UIView * _Nullable)GetView SWIFT_WARN_UNUSED_RESULT;
-- (void)Show;
+- (void)Show:(UIViewController * _Nullable)viewController;
+- (void)Close;
 - (void)Hide;
 - (nonnull instancetype)initWithId:(NSString * _Nonnull)id SWIFT_UNAVAILABLE;
 @end
@@ -1472,13 +1487,22 @@ typedef SWIFT_ENUM(NSInteger, SpendMethod, open) {
   SpendMethodOther = 7,
 };
 
-@class UIViewController;
 @class NSMutableDictionary;
 
 SWIFT_CLASS("_TtC8NeftaSDK11NeftaPlugin")
 @interface NeftaPlugin : NSObject
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull Version;)
 + (NSString * _Nonnull)Version SWIFT_WARN_UNUSED_RESULT;
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ContentRating_Unspecified;)
++ (NSString * _Nonnull)ContentRating_Unspecified SWIFT_WARN_UNUSED_RESULT;
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ContentRating_General;)
++ (NSString * _Nonnull)ContentRating_General SWIFT_WARN_UNUSED_RESULT;
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ContentRating_ParentalGuidance;)
++ (NSString * _Nonnull)ContentRating_ParentalGuidance SWIFT_WARN_UNUSED_RESULT;
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ContentRating_Teen;)
++ (NSString * _Nonnull)ContentRating_Teen SWIFT_WARN_UNUSED_RESULT;
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ContentRating_MatureAudience;)
++ (NSString * _Nonnull)ContentRating_MatureAudience SWIFT_WARN_UNUSED_RESULT;
 @property (nonatomic, strong) NeftaEvents * _Nonnull Events;
 @property (nonatomic, copy) void (^ _Nullable OnReady)(NSDictionary<NSString *, Placement *> * _Nonnull);
 @property (nonatomic, copy) void (^ _Nullable OnBehaviourInsight)(NSDictionary<NSString *, Insight *> * _Nonnull);
@@ -1493,17 +1517,17 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NeftaPlugin * _Null_un
 + (NeftaPlugin * _Nonnull)InitWithAppId:(NSString * _Nonnull)appId SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
+- (void)SetContentRatingWithRating:(NSString * _Nonnull)rating;
 - (void)SetTrackingWithIsAuthorized:(BOOL)isAuthorized;
-- (void)PrepareRendererWithViewController:(UIViewController * _Nonnull)viewController;
 - (void)RecordWithType:(NSInteger)type category:(NSInteger)category subCategory:(NSInteger)subCategory name:(NSString * _Nullable)name value:(int64_t)value customPayload:(NSString * _Nullable)customPayload;
 - (void)SetPublisherUserIdWithId:(NSString * _Nonnull)id;
 - (void)GetBehaviourInsightWithString:(NSString * _Nonnull)string;
 - (void)GetBehaviourInsight:(NSArray<NSString *> * _Nonnull)insightList;
 - (NSString * _Nonnull)GetNuidWithPresent:(BOOL)present SWIFT_WARN_UNUSED_RESULT;
-+ (void)OnExternalAdLoad:(NSString * _Nonnull)provider adType:(NSInteger)adType unitFloorPrice:(double)unitFloorPrice calculatedFloorPrice:(double)calculatedFloorPrice status:(NSInteger)status;
-+ (void)OnExternalAdShown:(NSString * _Nonnull)path data:(NSMutableDictionary * _Nonnull)data;
-+ (void)OnExternalAdShownAsString:(NSString * _Nonnull)path data:(NSString * _Nonnull)data;
-- (void)SetOverrideWithUrl:(NSString * _Nullable)url;
++ (void)OnExternalMediationRequest:(NSString * _Nonnull)provider adType:(NSInteger)adType requestedFloorPrice:(double)requestedFloorPrice calculatedFloorPrice:(double)calculatedFloorPrice adUnitId:(NSString * _Nullable)adUnitId revenue:(double)revenue precision:(NSString * _Nullable)precision status:(NSInteger)status;
++ (void)OnExternalMediationImpression:(NSString * _Nonnull)path data:(NSMutableDictionary * _Nonnull)data;
++ (void)OnExternalMediationImpressionAsString:(NSString * _Nonnull)path data:(NSString * _Nonnull)data;
++ (void)SetOverrideWithUrl:(NSString * _Nullable)url;
 @end
 
 
@@ -1540,7 +1564,7 @@ SWIFT_CLASS("_TtC8NeftaSDK12UnityWrapper")
 @property (nonatomic, copy) void (^ _Nullable IOnClose)(NSString * _Nonnull);
 @property (nonatomic, copy) void (^ _Nullable IOnReward)(NSString * _Nonnull);
 @property (nonatomic, readonly, strong) NeftaPlugin * _Nonnull _plugin;
-- (nonnull instancetype)initWithAppId:(NSString * _Nonnull)appId OBJC_DESIGNATED_INITIALIZER;
+- (nonnull instancetype)initWithViewController:(UIViewController * _Nonnull)viewController appId:(NSString * _Nonnull)appId OBJC_DESIGNATED_INITIALIZER;
 - (void)SetFloorPriceWithId:(NSString * _Nonnull)id floorPrice:(float)floorPrice;
 - (void)SetCustomParameterWithId:(NSString * _Nonnull)id provider:(NSString * _Nonnull)provider value:(NSString * _Nonnull)value;
 - (void)MuteWithId:(NSString * _Nonnull)id mute:(BOOL)mute;

@@ -16,24 +16,24 @@ NSString * const _mediationProvider = @"applovin-max";
 
 static NeftaPlugin *_plugin;
 
-+(void) OnExternalAdLoad:(AdType)adType unitFloorPrice:(double)unitFloorPrice calculatedFloorPrice:(double)calculatedFloorPrice {
-    [NeftaPlugin OnExternalAdLoad: @"max" adType: adType unitFloorPrice: unitFloorPrice calculatedFloorPrice: calculatedFloorPrice status: 1];
++(void) OnExternalMediationRequestLoad:(AdType)adType requestedFloorPrice:(double)requestedFloorPrice calculatedFloorPrice:(double)calculatedFloorPrice ad:(MAAd *)ad {
+    [NeftaPlugin OnExternalMediationRequest: @"max" adType: adType requestedFloorPrice: requestedFloorPrice calculatedFloorPrice: calculatedFloorPrice adUnitId: ad.adUnitIdentifier revenue: ad.revenue precision: ad.revenuePrecision status: 1];
 }
 
-+(void) OnExternalAdFail:(AdType)adType unitFloorPrice:(double)unitFloorPrice calculatedFloorPrice:(double)calculatedFloorPrice error:(MAError *)error {
++(void) OnExternalMediationRequestFail:(AdType)adType requestedFloorPrice:(double)requestedFloorPrice calculatedFloorPrice:(double)calculatedFloorPrice adUnitIdentifier:(NSString *)adUnitIdentifier error:(MAError *)error {
     int status = 0;
     if (error.code == MAErrorCodeNoFill) {
         status = 2;
     }
-    [NeftaPlugin OnExternalAdLoad: @"max" adType: adType unitFloorPrice: unitFloorPrice calculatedFloorPrice: calculatedFloorPrice status: status];
+    [NeftaPlugin OnExternalMediationRequest: @"max" adType: adType requestedFloorPrice: requestedFloorPrice calculatedFloorPrice: calculatedFloorPrice adUnitId: adUnitIdentifier revenue: -1 precision: nil status: status];
 }
 
-+(void) OnExternalAdShown:(MAAd*)ad {
++(void) OnExternalMediationImpression:(MAAd*)ad {    
     NSMutableDictionary *data = [NSMutableDictionary dictionary];
     [data setObject: _mediationProvider forKey: @"mediation_provider"];
     [data setObject: ad.format.label forKey: @"format"];
     [data setObject: [NSString stringWithFormat:@"%dx%d", (int)ad.size.width, (int)ad.size.height] forKey: @"size"];
-    [data setObject: ad.adUnitIdentifier forKey: @"adUnit_id"];
+    [data setObject: ad.adUnitIdentifier forKey: @"ad_unit_id"];
     [data setObject: ad.networkName forKey: @"network_name"];
     if (ad.creativeIdentifier != nil) {
         [data setObject: ad.creativeIdentifier forKey: @"creative_id"];
@@ -73,7 +73,7 @@ static NeftaPlugin *_plugin;
         }
         [data setObject: waterfalls forKey: @"waterfall"];
     }
-    [NeftaPlugin OnExternalAdShown: @"max" data: data];
+    [NeftaPlugin OnExternalMediationImpression: @"max" data: data];
 }
 
 - (void)initializeWithParameters:(id<MAAdapterInitializationParameters>)parameters completionHandler:(void (^)(MAAdapterInitializationStatus, NSString *_Nullable))completionHandler {
@@ -96,7 +96,7 @@ static NeftaPlugin *_plugin;
 }
 
 - (NSString *)adapterVersion {
-    return @"2.1.2";
+    return @"2.2.0";
 }
 
 - (void)destroy {
@@ -128,15 +128,15 @@ static NeftaPlugin *_plugin;
         return;
     }
     
-    [_ad Show];
+    [_ad Show: [self GetViewController: parameters]];
 }
 
-- (void)loadRewardedAdForParameters:(id<MAAdapterResponseParameters>)parameters andNotify:(id<MARewardedAdapterDelegate>)delegate {
+- (void) loadRewardedAdForParameters:(id<MAAdapterResponseParameters>)parameters andNotify:(id<MARewardedAdapterDelegate>)delegate {
     _ad = [[ALNeftaRewarded alloc] initWithId: parameters.thirdPartyAdPlacementIdentifier listener: delegate];
     [self Load: parameters];
 }
 
-- (void)showRewardedAdForParameters:(id<MAAdapterResponseParameters>)parameters andNotify:(id<MARewardedAdapterDelegate>)delegate {
+- (void) showRewardedAdForParameters:(id<MAAdapterResponseParameters>)parameters andNotify:(id<MARewardedAdapterDelegate>)delegate {
     int readyStatus = [_ad CanShow];
     if (readyStatus == NAd.Loading) {
         [delegate didFailToLoadRewardedAdWithError: MAAdapterError.adNotReady];
@@ -154,18 +154,10 @@ static NeftaPlugin *_plugin;
     ALNeftaRewarded *rewarded = (ALNeftaRewarded *) _ad;
     rewarded.reward = [self reward];
     rewarded.giveReward = [self shouldAlwaysRewardUser];
-    [_ad Show];
+    [_ad Show: [self GetViewController: parameters]];
 }
 
-- (void)Load:(id<MAAdapterResponseParameters>)parameters {
-    UIViewController *viewController;
-    if (ALSdk.versionCode >= 11020199) {
-        viewController = parameters.presentingViewController ?: [ALUtils topViewControllerFromKeyWindow];
-    } else {
-        viewController = [ALUtils topViewControllerFromKeyWindow];
-    }
-    [_plugin PrepareRendererWithViewController: viewController];
-    
+- (void) Load:(id<MAAdapterResponseParameters>)parameters {
     if (parameters.customParameters != nil && [parameters.customParameters count] > 0) {
         NSError *error;
         NSData *jsonData = [NSJSONSerialization dataWithJSONObject:parameters.customParameters options:0 error:&error];
@@ -178,5 +170,12 @@ static NeftaPlugin *_plugin;
     }
     
     [_ad Load];
+}
+
+- (UIViewController *) GetViewController:(id<MAAdapterResponseParameters>)parameters {
+    if (ALSdk.versionCode >= 11020199) {
+        return parameters.presentingViewController ?: [ALUtils topViewControllerFromKeyWindow];
+    }
+    return [ALUtils topViewControllerFromKeyWindow];
 }
 @end

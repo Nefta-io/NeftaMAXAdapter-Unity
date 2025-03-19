@@ -16,19 +16,19 @@ class ALNeftaMediationAdapterSwift {
         case Rewarded = 3
     }
     
-    static func OnExternalAdLoad(_ adType: AdTypeSwift, unitFloorPrice: Float64, calculatedFloorPrice: Float64) {
-        NeftaPlugin.OnExternalAdLoad("max", adType: adType.rawValue, unitFloorPrice: unitFloorPrice, calculatedFloorPrice: calculatedFloorPrice, status: 1)
+    static func OnExternalMediationRequestLoad(_ adType: AdTypeSwift, requestedFloorPrice: Float64, calculatedFloorPrice: Float64, ad: MAAd) {
+        NeftaPlugin.OnExternalMediationRequest("max", adType: adType.rawValue, requestedFloorPrice: requestedFloorPrice, calculatedFloorPrice: calculatedFloorPrice, adUnitId: ad.adUnitIdentifier, revenue: ad.revenue, precision: ad.revenuePrecision, status: 1)
     }
     
-    static func OnExternalAdFail(_ adType: AdTypeSwift, unitFloorPrice: Float64, calculatedFloorPrice: Float64, error: MAError) {
+    static func OnExternalMediationRequestFail(_ adType: AdTypeSwift, requestedFloorPrice: Float64, calculatedFloorPrice: Float64, adUnitIdentifier: String?, error: MAError) {
         var status = 0
         if (error.code == .noFill) {
             status = 2
         }
-        NeftaPlugin.OnExternalAdLoad("max", adType: adType.rawValue, unitFloorPrice: unitFloorPrice, calculatedFloorPrice: calculatedFloorPrice, status: status)
+        NeftaPlugin.OnExternalMediationRequest("max", adType: adType.rawValue, requestedFloorPrice: requestedFloorPrice, calculatedFloorPrice: calculatedFloorPrice, adUnitId: adUnitIdentifier, revenue: -1, precision: nil, status: status)
     }
                                  
-    static func OnExternalAdShown(_ ad: MAAd) {
+    static func OnExternalMediationImpression(_ ad: MAAd) {
         let data = NSMutableDictionary()
         data["mediation_provider"] = "applovin-max"
         data["format"] = ad.format.label
@@ -58,6 +58,6 @@ class ALNeftaMediationAdapterSwift {
             }
         }
         data["waterfall"] = waterfalls
-        NeftaPlugin.OnExternalAdShown("max", data: data)
+        NeftaPlugin.OnExternalMediationImpression("max", data: data)
     }
 }

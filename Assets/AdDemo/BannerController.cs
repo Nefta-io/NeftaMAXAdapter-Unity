@@ -1,7 +1,11 @@
+using System;
+using System.Collections.Generic;
 using Nefta.Core.Events;
 using NeftaCustomAdapter;
 using UnityEngine;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
+using Type = Nefta.Core.Events.Type;
 
 namespace AdDemo
 {
@@ -12,20 +16,13 @@ namespace AdDemo
         [SerializeField] private Button _hide;
         [SerializeField] private Text _status;
         
-        private string _adUnitId;
+        private Banner _banner;
 
-        public void Init(string adUnitId)
+        public void Init(List<AdConfig> adUnits, Action getInsights)
         {
-            _adUnitId = adUnitId;
-            
-            MaxSdkCallbacks.Banner.OnAdLoadedEvent += OnBannerAdLoadedEvent;
-            MaxSdkCallbacks.Banner.OnAdLoadFailedEvent += OnBannerAdFailedEvent;
-            MaxSdkCallbacks.Banner.OnAdClickedEvent += OnBannerAdClickedEvent;
-            MaxSdkCallbacks.Banner.OnAdRevenuePaidEvent += OnBannerAdRevenuePaidEvent;
+            _banner = new Banner("calculated_user_floor_price_banner", adUnits, getInsights, SetStatus);
 
-            MaxSdk.CreateBanner(_adUnitId, MaxSdkBase.BannerPosition.TopCenter);
-
-            _title.text = $"Banner {_adUnitId}";
+            _title.text = "Banner";
             _show.onClick.AddListener(OnShowClick);
             _hide.onClick.AddListener(OnHideClick);
             _hide.interactable = false;
@@ -40,44 +37,27 @@ namespace AdDemo
             NeftaAdapterEvents.Record(new ProgressionEvent(type, status)
                 { _source = source, _name = $"progression_{type}_{status} {source} {value}", _value = value });
             
-            MaxSdk.ShowBanner(_adUnitId);
+            _banner.Load();
+            _show.interactable = true;
+            
             _hide.interactable = true;
         }
         
         private void OnHideClick()
         {
+            _banner.Hide();
             _hide.interactable = false;
-            MaxSdk.HideBanner(_adUnitId);
-        }
-        
-        private void OnBannerAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
-        {
-            SetStatus($"Loaded {adInfo.NetworkName} {adInfo.NetworkPlacement}");
-            
-            NeftaAdapterEvents.OnExternalAdLoad(NeftaAdapterEvents.AdType.Banner, 0.3, 0.4);
-        }
-        
-        private void OnBannerAdFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
-        {
-            SetStatus("Load failed");
-            
-            NeftaAdapterEvents.OnExternalAdFail(NeftaAdapterEvents.AdType.Banner, 0.5, 0.6, errorInfo);
-        }
-
-        private void OnBannerAdClickedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
-        {
-            SetStatus("Clicked");
-        }
-
-        private void OnBannerAdRevenuePaidEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
-        {
-            SetStatus($"Paid {adInfo.Revenue}");
         }
         
         private void SetStatus(string status)
         {
             _status.text = status;
-            Debug.Log($"AdUnit \"{_adUnitId}\": {status}");
+            Debug.Log($"Banner: {status}");
+        }
+
+        public void OnBehaviourInsight(Dictionary<string, Insight> behaviourInsight)
+        {
+            _banner.OnBehaviourInsight(behaviourInsight);
         }
     }
 }

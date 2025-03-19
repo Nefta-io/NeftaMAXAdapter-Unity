@@ -26,6 +26,15 @@ namespace NeftaCustomAdapter
             Rewarded = 3
         }
         
+        public enum ContentRating
+        {
+            Unspecified = 0,
+            General = 1,
+            ParentalGuidance = 2,
+            Teen = 3,
+            MatureAudience = 4
+        }
+        
 #if UNITY_EDITOR
         private static NeftaPlugin _plugin;
 #elif UNITY_IOS
@@ -46,13 +55,16 @@ namespace NeftaCustomAdapter
         private static extern void NeftaPlugin_Record(int type, int category, int subCategory, string nameValue, long value, string customPayload);
 
         [DllImport ("__Internal")]
-        private static extern void NeftaPlugin_OnExternalAdLoad(int adType, double unitFloorPrice, double calculatedFloorPrice, int status);
+        private static extern void NeftaPlugin_OnExternalMediationRequest(int adType, double requestedFloorPrice, double calculatedFloorPrice, string adUnitId, double revenue, string precision, int status);
 
         [DllImport ("__Internal")]
-        private static extern void NeftaPlugin_OnExternalAdShownAsString(string ss);
+        private static extern void NeftaPlugin_OnExternalMediationImpressionAsString(string ss);
 
         [DllImport ("__Internal")]
         private static extern string NeftaPlugin_GetNuid(bool present);
+
+        [DllImport ("__Internal")]
+        private static extern void NeftaPlugin_SetContentRating(string rating);
         
         [DllImport ("__Internal")]
         private static extern void NeftaPlugin_GetBehaviourInsight(string insights);
@@ -100,9 +112,9 @@ namespace NeftaCustomAdapter
 #endif
             if (sendAdEvents)
             {
-                MaxSdkCallbacks.Banner.OnAdRevenuePaidEvent += OnExternalAdShown;
-                MaxSdkCallbacks.Interstitial.OnAdDisplayedEvent += OnExternalAdShown;
-                MaxSdkCallbacks.Rewarded.OnAdDisplayedEvent += OnExternalAdShown;
+                MaxSdkCallbacks.Banner.OnAdRevenuePaidEvent += OnExternalMediationImpression;
+                MaxSdkCallbacks.Interstitial.OnAdDisplayedEvent += OnExternalMediationImpression;
+                MaxSdkCallbacks.Rewarded.OnAdDisplayedEvent += OnExternalMediationImpression;
             }
         }
 
@@ -137,28 +149,28 @@ namespace NeftaCustomAdapter
 #endif
         }
         
-        public static void OnExternalAdLoad(AdType adType, double unitFloorPrice, double calculatedFloorPrice)
+        public static void OnExternalMediationRequestLoaded(AdType adType, double requestedFloorPrice, double calculatedFloorPrice, MaxSdkBase.AdInfo adInfo)
         {
-            OnExternalAdLoad((int) adType, unitFloorPrice, calculatedFloorPrice, 1);
+            OnExternalMediationRequest((int) adType, requestedFloorPrice, calculatedFloorPrice, adInfo.AdUnitIdentifier, adInfo.Revenue, adInfo.RevenuePrecision, 1);
         }
 
-        public static void OnExternalAdFail(AdType adType, double unitFloorPrice, double calculatedFloorPrice, MaxSdkBase.ErrorInfo errorInfo)
+        public static void OnExternalMediationRequestFailed(AdType adType, double requestedFloorPrice, double calculatedFloorPrice, string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
         {
-            OnExternalAdLoad((int) adType, unitFloorPrice, calculatedFloorPrice, errorInfo.Code == MaxSdkBase.ErrorCode.NoFill ? 2 : 0);
+            OnExternalMediationRequest((int) adType, requestedFloorPrice, calculatedFloorPrice, adUnitId, -1, null, errorInfo.Code == MaxSdkBase.ErrorCode.NoFill ? 2 : 0);
         }
 
-        private static void OnExternalAdLoad(int adType, double unitFloorPrice, double calculatedFloorPrice, int status)
+        private static void OnExternalMediationRequest(int adType, double requestedFloorPrice, double calculatedFloorPrice, string adUnitId, double revenue, string precision, int status)
         {
 #if UNITY_EDITOR
-            _plugin.OnExternalAdLoad("max", adType, unitFloorPrice, calculatedFloorPrice, status);
+            _plugin.OnExternalMediationRequest("max", adType, requestedFloorPrice, calculatedFloorPrice, adUnitId, revenue, precision, status);
 #elif UNITY_IOS
-            NeftaPlugin_OnExternalAdLoad(adType, unitFloorPrice, calculatedFloorPrice, status);
+            NeftaPlugin_OnExternalMediationRequest(adType, requestedFloorPrice, calculatedFloorPrice, adUnitId, revenue, precision, status);
 #elif UNITY_ANDROID
-            _plugin.CallStatic("OnExternalAdLoad", "max", adType, unitFloorPrice, calculatedFloorPrice, status);
+            _plugin.CallStatic("OnExternalMediationRequest", "max", adType, requestedFloorPrice, calculatedFloorPrice, adUnitId, revenue, precision, status);
 #endif
         }
 
-        private static void OnExternalAdShown(string adUnitId, MaxSdkBase.AdInfo adInfo)
+        private static void OnExternalMediationImpression(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
             if (adInfo == null)
             {
@@ -223,14 +235,14 @@ namespace NeftaCustomAdapter
 
             }
             sb.Append("\",\"revenue\":");
-            sb.Append(adInfo.Revenue);
+            sb.Append(adInfo.Revenue.ToString(CultureInfo.InvariantCulture));
             var data = sb.ToString();
 #if UNITY_EDITOR
-            _plugin.OnExternalAdShownAsString("max", data);
+            _plugin.OnExternalMediationImpressionAsString("max", data);
 #elif UNITY_IOS
-            NeftaPlugin_OnExternalAdShownAsString(data);
+            NeftaPlugin_OnExternalMediationImpressionAsString(data);
 #elif UNITY_ANDROID
-            _plugin.CallStatic("OnExternalAdShownAsString", "max", data);
+            _plugin.CallStatic("OnExternalMediationImpressionAsString", "max", data);
 #endif
         }
         
@@ -280,6 +292,33 @@ namespace NeftaCustomAdapter
             return nuid;
         }
         
+        public static void SetContentRating(ContentRating rating)
+        {
+            var r = "";
+            switch (rating)
+            {
+                case ContentRating.General:
+                    r = "G";
+                    break;
+                case ContentRating.ParentalGuidance:
+                    r = "PG";
+                    break;
+                case ContentRating.Teen:
+                    r = "T";
+                    break;
+                case ContentRating.MatureAudience:
+                    r = "MA";
+                    break;
+            }
+#if UNITY_EDITOR
+            _plugin.SetContentRating(r);
+#elif UNITY_IOS
+            NeftaPlugin_SetContentRating(r);
+#elif UNITY_ANDROID
+            _plugin.Call("SetContentRating", r);
+#endif
+        }
+        
         public static void SetOverride(string root) 
         {
 #if UNITY_EDITOR
@@ -287,7 +326,10 @@ namespace NeftaCustomAdapter
 #elif UNITY_IOS
             NeftaPlugin_SetOverride(root);
 #elif UNITY_ANDROID
-            _plugin.Call("SetOverride", root);
+            using (AndroidJavaClass neftaPlugin = new AndroidJavaClass("com.nefta.sdk.NeftaPlugin"))
+            {
+                neftaPlugin.CallStatic("SetOverride", root);
+            }
 #endif
         }
         

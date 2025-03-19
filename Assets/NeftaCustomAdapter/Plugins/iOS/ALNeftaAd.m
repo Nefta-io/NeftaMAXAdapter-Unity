@@ -16,7 +16,7 @@
 -(int) CanShow {
     return 0;
 }
--(void) Show {
+-(void) Show:(UIViewController *)viewController {
 }
 -(void) Close {
 }

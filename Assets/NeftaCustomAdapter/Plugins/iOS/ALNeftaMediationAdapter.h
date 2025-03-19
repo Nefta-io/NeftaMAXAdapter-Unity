@@ -18,9 +18,9 @@ typedef NS_ENUM(NSInteger, AdType) {
     AdTypeRewarded = 3
 };
 @property (nonatomic, strong, readonly) NSString * _Nonnull _mediationProvider;
-+ (void)OnExternalAdLoad:(AdType)adType unitFloorPrice:(double)unitFloorPrice calculatedFloorPrice:(double)calculatedFloorPrice;
-+ (void)OnExternalAdFail:(AdType)adType unitFloorPrice:(double)unitFloorPrice calculatedFloorPrice:(double)calculatedFloorPrice error:(MAError * _Nonnull)error;
-+ (void)OnExternalAdShown:(MAAd* _Nonnull)ad;
++ (void)OnExternalMediationRequestLoad:(AdType)adType requestedFloorPrice:(double)requestedFloorPrice calculatedFloorPrice:(double)calculatedFloorPrice ad:(MAAd * _Nonnull)ad;
++ (void)OnExternalMediationRequestFail:(AdType)adType requestedFloorPrice:(double)requestedFloorPrice calculatedFloorPrice:(double)calculatedFloorPrice adUnitIdentifier:(NSString * _Nonnull)adUnitIdentifier error:(MAError * _Nonnull)error;
++ (void)OnExternalMediationImpression:(MAAd* _Nonnull)ad;
 @property ALNeftaAd * _Nullable ad;
 @end
 

@@ -30,8 +30,8 @@
 - (int) CanShow {
     return (int)[_interstitial CanShow];
 }
-- (void) Show {
-    [_interstitial Show];
+- (void) Show:(UIViewController *)viewController {
+    [_interstitial Show: viewController];
 }
 
 - (void)OnLoadFailWithAd:(NAd * _Nonnull)ad error:(NError * _Nonnull)error {

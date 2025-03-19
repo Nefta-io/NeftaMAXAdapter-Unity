@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 using Nefta.Core.Events;
 using NeftaCustomAdapter;
 using UnityEngine;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 namespace AdDemo
 {
@@ -13,22 +15,16 @@ namespace AdDemo
         [SerializeField] private Button _show;
         [SerializeField] private Text _status;
 
-        private string _adUnitId;
+        private Interstitial _interstitial;
         private Queue<string> _statusQueue;
 
-        public void Init(string adUnitId)
+        public void Init(List<AdConfig> adUnits, Action getInsights)
         {
-            _adUnitId = adUnitId;
             _statusQueue = new Queue<string>();
             
-            MaxSdkCallbacks.Interstitial.OnAdLoadedEvent += OnInterstitialLoadedEvent;
-            MaxSdkCallbacks.Interstitial.OnAdLoadFailedEvent += OnInterstitialFailedEvent;
-            MaxSdkCallbacks.Interstitial.OnAdDisplayedEvent += OnInterstitialShowEvent;
-            MaxSdkCallbacks.Interstitial.OnAdDisplayFailedEvent += InterstitialFailedToDisplayEvent;
-            MaxSdkCallbacks.Interstitial.OnAdHiddenEvent += OnInterstitialHidden;
-            MaxSdkCallbacks.Interstitial.OnAdRevenuePaidEvent += OnInterstitialRevenuePaidEvent;
+            _interstitial = new Interstitial("calculated_user_floor_price_interstitial", adUnits, getInsights, SetStatus, OnLoad);
             
-            _title.text = $"Interstitial {_adUnitId}";
+            _title.text = "Interstitial";
             _load.onClick.AddListener(OnLoadClick);
             _show.onClick.AddListener(OnShowClick);
             
@@ -41,67 +37,28 @@ namespace AdDemo
             var method = (ReceiveMethod)Random.Range(0, 8);
             var value = Random.Range(0, 101);
             NeftaAdapterEvents.Record(new ReceiveEvent(category) { _method = method, _name = $"receive_{category} {method} {value}", _value = value });
-            
+
+            _interstitial.Load();
             SetStatus("Loading...");
-            MaxSdk.LoadInterstitial(_adUnitId);
+        }
+
+        private void OnLoad()
+        {
+            _show.interactable = true;
         }
         
         private void OnShowClick()
         {
             _show.interactable = false;
-            if (MaxSdk.IsInterstitialReady(_adUnitId))
-            {
-                SetStatus("Showing");
-                MaxSdk.ShowInterstitial(_adUnitId);
-            }
-            else
-            {
-                SetStatus("Ad not ready");
-            }
-        }
-
-        private void OnInterstitialLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
-        {
-            SetStatus($"Loaded {adInfo.NetworkName} {adInfo.NetworkPlacement}");
-            _show.interactable = true;
-            
-            NeftaAdapterEvents.OnExternalAdLoad(NeftaAdapterEvents.AdType.Interstitial, 0.3f, 0.4f);
-        }
-
-        private void OnInterstitialFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo error)
-        {
-            SetStatus("Load failed");
-            
-            NeftaAdapterEvents.OnExternalAdFail(NeftaAdapterEvents.AdType.Rewarded, 0.3f, 0.4f, error);
-        }
-
-        private void OnInterstitialShowEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
-        {
-            SetStatus("Show");
+            _interstitial.Show();
         }
         
-        private void InterstitialFailedToDisplayEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo, MaxSdkBase.AdInfo adInfo)
-        {
-            SetStatus("Display failed");
-        }
-        
-        private void OnInterstitialHidden(string adUnitId, MaxSdkBase.AdInfo adInfo)
-        {
-            SetStatus("Hidden");
-        }
-
-        private void OnInterstitialRevenuePaidEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
+        private void SetStatus(string status)
         {
             lock(_statusQueue)
             {
-                _statusQueue.Enqueue($"Paid {adInfo.Revenue}");
+                _statusQueue.Enqueue(status);
             }
-        }
-
-        private void SetStatus(string status)
-        {
-            _status.text = status;
-            Debug.Log($"AdUnit \"{_adUnitId}\": {status}");
         }
         
         private void Update()
@@ -116,9 +73,16 @@ namespace AdDemo
                 while (_statusQueue.Count > 0)
                 {
                     var status = _statusQueue.Dequeue();
-                    SetStatus(status);
+                    
+                    _status.text = status;
+                    Debug.Log($"Interstitial: {status}");
                 }
             }
+        }
+        
+        public void OnBehaviourInsight(Dictionary<string, Insight> behaviourInsight)
+        {
+            _interstitial.OnBehaviourInsight(behaviourInsight);
         }
     }
 }

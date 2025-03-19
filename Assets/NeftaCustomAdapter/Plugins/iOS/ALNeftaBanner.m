@@ -32,7 +32,7 @@
     [_listener didFailToLoadAdViewAdWithError: MAAdapterError.unspecified];
 }
 - (void)OnLoadWithAd:(NAd * _Nonnull)ad width:(NSInteger)width height:(NSInteger)height {
-    UIView *v = [_banner GracefulShow];
+    UIView *v = [_banner GracefulShow: nil];
     [_listener didLoadAdForAdView: v];
 }
 - (void)OnShowFailWithAd:(NAd * _Nonnull)ad error:(NError * _Nonnull)error {

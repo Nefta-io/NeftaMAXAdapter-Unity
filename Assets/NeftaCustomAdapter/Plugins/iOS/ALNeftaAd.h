@@ -12,6 +12,6 @@
 - (void) SetCustomParameterWithProvider:(NSString *_Nonnull)provider value: (NSString *_Nonnull)value;
 - (void) Load;
 - (int) CanShow;
-- (void) Show;
+- (void) Show:(UIViewController * _Nonnull)viewController;
 - (void) Close;
 @end

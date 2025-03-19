@@ -12,21 +12,28 @@ namespace AdDemo
         private const string MaxSdkKey = "IAhBswbDpMg9GhQ8NEKffzNrXQP1H4ABNFvUA7ePIz2xmarVFcy_VB8UfGnC9IPMOgpQ3p8G5hBMebJiTHv3P9";
 
 #if UNITY_IOS
-        private const string BannerAdUnitId = "d066ee44f5d29f8b";
-        private const string InterstitialAdUnitId = "c9acf50602329bfe";
-        private const string RewardedAdUnitId = "08304643cb16df3b";
-        
         private const string NeftaId = "5661184053215232";
         
         [DllImport("__Internal")]
         private static extern void CheckTrackingPermission();
 #else // UNITY_ANDROID
-        private const string BannerAdUnitId = "6345b3fa80c73572";
-        private const string InterstitialAdUnitId = "60bbc7cc56dfa329";
-        private const string RewardedAdUnitId = "3082ee9199cf59f0";
-        
         private const string NeftaId = "5643649824063488";
 #endif
+        
+        private List<AdConfig> _bannerAdUnits = new List<AdConfig>()
+        {
+            new AdConfig("d066ee44f5d29f8b", "6345b3fa80c73572", 100),
+        };
+        
+        private List<AdConfig> _interstitialAdUnits = new List<AdConfig>
+        {
+            new AdConfig("c9acf50602329bfe", "60bbc7cc56dfa329", 100),
+        };
+        
+        private List<AdConfig> _rewardedAdUnits = new List<AdConfig>
+        {
+            new AdConfig("08304643cb16df3b", "3082ee9199cf59f0", 100),
+        };
         
         private bool _isBannerShown;
 
@@ -41,13 +48,28 @@ namespace AdDemo
         {
             NeftaAdapterEvents.EnableLogging(true);
             NeftaAdapterEvents.Init(NeftaId);
+            NeftaAdapterEvents.SetContentRating(NeftaAdapterEvents.ContentRating.MatureAudience);
 
             NeftaAdapterEvents.BehaviourInsightCallback = OnBehaviourInsight;
-            NeftaAdapterEvents.GetBehaviourInsight(new string[] { "p_churn_14d"});
+            GetBehaviourInsight();
+            
+            _banner.Init(_bannerAdUnits, GetBehaviourInsight);
+            _interstitial.Init(_interstitialAdUnits, GetBehaviourInsight);
+            _rewarded.Init(_rewardedAdUnits, GetBehaviourInsight);
             
 #if UNITY_EDITOR || !UNITY_IOS
-            InitAds();
+            _stateTime = 1f; // skip IDFA check
 #endif
+        }
+
+        private void GetBehaviourInsight()
+        {
+            NeftaAdapterEvents.GetBehaviourInsight(new string[]
+            {
+                "calculated_user_floor_price_banner",
+                "calculated_user_floor_price_interstitial",
+                "calculated_user_floor_price_rewarded"
+            });
         }
         
         private void OnBehaviourInsight(Dictionary<string, Insight> behaviourInsight)
@@ -57,6 +79,10 @@ namespace AdDemo
                 var insightValue = insight.Value;
                 Debug.Log($"BehaviourInsight {insight.Key} status:{insightValue._status} i:{insightValue._int} f:{insightValue._float} s:{insightValue._string}");
             }
+            
+            _banner.OnBehaviourInsight(behaviourInsight);
+            _interstitial.OnBehaviourInsight(behaviourInsight);
+            _rewarded.OnBehaviourInsight(behaviourInsight);
         }
 
         private void InitAds()
@@ -68,13 +94,8 @@ namespace AdDemo
                     
             MaxSdk.SetSdkKey(MaxSdkKey);
             MaxSdk.InitializeSdk();
-
-            _banner.Init(BannerAdUnitId);
-            _interstitial.Init(InterstitialAdUnitId);
-            _rewarded.Init(RewardedAdUnitId);
         }
         
-#if !UNITY_EDITOR && UNITY_IOS
         private void Update()
         {
             if (!_permissionChecked)
@@ -83,13 +104,12 @@ namespace AdDemo
                 if (_stateTime > 1f)
                 {
                     _permissionChecked = true;
-                    
+#if !UNITY_EDITOR && UNITY_IOS
                     CheckTrackingPermission();
-                        
+#endif
                     InitAds();
                 }
             }
         }
-#endif
     }
 }

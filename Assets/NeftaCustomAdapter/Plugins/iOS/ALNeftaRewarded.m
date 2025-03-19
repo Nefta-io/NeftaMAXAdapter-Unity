@@ -27,32 +27,32 @@
 - (int) CanShow {
     return (int)[_rewarded CanShow];
 }
-- (void) Show {
-    [_rewarded Show];
+- (void) Show:(UIViewController *)viewController {
+    [_rewarded Show: viewController];
 }
 
-- (void)OnLoadFailWithAd:(NAd * _Nonnull)ad error:(NError * _Nonnull)error {
+- (void) OnLoadFailWithAd:(NAd * _Nonnull)ad error:(NError * _Nonnull)error {
     [_listener didFailToLoadRewardedAdWithError: MAAdapterError.unspecified];
 }
-- (void)OnLoadWithAd:(NAd * _Nonnull)ad width:(NSInteger)width height:(NSInteger)height {
+- (void) OnLoadWithAd:(NAd * _Nonnull)ad width:(NSInteger)width height:(NSInteger)height {
     [_listener didLoadRewardedAd];
 }
-- (void)OnShowFailWithAd:(NAd * _Nonnull)ad error:(NError * _Nonnull)error {
+- (void) OnShowFailWithAd:(NAd * _Nonnull)ad error:(NError * _Nonnull)error {
     [_listener didFailToLoadRewardedAdWithError: MAAdapterError.adDisplayFailedError];
 }
-- (void)OnShowWithAd:(NAd * _Nonnull)ad {
+- (void) OnShowWithAd:(NAd * _Nonnull)ad {
     [_listener didDisplayRewardedAd];
 }
-- (void)OnClickWithAd:(NAd * _Nonnull)ad {
+- (void) OnClickWithAd:(NAd * _Nonnull)ad {
     [_listener didClickRewardedAd];
 }
-- (void)OnRewardWithAd:(NAd * _Nonnull)ad {
+- (void) OnRewardWithAd:(NAd * _Nonnull)ad {
     _giveReward = true;
     if (_reward == nil) {
         _reward = [MAReward rewardWithAmount: MAReward.defaultAmount label: MAReward.defaultLabel];
     }
 }
-- (void)OnCloseWithAd:(NAd * _Nonnull)ad {
+- (void) OnCloseWithAd:(NAd * _Nonnull)ad {
     if (_giveReward) {
         [_listener didRewardUserWithReward: _reward];
     }

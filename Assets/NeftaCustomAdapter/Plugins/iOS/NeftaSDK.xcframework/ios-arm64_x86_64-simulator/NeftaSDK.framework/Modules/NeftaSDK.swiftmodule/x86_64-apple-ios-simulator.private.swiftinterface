@@ -85,8 +85,8 @@ import os
   @objc public func Bid()
   @objc public func LoadWithBidResponse(bidResponse: Foundation.Data)
   @objc public func Load()
-  @objc public func ShowThreaded()
-  @objc public func Show()
+  @objc(ShowThreaded:) public func ShowThreaded(viewController: UIKit.UIViewController)
+  @objc(Show:) public func Show(viewController: UIKit.UIViewController?)
   @objc public func CloseThreaded()
   @objc public func Close()
   @objc public func SetFloorPrice(floorPrice: Swift.Float)
@@ -99,17 +99,6 @@ import os
   @objc deinit
 }
 @_inheritsConvenienceInitializers @objc public class BidResponse : ObjectiveC.NSObject {
-  public enum AdMarkupTypes : Swift.Int {
-    case VastXml
-    case HtmlRaw
-    case HtmlLink
-    case ImageLink
-    public init?(rawValue: Swift.Int)
-    public typealias RawValue = Swift.Int
-    public var rawValue: Swift.Int {
-      get
-    }
-  }
   @objc public var _id: Swift.String!
   @objc public var _price: Swift.Float
   @objc public var _campaignId: Swift.String?
@@ -121,7 +110,6 @@ import os
 @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc public class NeftaPlugin : ObjectiveC.NSObject {
   @_hasMissingDesignatedInitializers public class Info {
     public var _appId: Swift.String?
-    public var _restUrl: Swift.String
     public var _bundleId: Swift.String
     public var _bundleVersion: Swift.String
     public var _model: Swift.String?
@@ -136,8 +124,14 @@ import os
   public typealias OnBehaviourInsightAsStringBlock = ((Swift.String) -> Swift.Void)
   public typealias OnLogBlock = ((Swift.String) -> Swift.Void)
   @objc public static let Version: Swift.String
+  @objc public static let ContentRating_Unspecified: Swift.String
+  @objc public static let ContentRating_General: Swift.String
+  @objc public static let ContentRating_ParentalGuidance: Swift.String
+  @objc public static let ContentRating_Teen: Swift.String
+  @objc public static let ContentRating_MatureAudience: Swift.String
   final public let _info: NeftaSDK.NeftaPlugin.Info
   final public let _state: NeftaSDK.NeftaPlugin.State
+  public static var _rtbUrl: Swift.String
   public var _cachedInitRespose: Foundation.Data?
   @objc public var Events: NeftaSDK.NeftaEvents
   public var _placements: [Swift.String : NeftaSDK.Placement]!
@@ -149,18 +143,18 @@ import os
   @objc public static var _instance: NeftaSDK.NeftaPlugin!
   @objc(EnableLogging:) public static func EnableLogging(enable: Swift.Bool)
   @objc public static func Init(appId: Swift.String) -> NeftaSDK.NeftaPlugin
+  @objc public func SetContentRating(rating: Swift.String)
   @objc public func SetTracking(isAuthorized: Swift.Bool)
-  @objc public func PrepareRenderer(viewController: UIKit.UIViewController)
   public static func SetDebugTime(offset: Swift.Int)
   @objc public func Record(type: Swift.Int, category: Swift.Int, subCategory: Swift.Int, name: Swift.String?, value: Swift.Int64, customPayload: Swift.String?)
   @objc public func SetPublisherUserId(id: Swift.String)
   @objc public func GetBehaviourInsight(string: Swift.String)
   @objc public func GetBehaviourInsight(_ insightList: [Swift.String])
   @objc public func GetNuid(present: Swift.Bool) -> Swift.String
-  @objc public static func OnExternalAdLoad(_ provider: Swift.String, adType: Swift.Int, unitFloorPrice: Swift.Float64, calculatedFloorPrice: Swift.Float64, status: Swift.Int)
-  @objc public static func OnExternalAdShown(_ path: Swift.String, data: Foundation.NSMutableDictionary)
-  @objc public static func OnExternalAdShownAsString(_ path: Swift.String, data: Swift.String)
-  @objc public func SetOverride(url: Swift.String?)
+  @objc public static func OnExternalMediationRequest(_ provider: Swift.String, adType: Swift.Int, requestedFloorPrice: Swift.Float64, calculatedFloorPrice: Swift.Float64, adUnitId: Swift.String?, revenue: Swift.Float64, precision: Swift.String?, status: Swift.Int)
+  @objc public static func OnExternalMediationImpression(_ path: Swift.String, data: Foundation.NSMutableDictionary)
+  @objc public static func OnExternalMediationImpressionAsString(_ path: Swift.String, data: Swift.String)
+  @objc public static func SetOverride(url: Swift.String?)
   @objc deinit
 }
 @_hasMissingDesignatedInitializers @objc public class NeftaEvents : ObjectiveC.NSObject {
@@ -319,12 +313,14 @@ import os
     }
   }
   @objc public var _position: NeftaSDK.NBanner.Position
+  @objc public var _onRemove: ((NeftaSDK.NBanner) -> Swift.Void)?
   @objc public init(id: Swift.String, parent: UIKit.UIView)
   @objc public init(id: Swift.String, position: NeftaSDK.NBanner.Position)
   @objc(SetAutoRefresh:) public func SetAutoRefresh(autoRefresh: Swift.Bool)
-  @objc public func GracefulShow() -> UIKit.UIView?
+  @objc(GracefulShow:) public func GracefulShow(viewController: UIKit.UIViewController?) -> UIKit.UIView?
   @objc public func GetView() -> UIKit.UIView?
-  @objc override public func Show()
+  @objc override public func Show(viewController: UIKit.UIViewController?)
+  @objc override public func Close()
   @objc public func Hide()
   @objc deinit
 }
@@ -345,7 +341,7 @@ import os
   @objc public var IOnClose: NeftaSDK.UnityWrapper.IOnChangeBlock?
   @objc public var IOnReward: NeftaSDK.UnityWrapper.IOnChangeBlock?
   @objc final public let _plugin: NeftaSDK.NeftaPlugin
-  @objc public init(appId: Swift.String)
+  @objc public init(viewController: UIKit.UIViewController, appId: Swift.String)
   @objc public func SetFloorPrice(id: Swift.String, floorPrice: Swift.Float)
   @objc public func SetCustomParameter(id: Swift.String, provider: Swift.String, value: Swift.String)
   @objc public func Mute(id: Swift.String, mute: Swift.Bool)
@@ -363,9 +359,6 @@ import os
 extension NeftaSDK.Placement.Types : Swift.Equatable {}
 extension NeftaSDK.Placement.Types : Swift.Hashable {}
 extension NeftaSDK.Placement.Types : Swift.RawRepresentable {}
-extension NeftaSDK.BidResponse.AdMarkupTypes : Swift.Equatable {}
-extension NeftaSDK.BidResponse.AdMarkupTypes : Swift.Hashable {}
-extension NeftaSDK.BidResponse.AdMarkupTypes : Swift.RawRepresentable {}
 extension NeftaSDK.NeftaEvents.SessionCategory : Swift.Equatable {}
 extension NeftaSDK.NeftaEvents.SessionCategory : Swift.Hashable {}
 extension NeftaSDK.NeftaEvents.SessionCategory : Swift.RawRepresentable {}

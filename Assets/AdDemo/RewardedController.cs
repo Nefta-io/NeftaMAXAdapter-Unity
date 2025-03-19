@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 using Nefta.Core.Events;
 using NeftaCustomAdapter;
 using UnityEngine;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 namespace AdDemo
 {
@@ -13,24 +15,16 @@ namespace AdDemo
         [SerializeField] private Button _show;
         [SerializeField] private Text _status;
 
-        private string _adUnitId;
+        private Rewarded _rewarded;
         private Queue<string> _statusQueue;
         
-        public void Init(string adUnitId)
+        public void Init(List<AdConfig> adUnits, Action getInsights)
         {
-            _adUnitId = adUnitId;
             _statusQueue = new Queue<string>();
-            
-            MaxSdkCallbacks.Rewarded.OnAdLoadedEvent += OnRewardedAdLoadedEvent;
-            MaxSdkCallbacks.Rewarded.OnAdLoadFailedEvent += OnRewardedAdFailedEvent;
-            MaxSdkCallbacks.Rewarded.OnAdDisplayFailedEvent += OnRewardedAdFailedToDisplayEvent;
-            MaxSdkCallbacks.Rewarded.OnAdDisplayedEvent += OnRewardedAdDisplayedEvent;
-            MaxSdkCallbacks.Rewarded.OnAdClickedEvent += OnRewardedAdClickedEvent;
-            MaxSdkCallbacks.Rewarded.OnAdHiddenEvent += OnRewardedAdHideEvent;
-            MaxSdkCallbacks.Rewarded.OnAdReceivedRewardEvent += OnRewardedAdReceivedRewardEvent;
-            MaxSdkCallbacks.Rewarded.OnAdRevenuePaidEvent += OnRewardedAdRevenuePaidEvent;
 
-            _title.text = $"Rewarded {_adUnitId}";
+            _rewarded = new Rewarded("calculated_user_floor_price_rewarded", adUnits, getInsights, SetStatus, OnLoad);
+
+            _title.text = "Rewarded";
             _load.onClick.AddListener(OnLoadClick);
             _show.onClick.AddListener(OnShowClick);
 
@@ -45,75 +39,26 @@ namespace AdDemo
             NeftaAdapterEvents.Record(new SpendEvent(category) { _method = method, _name = $"spend_{category} {method} {value}", _value = value });
             
             SetStatus("Loading...");
-            MaxSdk.LoadRewardedAd(_adUnitId);
+            _rewarded.Load();
+        }
+
+        private void OnLoad()
+        {
+            _show.interactable = true;
         }
         
         private void OnShowClick()
         {
             _show.interactable = false;
-            if (MaxSdk.IsRewardedAdReady(_adUnitId))
-            {
-                SetStatus("Showing");
-                MaxSdk.ShowRewardedAd(_adUnitId);
-            }
-            else
-            {
-                SetStatus("Ad not ready");
-            }
-        }
-        
-        private void OnRewardedAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
-        {
-            SetStatus($"Loaded {adInfo.NetworkName} {adInfo.NetworkPlacement}");
-            _show.interactable = true;
-            
-            NeftaAdapterEvents.OnExternalAdLoad(NeftaAdapterEvents.AdType.Rewarded, 0.3f, 0.4f);
-        }
-        
-        private void OnRewardedAdFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
-        {
-            SetStatus("Load failed");
-                        
-            NeftaAdapterEvents.OnExternalAdFail(NeftaAdapterEvents.AdType.Rewarded, 0.3f, 0.4f, errorInfo);
-        }
-        
-        private void OnRewardedAdFailedToDisplayEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo, MaxSdkBase.AdInfo adInfo)
-        {
-            SetStatus("Display failed");
-        }
-        
-        private void OnRewardedAdDisplayedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
-        {
-            SetStatus("Displayed");
-        }
-        
-        private void OnRewardedAdClickedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
-        {
-            SetStatus("Rewarded ad clicked");
-        }
-        
-        private void OnRewardedAdHideEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
-        {
-            SetStatus("Hidden");
-        }
-        
-        private void OnRewardedAdReceivedRewardEvent(string adUnitId, MaxSdk.Reward reward, MaxSdkBase.AdInfo adInfo)
-        {
-            SetStatus("Rewarded ad received reward");
-        }
-        
-        private void OnRewardedAdRevenuePaidEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
-        {
-            lock (_statusQueue)
-            {
-                _statusQueue.Enqueue($"Paid {adInfo.Revenue}");
-            }
+            _rewarded.Show();
         }
         
         private void SetStatus(string status)
         {
-            _status.text = status;
-            Debug.Log($"AdUnit \"{_adUnitId}\": {status}");
+            lock (_statusQueue)
+            {
+                _statusQueue.Enqueue(status);
+            }
         }
         
         private void Update()
@@ -128,9 +73,16 @@ namespace AdDemo
                 while (_statusQueue.Count > 0)
                 {
                     var status = _statusQueue.Dequeue();
-                    SetStatus(status);
+                    
+                    _status.text = status;
+                    Debug.Log($"Rewarded: {status}");
                 }
             }
+        }
+        
+        public void OnBehaviourInsight(Dictionary<string, Insight> behaviourInsight)
+        {
+            _rewarded.OnBehaviourInsight(behaviourInsight);
         }
     }
 }
