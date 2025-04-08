@@ -19,13 +19,7 @@ namespace AdDemo
 #else // UNITY_ANDROID
         private const string NeftaId = "5643649824063488";
 #endif
-        
-        private List<AdConfig> _bannerAdUnits = new List<AdConfig>()
-        {
-            new AdConfig("d066ee44f5d29f8b", "6345b3fa80c73572", 100),
-        };
-        
-        private List<AdConfig> _interstitialAdUnits = new List<AdConfig>
+        /*private List<AdConfig> _interstitialAdUnits = new List<AdConfig>
         {
             new AdConfig("c9acf50602329bfe", "60bbc7cc56dfa329", 100),
         };
@@ -33,7 +27,7 @@ namespace AdDemo
         private List<AdConfig> _rewardedAdUnits = new List<AdConfig>
         {
             new AdConfig("08304643cb16df3b", "3082ee9199cf59f0", 100),
-        };
+        };*/
         
         private bool _isBannerShown;
 
@@ -53,9 +47,9 @@ namespace AdDemo
             NeftaAdapterEvents.BehaviourInsightCallback = OnBehaviourInsight;
             GetBehaviourInsight();
             
-            _banner.Init(_bannerAdUnits, GetBehaviourInsight);
-            _interstitial.Init(_interstitialAdUnits, GetBehaviourInsight);
-            _rewarded.Init(_rewardedAdUnits, GetBehaviourInsight);
+            _banner.Init(GetBehaviourInsight);
+            _interstitial.Init(GetBehaviourInsight, OnFullScreenAdDisplay);
+            _rewarded.Init(GetBehaviourInsight, OnFullScreenAdDisplay);
             
 #if UNITY_EDITOR || !UNITY_IOS
             _stateTime = 1f; // skip IDFA check
@@ -66,9 +60,9 @@ namespace AdDemo
         {
             NeftaAdapterEvents.GetBehaviourInsight(new string[]
             {
-                "calculated_user_floor_price_banner",
-                "calculated_user_floor_price_interstitial",
-                "calculated_user_floor_price_rewarded"
+                Banner.FloorPrice,
+                Interstitial.AdUnitId, Interstitial.FloorPrice,
+                Rewarded.AdUnitId, Rewarded.FloorPrice
             });
         }
         
@@ -110,6 +104,11 @@ namespace AdDemo
                     InitAds();
                 }
             }
+        }
+
+        private void OnFullScreenAdDisplay(bool displayed)
+        {
+            _banner.SetAutoRefresh(!displayed);
         }
     }
 }

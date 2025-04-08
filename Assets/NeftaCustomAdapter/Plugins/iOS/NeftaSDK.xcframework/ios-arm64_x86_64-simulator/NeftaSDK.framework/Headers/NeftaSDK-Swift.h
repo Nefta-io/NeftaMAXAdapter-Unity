@@ -310,6 +310,7 @@ typedef unsigned int swift_uint4  __attribute__((__ext_vector_type__(4)));
 
 SWIFT_CLASS("_TtC8NeftaSDK11BidResponse")
 @interface BidResponse : NSObject
+@property (nonatomic, copy) NSString * _Nullable _auctionId;
 @property (nonatomic, copy) NSString * _Null_unspecified _id;
 @property (nonatomic) float _price;
 @property (nonatomic, copy) NSString * _Nullable _campaignId;
@@ -435,6 +436,18 @@ SWIFT_CLASS("_TtC8NeftaSDK6NError")
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
+
+typedef SWIFT_ENUM(NSInteger, Code, open) {
+  CodeUnknown = 0,
+  CodeRequest = 100,
+  CodeInvalidState = 101,
+  CodeExpired = 102,
+  CodeNetwork = 200,
+  CodeTimeout = 201,
+  CodeResponse = 300,
+  CodeNoFill = 301,
+  CodeParse = 302,
+};
 
 
 SWIFT_CLASS("_TtC8NeftaSDK13NInterstitial")
@@ -716,7 +729,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NeftaPlugin * _Null_un
 - (void)GetBehaviourInsightWithString:(NSString * _Nonnull)string;
 - (void)GetBehaviourInsight:(NSArray<NSString *> * _Nonnull)insightList;
 - (NSString * _Nonnull)GetNuidWithPresent:(BOOL)present SWIFT_WARN_UNUSED_RESULT;
-+ (void)OnExternalMediationRequest:(NSString * _Nonnull)provider adType:(NSInteger)adType requestedFloorPrice:(double)requestedFloorPrice calculatedFloorPrice:(double)calculatedFloorPrice adUnitId:(NSString * _Nullable)adUnitId revenue:(double)revenue precision:(NSString * _Nullable)precision status:(NSInteger)status;
++ (void)OnExternalMediationRequest:(NSString * _Nonnull)provider adType:(NSInteger)adType recommendedAdUnitId:(NSString * _Nullable)recommendedAdUnitId requestedFloorPrice:(double)requestedFloorPrice calculatedFloorPrice:(double)calculatedFloorPrice adUnitId:(NSString * _Nullable)adUnitId revenue:(double)revenue precision:(NSString * _Nullable)precision status:(NSInteger)status;
 + (void)OnExternalMediationImpression:(NSString * _Nonnull)path data:(NSMutableDictionary * _Nonnull)data;
 + (void)OnExternalMediationImpressionAsString:(NSString * _Nonnull)path data:(NSString * _Nonnull)data;
 + (void)SetOverrideWithUrl:(NSString * _Nullable)url;
@@ -1118,6 +1131,7 @@ typedef unsigned int swift_uint4  __attribute__((__ext_vector_type__(4)));
 
 SWIFT_CLASS("_TtC8NeftaSDK11BidResponse")
 @interface BidResponse : NSObject
+@property (nonatomic, copy) NSString * _Nullable _auctionId;
 @property (nonatomic, copy) NSString * _Null_unspecified _id;
 @property (nonatomic) float _price;
 @property (nonatomic, copy) NSString * _Nullable _campaignId;
@@ -1243,6 +1257,18 @@ SWIFT_CLASS("_TtC8NeftaSDK6NError")
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
+
+typedef SWIFT_ENUM(NSInteger, Code, open) {
+  CodeUnknown = 0,
+  CodeRequest = 100,
+  CodeInvalidState = 101,
+  CodeExpired = 102,
+  CodeNetwork = 200,
+  CodeTimeout = 201,
+  CodeResponse = 300,
+  CodeNoFill = 301,
+  CodeParse = 302,
+};
 
 
 SWIFT_CLASS("_TtC8NeftaSDK13NInterstitial")
@@ -1524,7 +1550,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NeftaPlugin * _Null_un
 - (void)GetBehaviourInsightWithString:(NSString * _Nonnull)string;
 - (void)GetBehaviourInsight:(NSArray<NSString *> * _Nonnull)insightList;
 - (NSString * _Nonnull)GetNuidWithPresent:(BOOL)present SWIFT_WARN_UNUSED_RESULT;
-+ (void)OnExternalMediationRequest:(NSString * _Nonnull)provider adType:(NSInteger)adType requestedFloorPrice:(double)requestedFloorPrice calculatedFloorPrice:(double)calculatedFloorPrice adUnitId:(NSString * _Nullable)adUnitId revenue:(double)revenue precision:(NSString * _Nullable)precision status:(NSInteger)status;
++ (void)OnExternalMediationRequest:(NSString * _Nonnull)provider adType:(NSInteger)adType recommendedAdUnitId:(NSString * _Nullable)recommendedAdUnitId requestedFloorPrice:(double)requestedFloorPrice calculatedFloorPrice:(double)calculatedFloorPrice adUnitId:(NSString * _Nullable)adUnitId revenue:(double)revenue precision:(NSString * _Nullable)precision status:(NSInteger)status;
 + (void)OnExternalMediationImpression:(NSString * _Nonnull)path data:(NSMutableDictionary * _Nonnull)data;
 + (void)OnExternalMediationImpressionAsString:(NSString * _Nonnull)path data:(NSString * _Nonnull)data;
 + (void)SetOverrideWithUrl:(NSString * _Nullable)url;

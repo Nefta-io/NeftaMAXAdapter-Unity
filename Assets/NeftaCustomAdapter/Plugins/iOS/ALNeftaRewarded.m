@@ -7,6 +7,9 @@
 
 #import "ALNeftaRewarded.h"
 
+static NSString* _lastCreativeId;
+static NSString* _lastAuctionId;
+
 @implementation ALNeftaRewarded
 - (instancetype)initWithId:(NSString *)id listener:(id<MARewardedAdapterDelegate>)listener {
     self = [super init];
@@ -32,7 +35,8 @@
 }
 
 - (void) OnLoadFailWithAd:(NAd * _Nonnull)ad error:(NError * _Nonnull)error {
-    [_listener didFailToLoadRewardedAdWithError: MAAdapterError.unspecified];
+    MAAdapterError* mError = [ALNeftaAd NLoadToAdapterError: error];
+    [_listener didFailToLoadRewardedAdWithError: mError];
 }
 - (void) OnLoadWithAd:(NAd * _Nonnull)ad width:(NSInteger)width height:(NSInteger)height {
     [_listener didLoadRewardedAd];
@@ -41,6 +45,8 @@
     [_listener didFailToLoadRewardedAdWithError: MAAdapterError.adDisplayFailedError];
 }
 - (void) OnShowWithAd:(NAd * _Nonnull)ad {
+    _lastAuctionId = ad._bid._auctionId;
+    _lastCreativeId = ad._bid._creativeId;
     [_listener didDisplayRewardedAd];
 }
 - (void) OnClickWithAd:(NAd * _Nonnull)ad {
@@ -57,5 +63,12 @@
         [_listener didRewardUserWithReward: _reward];
     }
     [_listener didHideRewardedAd];
+}
+
++ (NSString*) GetLastAuctionId {
+    return _lastAuctionId;
+}
++ (NSString*) GetLastCreativeId {
+    return _lastCreativeId;
 }
 @end

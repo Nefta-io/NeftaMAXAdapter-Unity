@@ -11,4 +11,6 @@
 @property NInterstitial * _Nonnull interstitial;
 @property(nonatomic, weak) id<MAInterstitialAdapterDelegate> listener;
 - (instancetype _Nonnull )initWithId:(NSString *_Nonnull)id listener:(id<MAInterstitialAdapterDelegate>_Nonnull)listener;
++ (NSString * _Nullable) GetLastAuctionId;
++ (NSString * _Nullable) GetLastCreativeId;
 @end

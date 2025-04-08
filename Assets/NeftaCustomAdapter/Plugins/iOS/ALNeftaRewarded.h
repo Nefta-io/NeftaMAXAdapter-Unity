@@ -14,4 +14,6 @@
 @property bool giveReward;
 @property(nonatomic, weak) id<MARewardedAdapterDelegate> listener;
 - (instancetype _Nonnull)initWithId:(NSString *_Nonnull)id listener:(id<MARewardedAdapterDelegate>_Nonnull)listener;
++ (NSString * _Nullable) GetLastAuctionId;
++ (NSString * _Nullable) GetLastCreativeId;
 @end

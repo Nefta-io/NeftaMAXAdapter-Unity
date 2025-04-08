@@ -18,9 +18,9 @@ namespace AdDemo
         
         private Banner _banner;
 
-        public void Init(List<AdConfig> adUnits, Action getInsights)
+        public void Init(Action getInsights)
         {
-            _banner = new Banner("calculated_user_floor_price_banner", adUnits, getInsights, SetStatus);
+            _banner = new Banner(getInsights, SetStatus);
 
             _title.text = "Banner";
             _show.onClick.AddListener(OnShowClick);
@@ -41,6 +41,14 @@ namespace AdDemo
             _show.interactable = true;
             
             _hide.interactable = true;
+        }
+
+        public void SetAutoRefresh(bool refresh)
+        {
+            if (_banner != null)
+            {
+                _banner.SetAutoRefresh(refresh);
+            }
         }
         
         private void OnHideClick()

@@ -55,10 +55,10 @@ namespace NeftaCustomAdapter
         private static extern void NeftaPlugin_Record(int type, int category, int subCategory, string nameValue, long value, string customPayload);
 
         [DllImport ("__Internal")]
-        private static extern void NeftaPlugin_OnExternalMediationRequest(int adType, double requestedFloorPrice, double calculatedFloorPrice, string adUnitId, double revenue, string precision, int status);
+        private static extern void NeftaPlugin_OnExternalMediationRequest(int adType, string recommendedAdUnitId, double requestedFloorPrice, double calculatedFloorPrice, string adUnitId, double revenue, string precision, int status);
 
         [DllImport ("__Internal")]
-        private static extern void NeftaPlugin_OnExternalMediationImpressionAsString(string ss);
+        private static extern void NeftaPlugin_OnExternalMediationImpressionAsString(string network, string format, string creativeId, string data);
 
         [DllImport ("__Internal")]
         private static extern string NeftaPlugin_GetNuid(bool present);
@@ -149,24 +149,41 @@ namespace NeftaCustomAdapter
 #endif
         }
         
+        public static void OnExternalMediationRequestLoaded(AdType adType, string recommendedAdUnitId, double calculatedFloorPrice, MaxSdkBase.AdInfo adInfo)
+        {
+            OnExternalMediationRequest((int) adType, recommendedAdUnitId, -1, calculatedFloorPrice, adInfo.AdUnitIdentifier, adInfo.Revenue, adInfo.RevenuePrecision, 1);
+        }
+
+        public static void OnExternalMediationRequestFailed(AdType adType, string recommendedAdUnitId, double calculatedFloorPrice, string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
+        {
+            OnExternalMediationRequest((int) adType, recommendedAdUnitId, -1, calculatedFloorPrice, adUnitId, -1, null, errorInfo.Code == MaxSdkBase.ErrorCode.NoFill ? 2 : 0);
+        }
+        
+        /// <summary>
+        /// Should be called when MAX loads any ad (MaxSdkCallbacks.[AdType].OnAdLoadedEvent
+        /// </summary>
+        /// <param name="adType"></param>
+        /// <param name="requestedFloorPrice">The price of </param>
+        /// <param name="calculatedFloorPrice"></param>
+        /// <param name="adInfo"></param>
         public static void OnExternalMediationRequestLoaded(AdType adType, double requestedFloorPrice, double calculatedFloorPrice, MaxSdkBase.AdInfo adInfo)
         {
-            OnExternalMediationRequest((int) adType, requestedFloorPrice, calculatedFloorPrice, adInfo.AdUnitIdentifier, adInfo.Revenue, adInfo.RevenuePrecision, 1);
+            OnExternalMediationRequest((int) adType, null, requestedFloorPrice, calculatedFloorPrice, adInfo.AdUnitIdentifier, adInfo.Revenue, adInfo.RevenuePrecision, 1);
         }
 
         public static void OnExternalMediationRequestFailed(AdType adType, double requestedFloorPrice, double calculatedFloorPrice, string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
         {
-            OnExternalMediationRequest((int) adType, requestedFloorPrice, calculatedFloorPrice, adUnitId, -1, null, errorInfo.Code == MaxSdkBase.ErrorCode.NoFill ? 2 : 0);
+            OnExternalMediationRequest((int) adType, null, requestedFloorPrice, calculatedFloorPrice, adUnitId, -1, null, errorInfo.Code == MaxSdkBase.ErrorCode.NoFill ? 2 : 0);
         }
 
-        private static void OnExternalMediationRequest(int adType, double requestedFloorPrice, double calculatedFloorPrice, string adUnitId, double revenue, string precision, int status)
+        private static void OnExternalMediationRequest(int adType, string recommendedAdUnitId, double requestedFloorPrice, double calculatedFloorPrice, string adUnitId, double revenue, string precision, int status)
         {
 #if UNITY_EDITOR
-            _plugin.OnExternalMediationRequest("max", adType, requestedFloorPrice, calculatedFloorPrice, adUnitId, revenue, precision, status);
+            _plugin.OnExternalMediationRequest("max", adType, recommendedAdUnitId, requestedFloorPrice, calculatedFloorPrice, adUnitId, revenue, precision, status);
 #elif UNITY_IOS
-            NeftaPlugin_OnExternalMediationRequest(adType, requestedFloorPrice, calculatedFloorPrice, adUnitId, revenue, precision, status);
+            NeftaPlugin_OnExternalMediationRequest(adType, recommendedAdUnitId, requestedFloorPrice, calculatedFloorPrice, adUnitId, revenue, precision, status);
 #elif UNITY_ANDROID
-            _plugin.CallStatic("OnExternalMediationRequest", "max", adType, requestedFloorPrice, calculatedFloorPrice, adUnitId, revenue, precision, status);
+            _plugin.CallStatic("OnExternalMediationRequest", "max", adType, recommendedAdUnitId, requestedFloorPrice, calculatedFloorPrice, adUnitId, revenue, precision, status);
 #endif
         }
 
@@ -176,15 +193,13 @@ namespace NeftaCustomAdapter
             {
                 return;
             }
+            
+            var network = adInfo.NetworkName;
+            var format = adInfo.AdFormat;
+            var creativeId = adInfo.CreativeIdentifier;
             var sb = new StringBuilder();
-            sb.Append("{\"mediation_provider\":\"applovin-max\",\"format\":\"");
-            sb.Append(adInfo.AdFormat);
-            sb.Append("\",\"ad_unit_id\":\"");
+            sb.Append("{\"mediation_provider\":\"applovin-max\",\"ad_unit_id\":\"");
             sb.Append(adUnitId);
-            sb.Append("\",\"network_name\":\"");
-            sb.Append(JavaScriptStringEncode(adInfo.NetworkName));
-            sb.Append("\",\"creative_id\":\"");
-            sb.Append(JavaScriptStringEncode(adInfo.CreativeIdentifier));
             sb.Append("\",\"revenue_precision\":\"");
             sb.Append(adInfo.RevenuePrecision);
             sb.Append("\",\"placement_name\":\"");
@@ -238,11 +253,14 @@ namespace NeftaCustomAdapter
             sb.Append(adInfo.Revenue.ToString(CultureInfo.InvariantCulture));
             var data = sb.ToString();
 #if UNITY_EDITOR
-            _plugin.OnExternalMediationImpressionAsString("max", data);
+
 #elif UNITY_IOS
-            NeftaPlugin_OnExternalMediationImpressionAsString(data);
+            NeftaPlugin_OnExternalMediationImpressionAsString(network, format, creativeId, data);
 #elif UNITY_ANDROID
-            _plugin.CallStatic("OnExternalMediationImpressionAsString", "max", data);
+            using (AndroidJavaClass adapter = new AndroidJavaClass("com.applovin.mediation.adapters.NeftaMediationAdapter"))
+            {
+                adapter.CallStatic("OnExternalMediationImpressionAsString", network, format, creativeId, data);
+            }
 #endif
         }
         
@@ -372,7 +390,7 @@ namespace NeftaCustomAdapter
                             }
 
                             var doubleString = bi.Substring(start, end - start);
-                            floatVal = Double.Parse(doubleString, NumberStyles.Float);
+                            floatVal = Double.Parse(doubleString, NumberStyles.Float, CultureInfo.InvariantCulture);
                         }
                         else if (bi[start] == 'i')
                         {
@@ -387,7 +405,7 @@ namespace NeftaCustomAdapter
                             }
 
                             var intString = bi.Substring(start, end - start);
-                            intVal = long.Parse(intString, NumberStyles.Number);
+                            intVal = long.Parse(intString, NumberStyles.Number, CultureInfo.InvariantCulture);
                         }
                         else if (bi[start] == 's')
                         {
@@ -426,6 +444,7 @@ namespace NeftaCustomAdapter
                     behaviourInsight.Add(insightName, new Insight("Error retrieving key", 0, 0, null));
                 }
             }
+            
             _threadContext.Post(_ => BehaviourInsightCallback(behaviourInsight), null);
         }
         

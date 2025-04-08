@@ -19,6 +19,22 @@ import _StringProcessing
 import _SwiftConcurrencyShims
 import os
 @_hasMissingDesignatedInitializers @objc public class NError : ObjectiveC.NSObject {
+  @objc public enum Code : Swift.Int {
+    case Unknown = 0
+    case Request = 100
+    case InvalidState = 101
+    case Expired = 102
+    case Network = 200
+    case Timeout = 201
+    case Response = 300
+    case NoFill = 301
+    case Parse = 302
+    public init?(rawValue: Swift.Int)
+    public typealias RawValue = Swift.Int
+    public var rawValue: Swift.Int {
+      get
+    }
+  }
   @objc final public let _code: Swift.Int
   @objc final public let _message: Swift.String
   @objc deinit
@@ -99,6 +115,7 @@ import os
   @objc deinit
 }
 @_inheritsConvenienceInitializers @objc public class BidResponse : ObjectiveC.NSObject {
+  @objc public var _auctionId: Swift.String?
   @objc public var _id: Swift.String!
   @objc public var _price: Swift.Float
   @objc public var _campaignId: Swift.String?
@@ -151,7 +168,7 @@ import os
   @objc public func GetBehaviourInsight(string: Swift.String)
   @objc public func GetBehaviourInsight(_ insightList: [Swift.String])
   @objc public func GetNuid(present: Swift.Bool) -> Swift.String
-  @objc public static func OnExternalMediationRequest(_ provider: Swift.String, adType: Swift.Int, requestedFloorPrice: Swift.Float64, calculatedFloorPrice: Swift.Float64, adUnitId: Swift.String?, revenue: Swift.Float64, precision: Swift.String?, status: Swift.Int)
+  @objc public static func OnExternalMediationRequest(_ provider: Swift.String, adType: Swift.Int, recommendedAdUnitId: Swift.String?, requestedFloorPrice: Swift.Float64, calculatedFloorPrice: Swift.Float64, adUnitId: Swift.String?, revenue: Swift.Float64, precision: Swift.String?, status: Swift.Int)
   @objc public static func OnExternalMediationImpression(_ path: Swift.String, data: Foundation.NSMutableDictionary)
   @objc public static func OnExternalMediationImpressionAsString(_ path: Swift.String, data: Swift.String)
   @objc public static func SetOverride(url: Swift.String?)
@@ -356,6 +373,9 @@ import os
   @objc public func Close(id: Swift.String)
   @objc deinit
 }
+extension NeftaSDK.NError.Code : Swift.Equatable {}
+extension NeftaSDK.NError.Code : Swift.Hashable {}
+extension NeftaSDK.NError.Code : Swift.RawRepresentable {}
 extension NeftaSDK.Placement.Types : Swift.Equatable {}
 extension NeftaSDK.Placement.Types : Swift.Hashable {}
 extension NeftaSDK.Placement.Types : Swift.RawRepresentable {}

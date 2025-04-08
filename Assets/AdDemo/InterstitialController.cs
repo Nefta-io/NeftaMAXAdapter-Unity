@@ -18,11 +18,11 @@ namespace AdDemo
         private Interstitial _interstitial;
         private Queue<string> _statusQueue;
 
-        public void Init(List<AdConfig> adUnits, Action getInsights)
+        public void Init(Action getInsights, Action<bool> onFullScreenAdDisplayed)
         {
             _statusQueue = new Queue<string>();
             
-            _interstitial = new Interstitial("calculated_user_floor_price_interstitial", adUnits, getInsights, SetStatus, OnLoad);
+            _interstitial = new Interstitial(getInsights, SetStatus, OnLoad, onFullScreenAdDisplayed);
             
             _title.text = "Interstitial";
             _load.onClick.AddListener(OnLoadClick);
@@ -82,7 +82,7 @@ namespace AdDemo
         
         public void OnBehaviourInsight(Dictionary<string, Insight> behaviourInsight)
         {
-            _interstitial.OnBehaviourInsight(behaviourInsight);
+            _interstitial.OnUserInsights(behaviourInsight);
         }
     }
 }

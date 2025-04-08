@@ -10,34 +10,44 @@
 #import "ALNeftaInterstitial.h"
 #import "ALNeftaRewarded.h"
 
+#import <AppLovinSDK/AppLovinSDK.h>
+
 NSString * const _mediationProvider = @"applovin-max";
 
 @implementation ALNeftaMediationAdapter
 
 static NeftaPlugin *_plugin;
 
-+(void) OnExternalMediationRequestLoad:(AdType)adType requestedFloorPrice:(double)requestedFloorPrice calculatedFloorPrice:(double)calculatedFloorPrice ad:(MAAd *)ad {
-    [NeftaPlugin OnExternalMediationRequest: @"max" adType: adType requestedFloorPrice: requestedFloorPrice calculatedFloorPrice: calculatedFloorPrice adUnitId: ad.adUnitIdentifier revenue: ad.revenue precision: ad.revenuePrecision status: 1];
++ (void)OnExternalMediationRequestLoad:(AdType)adType recommendedAdUnitId:(NSString* _Nullable)recommendedAdUnitId calculatedFloorPrice:(double)calculatedFloorPrice ad:(MAAd * _Nonnull)ad {
+    [NeftaPlugin OnExternalMediationRequest: @"max" adType: adType recommendedAdUnitId: recommendedAdUnitId requestedFloorPrice: -1 calculatedFloorPrice: calculatedFloorPrice adUnitId: ad.adUnitIdentifier revenue: ad.revenue precision: ad.revenuePrecision status: 1];
 }
-
-+(void) OnExternalMediationRequestFail:(AdType)adType requestedFloorPrice:(double)requestedFloorPrice calculatedFloorPrice:(double)calculatedFloorPrice adUnitIdentifier:(NSString *)adUnitIdentifier error:(MAError *)error {
++ (void)OnExternalMediationRequestFail:(AdType)adType recommendedAdUnitId:(NSString* _Nullable)recommendedAdUnitId calculatedFloorPrice:(double)calculatedFloorPrice adUnitIdentifier:(NSString * _Nonnull)adUnitIdentifier error:(MAError * _Nonnull)error {
     int status = 0;
     if (error.code == MAErrorCodeNoFill) {
         status = 2;
     }
-    [NeftaPlugin OnExternalMediationRequest: @"max" adType: adType requestedFloorPrice: requestedFloorPrice calculatedFloorPrice: calculatedFloorPrice adUnitId: adUnitIdentifier revenue: -1 precision: nil status: status];
+    [NeftaPlugin OnExternalMediationRequest: @"max" adType: adType recommendedAdUnitId: recommendedAdUnitId requestedFloorPrice: -1 calculatedFloorPrice: calculatedFloorPrice adUnitId: adUnitIdentifier revenue: -1 precision: nil status: status];
 }
 
-+(void) OnExternalMediationImpression:(MAAd*)ad {    
++ (void) OnExternalMediationRequestLoad:(AdType)adType requestedFloorPrice:(double)requestedFloorPrice calculatedFloorPrice:(double)calculatedFloorPrice ad:(MAAd *)ad {
+    [NeftaPlugin OnExternalMediationRequest: @"max" adType: adType recommendedAdUnitId: nil requestedFloorPrice: requestedFloorPrice calculatedFloorPrice: calculatedFloorPrice adUnitId: ad.adUnitIdentifier revenue: ad.revenue precision: ad.revenuePrecision status: 1];
+}
+
++ (void) OnExternalMediationRequestFail:(AdType)adType requestedFloorPrice:(double)requestedFloorPrice calculatedFloorPrice:(double)calculatedFloorPrice adUnitIdentifier:(NSString *)adUnitIdentifier error:(MAError *)error {
+    int status = 0;
+    if (error.code == MAErrorCodeNoFill) {
+        status = 2;
+    }
+    [NeftaPlugin OnExternalMediationRequest: @"max" adType: adType recommendedAdUnitId: nil requestedFloorPrice: requestedFloorPrice calculatedFloorPrice: calculatedFloorPrice adUnitId: adUnitIdentifier revenue: -1 precision: nil status: status];
+}
+
++ (void) OnExternalMediationImpression:(MAAd*)ad {
     NSMutableDictionary *data = [NSMutableDictionary dictionary];
     [data setObject: _mediationProvider forKey: @"mediation_provider"];
     [data setObject: ad.format.label forKey: @"format"];
     [data setObject: [NSString stringWithFormat:@"%dx%d", (int)ad.size.width, (int)ad.size.height] forKey: @"size"];
     [data setObject: ad.adUnitIdentifier forKey: @"ad_unit_id"];
     [data setObject: ad.networkName forKey: @"network_name"];
-    if (ad.creativeIdentifier != nil) {
-        [data setObject: ad.creativeIdentifier forKey: @"creative_id"];
-    }
     [data setObject: @(ad.revenue) forKey: @"revenue"];
     [data setObject: ad.revenuePrecision forKey: @"revenue_precision"];
     if (ad.placement != nil) {
@@ -73,7 +83,60 @@ static NeftaPlugin *_plugin;
         }
         [data setObject: waterfalls forKey: @"waterfall"];
     }
+    NSString* auctionId;
+    NSString* creativeId = ad.creativeIdentifier;
+    if ([ad.networkName isEqualToString: @"Nefta"]) {
+        if (ad.format == MAAdFormat.banner || ad.format == MAAdFormat.leader) {
+            auctionId = ALNeftaBanner.GetLastAuctionId;
+            creativeId = ALNeftaBanner.GetLastCreativeId;
+        } else if (ad.format == MAAdFormat.interstitial) {
+            auctionId = ALNeftaInterstitial.GetLastAuctionId;
+            creativeId = ALNeftaInterstitial.GetLastCreativeId;
+        } else if (ad.format == MAAdFormat.rewarded) {
+            auctionId = ALNeftaRewarded.GetLastAuctionId;
+            creativeId = ALNeftaRewarded.GetLastCreativeId;
+        }
+    }
+    if (auctionId != nil) {
+        [data setObject: auctionId forKey: @"ad_opportunity_id"];
+    }
+    if (creativeId != nil) {
+        [data setObject: creativeId forKey: @"creative_id"];
+    }
     [NeftaPlugin OnExternalMediationImpression: @"max" data: data];
+}
+
++ (void) OnExternalMediationImpressionAsString:(NSString*)network format:(NSString *)format creativeId:(NSString *)creativeId data:(NSString *)data {
+    NSString *auctionId = nil;
+    if ([network isEqual: @"Nefta"]) {
+        if ([format isEqualToString: MAAdFormat.banner.label] || [format isEqualToString: MAAdFormat.leader.label]) {
+            auctionId = ALNeftaBanner.GetLastAuctionId;
+            creativeId = ALNeftaBanner.GetLastCreativeId;
+        } else if ([format isEqualToString: MAAdFormat.interstitial.label]) {
+            auctionId = ALNeftaInterstitial.GetLastAuctionId;
+            creativeId = ALNeftaInterstitial.GetLastCreativeId;
+        } else if ([format isEqualToString: MAAdFormat.rewarded.label]) {
+            auctionId = ALNeftaRewarded.GetLastAuctionId;
+            creativeId = ALNeftaRewarded.GetLastCreativeId;
+        }
+    }
+    
+    NSMutableString *sb = [[NSMutableString alloc] initWithString: data];
+    [sb appendString: @",\"network_name\":\""];
+    [sb appendString: network];
+    [sb appendString: @"\",\"format\":\""];
+    [sb appendString: format];
+    if (auctionId != nil) {
+        [sb appendString: @"\",\"ad_opportunity_id\":\""];
+        [sb appendString: auctionId];
+    }
+    if (creativeId != nil) {
+        [sb appendString: @"\",\"creative_id\":\""];
+        [sb appendString: creativeId];
+    }
+    [sb appendString: @"\""];
+    
+    [NeftaPlugin OnExternalMediationImpressionAsString: @"max" data: sb];
 }
 
 - (void)initializeWithParameters:(id<MAAdapterInitializationParameters>)parameters completionHandler:(void (^)(MAAdapterInitializationStatus, NSString *_Nullable))completionHandler {
@@ -96,7 +159,7 @@ static NeftaPlugin *_plugin;
 }
 
 - (NSString *)adapterVersion {
-    return @"2.2.0";
+    return @"2.2.1";
 }
 
 - (void)destroy {

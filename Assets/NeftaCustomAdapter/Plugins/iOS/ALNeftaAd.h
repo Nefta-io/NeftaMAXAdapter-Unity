@@ -14,4 +14,6 @@
 - (int) CanShow;
 - (void) Show:(UIViewController * _Nonnull)viewController;
 - (void) Close;
+
++ (MAAdapterError *_Nonnull) NLoadToAdapterError:(NError *_Nonnull)error;
 @end

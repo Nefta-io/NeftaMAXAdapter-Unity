@@ -18,11 +18,11 @@ namespace AdDemo
         private Rewarded _rewarded;
         private Queue<string> _statusQueue;
         
-        public void Init(List<AdConfig> adUnits, Action getInsights)
+        public void Init(Action getInsights, Action<bool> onFullScreenAdDisplayed)
         {
             _statusQueue = new Queue<string>();
 
-            _rewarded = new Rewarded("calculated_user_floor_price_rewarded", adUnits, getInsights, SetStatus, OnLoad);
+            _rewarded = new Rewarded(getInsights, SetStatus, OnLoad, onFullScreenAdDisplayed);
 
             _title.text = "Rewarded";
             _load.onClick.AddListener(OnLoadClick);
@@ -82,7 +82,7 @@ namespace AdDemo
         
         public void OnBehaviourInsight(Dictionary<string, Insight> behaviourInsight)
         {
-            _rewarded.OnBehaviourInsight(behaviourInsight);
+            _rewarded.OnUserInsights(behaviourInsight);
         }
     }
 }

@@ -6,8 +6,10 @@
 //
 
 #import "ALNeftaInterstitial.h"
-
 #import "ALNeftaMediationAdapter.h"
+
+static NSString* _lastCreativeId;
+static NSString* _lastAuctionId;
 
 @implementation ALNeftaInterstitial
 
@@ -35,7 +37,8 @@
 }
 
 - (void)OnLoadFailWithAd:(NAd * _Nonnull)ad error:(NError * _Nonnull)error {
-    [_listener didFailToLoadInterstitialAdWithError: MAAdapterError.unspecified];
+    MAAdapterError* mError = [ALNeftaAd NLoadToAdapterError: error];
+    [_listener didFailToLoadInterstitialAdWithError: mError];
 }
 - (void)OnLoadWithAd:(NAd * _Nonnull)ad width:(NSInteger)width height:(NSInteger)height {
     [_listener didLoadInterstitialAd];
@@ -44,6 +47,8 @@
     [_listener didFailToDisplayInterstitialAdWithError: MAAdapterError.adDisplayFailedError];
 }
 - (void)OnShowWithAd:(NAd * _Nonnull)ad {
+    _lastAuctionId = ad._bid._auctionId;
+    _lastCreativeId = ad._bid._creativeId;
     [_listener didDisplayInterstitialAd];
 }
 - (void)OnClickWithAd:(NAd * _Nonnull)ad {
@@ -51,5 +56,12 @@
 }
 - (void)OnCloseWithAd:(NAd * _Nonnull)ad {
     [_listener didHideInterstitialAd];
+}
+
++ (NSString*) GetLastAuctionId {
+    return _lastAuctionId;
+}
++ (NSString*) GetLastCreativeId {
+    return _lastCreativeId;
 }
 @end
