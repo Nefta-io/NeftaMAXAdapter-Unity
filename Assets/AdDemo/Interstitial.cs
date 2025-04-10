@@ -54,7 +54,7 @@ namespace AdDemo
             MaxSdkCallbacks.Interstitial.OnAdLoadedEvent += OnAdLoadedEvent;
             MaxSdkCallbacks.Interstitial.OnAdLoadFailedEvent += OnAdFailedEvent;
             MaxSdkCallbacks.Interstitial.OnAdDisplayedEvent += OnShowEvent;
-            MaxSdkCallbacks.Interstitial.OnAdDisplayFailedEvent += OnAdDisplayeFailedEvent;
+            MaxSdkCallbacks.Interstitial.OnAdDisplayFailedEvent += OnAdDisplayFailedEvent;
             MaxSdkCallbacks.Interstitial.OnAdHiddenEvent += OnAdHiddenEvent;
             MaxSdkCallbacks.Interstitial.OnAdRevenuePaidEvent += OnRevenuePaidEvent;
         }
@@ -115,7 +115,7 @@ namespace AdDemo
             _onFullScreenAdDisplayed(true);
         }
         
-        private void OnAdDisplayeFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo, MaxSdkBase.AdInfo adInfo)
+        private void OnAdDisplayFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo, MaxSdkBase.AdInfo adInfo)
         {
             _setStatus("Display failed");
         }

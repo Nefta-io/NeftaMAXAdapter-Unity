@@ -432,20 +432,22 @@ namespace NeftaCustomAdapter
 
                     start = end + 3;
                 }
+                
+                foreach (var insightName in _scheduledBehaviourInsight)
+                {
+                    if (!behaviourInsight.ContainsKey(insightName))
+                    {
+                        behaviourInsight.Add(insightName, new Insight("Error retrieving key", 0, 0, null));
+                    }
+                }
+
+                _scheduledBehaviourInsight = null;
+                _threadContext.Post(_ => BehaviourInsightCallback(behaviourInsight), null);
             }
             catch (Exception)
             {
                 // ignored
             }
-            foreach (var insightName in _scheduledBehaviourInsight)
-            {
-                if (!behaviourInsight.ContainsKey(insightName))
-                {
-                    behaviourInsight.Add(insightName, new Insight("Error retrieving key", 0, 0, null));
-                }
-            }
-            
-            _threadContext.Post(_ => BehaviourInsightCallback(behaviourInsight), null);
         }
         
         internal static string JavaScriptStringEncode(string value)
