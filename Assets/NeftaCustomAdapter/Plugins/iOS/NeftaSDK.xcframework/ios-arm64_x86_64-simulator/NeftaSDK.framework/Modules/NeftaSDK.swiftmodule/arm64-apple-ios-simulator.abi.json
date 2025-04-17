@@ -29253,35 +29253,6 @@
             "funcSelfKind": "NonMutating"
           },
           {
-            "kind": "Function",
-            "name": "OnClick",
-            "printedName": "OnClick(_:)",
-            "children": [
-              {
-                "kind": "TypeNominal",
-                "name": "Void",
-                "printedName": "()"
-              },
-              {
-                "kind": "TypeNominal",
-                "name": "UITapGestureRecognizer",
-                "printedName": "UIKit.UITapGestureRecognizer",
-                "usr": "c:objc(cs)UITapGestureRecognizer"
-              }
-            ],
-            "declKind": "Func",
-            "usr": "c:@M@NeftaSDK@objc(cs)WebController(im)OnClick:",
-            "mangledName": "$s8NeftaSDK13WebControllerC7OnClickyySo22UITapGestureRecognizerCF",
-            "moduleName": "NeftaSDK",
-            "isOpen": true,
-            "declAttributes": [
-              "Preconcurrency",
-              "Custom",
-              "ObjC"
-            ],
-            "funcSelfKind": "NonMutating"
-          },
-          {
             "kind": "Constructor",
             "name": "init",
             "printedName": "init(frame:)",
