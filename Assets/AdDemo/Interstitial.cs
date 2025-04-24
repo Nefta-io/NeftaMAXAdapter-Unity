@@ -61,6 +61,7 @@ namespace AdDemo
 
         public void Load()
         {
+            _isLoadPending = false;
             _loadedAdUnitId = _selectedAdUnitId ?? _defaultAdUnitId;
             MaxSdk.LoadInterstitial(_loadedAdUnitId);
         }
@@ -80,6 +81,8 @@ namespace AdDemo
         
         private void OnAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
+            _consecutiveAdFail = 0;
+            
             NeftaAdapterEvents.OnExternalMediationRequestLoaded(NeftaAdapterEvents.AdType.Interstitial, _recommendedAdUnitId, _calculatedBidFloor, adInfo);
             
             _setStatus($"Loaded {adInfo.NetworkName} {adInfo.NetworkPlacement}");

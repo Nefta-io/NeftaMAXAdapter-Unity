@@ -179,11 +179,11 @@ namespace NeftaCustomAdapter
         private static void OnExternalMediationRequest(int adType, string recommendedAdUnitId, double requestedFloorPrice, double calculatedFloorPrice, string adUnitId, double revenue, string precision, int status)
         {
 #if UNITY_EDITOR
-            _plugin.OnExternalMediationRequest("max", adType, recommendedAdUnitId, requestedFloorPrice, calculatedFloorPrice, adUnitId, revenue, precision, status);
+            _plugin.OnExternalMediationRequest("applovin-max", adType, recommendedAdUnitId, requestedFloorPrice, calculatedFloorPrice, adUnitId, revenue, precision, status);
 #elif UNITY_IOS
             NeftaPlugin_OnExternalMediationRequest(adType, recommendedAdUnitId, requestedFloorPrice, calculatedFloorPrice, adUnitId, revenue, precision, status);
 #elif UNITY_ANDROID
-            _plugin.CallStatic("OnExternalMediationRequest", "max", adType, recommendedAdUnitId, requestedFloorPrice, calculatedFloorPrice, adUnitId, revenue, precision, status);
+            _plugin.CallStatic("OnExternalMediationRequest", "applovin-max", adType, recommendedAdUnitId, requestedFloorPrice, calculatedFloorPrice, adUnitId, revenue, precision, status);
 #endif
         }
 
@@ -432,7 +432,14 @@ namespace NeftaCustomAdapter
 
                     start = end + 3;
                 }
-                
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
+
+            try
+            {
                 foreach (var insightName in _scheduledBehaviourInsight)
                 {
                     if (!behaviourInsight.ContainsKey(insightName))

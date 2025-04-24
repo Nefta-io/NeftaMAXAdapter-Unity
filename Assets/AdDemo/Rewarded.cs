@@ -63,6 +63,7 @@ namespace AdDemo
 
         public void Load()
         {
+            _isLoadPending = false;
             _loadedAdUnitId = _selectedAdUnitId ?? _defaultAdUnitId;
             MaxSdk.LoadRewardedAd(_loadedAdUnitId);
         }
@@ -91,6 +92,8 @@ namespace AdDemo
         
         private void OnAdFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
         {
+            _consecutiveAdFail = 0;
+            
             NeftaAdapterEvents.OnExternalMediationRequestFailed(NeftaAdapterEvents.AdType.Rewarded, _recommendedAdUnitId, _calculatedBidFloor, adUnitId, errorInfo);
             
             if (errorInfo.Code == MaxSdkBase.ErrorCode.NoFill)

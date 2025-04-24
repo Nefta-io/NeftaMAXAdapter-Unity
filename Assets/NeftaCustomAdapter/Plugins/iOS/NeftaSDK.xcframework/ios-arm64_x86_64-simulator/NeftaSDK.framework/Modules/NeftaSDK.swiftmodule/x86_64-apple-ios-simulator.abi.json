@@ -6685,6 +6685,25 @@
           },
           {
             "kind": "Function",
+            "name": "TryAutoClicks",
+            "printedName": "TryAutoClicks()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "usr": "s:Sb"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:8NeftaSDK3NAdC13TryAutoClicksSbyF",
+            "mangledName": "$s8NeftaSDK3NAdC13TryAutoClicksSbyF",
+            "moduleName": "NeftaSDK",
+            "isOpen": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
             "name": "NextCreative",
             "printedName": "NextCreative()",
             "children": [
@@ -6697,6 +6716,25 @@
             "declKind": "Func",
             "usr": "s:8NeftaSDK3NAdC12NextCreativeyyF",
             "mangledName": "$s8NeftaSDK3NAdC12NextCreativeyyF",
+            "moduleName": "NeftaSDK",
+            "isOpen": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "IsCloseBlocked",
+            "printedName": "IsCloseBlocked()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "usr": "s:Sb"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:8NeftaSDK3NAdC14IsCloseBlockedSbyF",
+            "mangledName": "$s8NeftaSDK3NAdC14IsCloseBlockedSbyF",
             "moduleName": "NeftaSDK",
             "isOpen": true,
             "funcSelfKind": "NonMutating"
@@ -7912,41 +7950,6 @@
           },
           {
             "kind": "Var",
-            "name": "_closeConfirmation",
-            "printedName": "_closeConfirmation",
-            "children": [
-              {
-                "kind": "TypeNominal",
-                "name": "ImplicitlyUnwrappedOptional",
-                "printedName": "UIKit.UIView?",
-                "children": [
-                  {
-                    "kind": "TypeNominal",
-                    "name": "UIView",
-                    "printedName": "UIKit.UIView",
-                    "usr": "c:objc(cs)UIView"
-                  }
-                ],
-                "usr": "s:Sq"
-              }
-            ],
-            "declKind": "Var",
-            "usr": "s:8NeftaSDK22RenderUIViewControllerC18_closeConfirmation33_87ABCC9BB89F426A8E85B3BCD30405E8LLSo0D0CSgvp",
-            "mangledName": "$s8NeftaSDK22RenderUIViewControllerC18_closeConfirmation33_87ABCC9BB89F426A8E85B3BCD30405E8LLSo0D0CSgvp",
-            "moduleName": "NeftaSDK",
-            "isInternal": true,
-            "declAttributes": [
-              "HasInitialValue",
-              "Preconcurrency",
-              "Custom",
-              "HasStorage",
-              "AccessControl"
-            ],
-            "fixedbinaryorder": 10,
-            "hasStorage": true
-          },
-          {
-            "kind": "Var",
             "name": "_creativeIndex",
             "printedName": "_creativeIndex",
             "children": [
@@ -7969,7 +7972,7 @@
               "HasStorage",
               "AccessControl"
             ],
-            "fixedbinaryorder": 11,
+            "fixedbinaryorder": 10,
             "hasStorage": true
           },
           {
@@ -8004,7 +8007,7 @@
               "HasStorage",
               "AccessControl"
             ],
-            "fixedbinaryorder": 12,
+            "fixedbinaryorder": 11,
             "hasStorage": true
           },
           {
@@ -8039,7 +8042,7 @@
               "HasStorage",
               "AccessControl"
             ],
-            "fixedbinaryorder": 13,
+            "fixedbinaryorder": 12,
             "hasStorage": true
           },
           {
@@ -8074,7 +8077,7 @@
               "HasStorage",
               "AccessControl"
             ],
-            "fixedbinaryorder": 14,
+            "fixedbinaryorder": 13,
             "hasStorage": true
           },
           {
@@ -8109,7 +8112,7 @@
               "HasStorage",
               "AccessControl"
             ],
-            "fixedbinaryorder": 15,
+            "fixedbinaryorder": 14,
             "hasStorage": true
           },
           {
@@ -8144,7 +8147,7 @@
               "HasStorage",
               "AccessControl"
             ],
-            "fixedbinaryorder": 16,
+            "fixedbinaryorder": 15,
             "hasStorage": true
           },
           {
@@ -8179,7 +8182,7 @@
               "HasStorage",
               "AccessControl"
             ],
-            "fixedbinaryorder": 17,
+            "fixedbinaryorder": 16,
             "hasStorage": true
           },
           {
@@ -8214,7 +8217,7 @@
               "HasStorage",
               "AccessControl"
             ],
-            "fixedbinaryorder": 18,
+            "fixedbinaryorder": 17,
             "hasStorage": true
           },
           {
@@ -8249,7 +8252,7 @@
               "HasStorage",
               "AccessControl"
             ],
-            "fixedbinaryorder": 19,
+            "fixedbinaryorder": 18,
             "hasStorage": true
           },
           {
@@ -8284,7 +8287,7 @@
               "HasStorage",
               "AccessControl"
             ],
-            "fixedbinaryorder": 20,
+            "fixedbinaryorder": 19,
             "hasStorage": true
           },
           {
@@ -8311,7 +8314,7 @@
               "HasStorage",
               "AccessControl"
             ],
-            "fixedbinaryorder": 21,
+            "fixedbinaryorder": 20,
             "hasStorage": true
           },
           {
@@ -8338,7 +8341,7 @@
               "HasStorage",
               "AccessControl"
             ],
-            "fixedbinaryorder": 22,
+            "fixedbinaryorder": 21,
             "hasStorage": true
           },
           {
@@ -8365,7 +8368,7 @@
               "HasStorage",
               "AccessControl"
             ],
-            "fixedbinaryorder": 23,
+            "fixedbinaryorder": 22,
             "hasStorage": true
           },
           {
@@ -8392,7 +8395,7 @@
               "HasStorage",
               "AccessControl"
             ],
-            "fixedbinaryorder": 24,
+            "fixedbinaryorder": 23,
             "hasStorage": true
           },
           {
@@ -8419,61 +8422,7 @@
               "HasStorage",
               "AccessControl"
             ],
-            "fixedbinaryorder": 25,
-            "hasStorage": true
-          },
-          {
-            "kind": "Var",
-            "name": "_isCloseConfirmationAnimating",
-            "printedName": "_isCloseConfirmationAnimating",
-            "children": [
-              {
-                "kind": "TypeNominal",
-                "name": "Bool",
-                "printedName": "Swift.Bool",
-                "usr": "s:Sb"
-              }
-            ],
-            "declKind": "Var",
-            "usr": "s:8NeftaSDK22RenderUIViewControllerC29_isCloseConfirmationAnimating33_87ABCC9BB89F426A8E85B3BCD30405E8LLSbvp",
-            "mangledName": "$s8NeftaSDK22RenderUIViewControllerC29_isCloseConfirmationAnimating33_87ABCC9BB89F426A8E85B3BCD30405E8LLSbvp",
-            "moduleName": "NeftaSDK",
-            "isInternal": true,
-            "declAttributes": [
-              "HasInitialValue",
-              "Preconcurrency",
-              "Custom",
-              "HasStorage",
-              "AccessControl"
-            ],
-            "fixedbinaryorder": 26,
-            "hasStorage": true
-          },
-          {
-            "kind": "Var",
-            "name": "_isCloseConfirmationShown",
-            "printedName": "_isCloseConfirmationShown",
-            "children": [
-              {
-                "kind": "TypeNominal",
-                "name": "Bool",
-                "printedName": "Swift.Bool",
-                "usr": "s:Sb"
-              }
-            ],
-            "declKind": "Var",
-            "usr": "s:8NeftaSDK22RenderUIViewControllerC25_isCloseConfirmationShown33_87ABCC9BB89F426A8E85B3BCD30405E8LLSbvp",
-            "mangledName": "$s8NeftaSDK22RenderUIViewControllerC25_isCloseConfirmationShown33_87ABCC9BB89F426A8E85B3BCD30405E8LLSbvp",
-            "moduleName": "NeftaSDK",
-            "isInternal": true,
-            "declAttributes": [
-              "HasInitialValue",
-              "Preconcurrency",
-              "Custom",
-              "HasStorage",
-              "AccessControl"
-            ],
-            "fixedbinaryorder": 27,
+            "fixedbinaryorder": 24,
             "hasStorage": true
           },
           {
@@ -8508,7 +8457,7 @@
               "HasStorage",
               "AccessControl"
             ],
-            "fixedbinaryorder": 28,
+            "fixedbinaryorder": 25,
             "hasStorage": true
           },
           {
@@ -8535,7 +8484,7 @@
               "HasStorage",
               "AccessControl"
             ],
-            "fixedbinaryorder": 29,
+            "fixedbinaryorder": 26,
             "hasStorage": true
           },
           {
@@ -8562,7 +8511,7 @@
               "HasStorage",
               "AccessControl"
             ],
-            "fixedbinaryorder": 30,
+            "fixedbinaryorder": 27,
             "hasStorage": true
           },
           {
@@ -8589,7 +8538,7 @@
               "HasStorage",
               "AccessControl"
             ],
-            "fixedbinaryorder": 31,
+            "fixedbinaryorder": 28,
             "hasStorage": true
           },
           {
@@ -8616,34 +8565,7 @@
               "HasStorage",
               "AccessControl"
             ],
-            "fixedbinaryorder": 32,
-            "hasStorage": true
-          },
-          {
-            "kind": "Var",
-            "name": "_isLoadingNext",
-            "printedName": "_isLoadingNext",
-            "children": [
-              {
-                "kind": "TypeNominal",
-                "name": "Bool",
-                "printedName": "Swift.Bool",
-                "usr": "s:Sb"
-              }
-            ],
-            "declKind": "Var",
-            "usr": "s:8NeftaSDK22RenderUIViewControllerC14_isLoadingNext33_87ABCC9BB89F426A8E85B3BCD30405E8LLSbvp",
-            "mangledName": "$s8NeftaSDK22RenderUIViewControllerC14_isLoadingNext33_87ABCC9BB89F426A8E85B3BCD30405E8LLSbvp",
-            "moduleName": "NeftaSDK",
-            "isInternal": true,
-            "declAttributes": [
-              "HasInitialValue",
-              "Preconcurrency",
-              "Custom",
-              "HasStorage",
-              "AccessControl"
-            ],
-            "fixedbinaryorder": 33,
+            "fixedbinaryorder": 29,
             "hasStorage": true
           },
           {
@@ -8678,7 +8600,7 @@
               "HasStorage",
               "AccessControl"
             ],
-            "fixedbinaryorder": 34,
+            "fixedbinaryorder": 30,
             "hasStorage": true
           },
           {
@@ -8705,7 +8627,7 @@
               "HasStorage",
               "AccessControl"
             ],
-            "fixedbinaryorder": 35,
+            "fixedbinaryorder": 31,
             "hasStorage": true
           },
           {
@@ -8740,7 +8662,7 @@
               "HasStorage",
               "AccessControl"
             ],
-            "fixedbinaryorder": 36,
+            "fixedbinaryorder": 32,
             "hasStorage": true
           },
           {
@@ -8774,7 +8696,7 @@
               "Custom",
               "HasStorage"
             ],
-            "fixedbinaryorder": 37,
+            "fixedbinaryorder": 33,
             "hasStorage": true,
             "accessors": [
               {
@@ -8891,7 +8813,7 @@
               "HasStorage",
               "AccessControl"
             ],
-            "fixedbinaryorder": 38,
+            "fixedbinaryorder": 34,
             "hasStorage": true
           },
           {
@@ -8918,7 +8840,7 @@
               "HasStorage",
               "AccessControl"
             ],
-            "fixedbinaryorder": 39,
+            "fixedbinaryorder": 35,
             "hasStorage": true
           },
           {
@@ -8945,7 +8867,34 @@
               "HasStorage",
               "AccessControl"
             ],
-            "fixedbinaryorder": 40,
+            "fixedbinaryorder": 36,
+            "hasStorage": true
+          },
+          {
+            "kind": "Var",
+            "name": "_cover",
+            "printedName": "_cover",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "UIView",
+                "printedName": "UIKit.UIView",
+                "usr": "c:objc(cs)UIView"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:8NeftaSDK22RenderUIViewControllerC6_cover33_87ABCC9BB89F426A8E85B3BCD30405E8LLSo0D0Cvp",
+            "mangledName": "$s8NeftaSDK22RenderUIViewControllerC6_cover33_87ABCC9BB89F426A8E85B3BCD30405E8LLSo0D0Cvp",
+            "moduleName": "NeftaSDK",
+            "isInternal": true,
+            "declAttributes": [
+              "HasInitialValue",
+              "Preconcurrency",
+              "Custom",
+              "HasStorage",
+              "AccessControl"
+            ],
+            "fixedbinaryorder": 37,
             "hasStorage": true
           },
           {
@@ -8971,7 +8920,7 @@
               "Custom",
               "HasStorage"
             ],
-            "fixedbinaryorder": 41,
+            "fixedbinaryorder": 38,
             "hasStorage": true,
             "accessors": [
               {
@@ -9063,7 +9012,7 @@
               "Custom",
               "HasStorage"
             ],
-            "fixedbinaryorder": 42,
+            "fixedbinaryorder": 39,
             "hasStorage": true,
             "accessors": [
               {
@@ -9155,7 +9104,7 @@
               "Custom",
               "HasStorage"
             ],
-            "fixedbinaryorder": 43,
+            "fixedbinaryorder": 40,
             "hasStorage": true,
             "accessors": [
               {
@@ -9248,7 +9197,7 @@
               "HasStorage",
               "AccessControl"
             ],
-            "fixedbinaryorder": 44,
+            "fixedbinaryorder": 41,
             "hasStorage": true
           },
           {
@@ -9274,7 +9223,7 @@
               "Custom",
               "HasStorage"
             ],
-            "fixedbinaryorder": 45,
+            "fixedbinaryorder": 42,
             "hasStorage": true,
             "accessors": [
               {
@@ -9881,64 +9830,6 @@
           },
           {
             "kind": "Function",
-            "name": "OnResumeVideoClick",
-            "printedName": "OnResumeVideoClick(_:)",
-            "children": [
-              {
-                "kind": "TypeNominal",
-                "name": "Void",
-                "printedName": "()"
-              },
-              {
-                "kind": "TypeNominal",
-                "name": "UITapGestureRecognizer",
-                "printedName": "UIKit.UITapGestureRecognizer",
-                "usr": "c:objc(cs)UITapGestureRecognizer"
-              }
-            ],
-            "declKind": "Func",
-            "usr": "c:@M@NeftaSDK@objc(cs)RenderUIViewController(im)OnResumeVideoClick:",
-            "mangledName": "$s8NeftaSDK22RenderUIViewControllerC18OnResumeVideoClickyySo22UITapGestureRecognizerCF",
-            "moduleName": "NeftaSDK",
-            "isOpen": true,
-            "declAttributes": [
-              "Preconcurrency",
-              "Custom",
-              "ObjC"
-            ],
-            "funcSelfKind": "NonMutating"
-          },
-          {
-            "kind": "Function",
-            "name": "OnCloseVideoClick",
-            "printedName": "OnCloseVideoClick(_:)",
-            "children": [
-              {
-                "kind": "TypeNominal",
-                "name": "Void",
-                "printedName": "()"
-              },
-              {
-                "kind": "TypeNominal",
-                "name": "UITapGestureRecognizer",
-                "printedName": "UIKit.UITapGestureRecognizer",
-                "usr": "c:objc(cs)UITapGestureRecognizer"
-              }
-            ],
-            "declKind": "Func",
-            "usr": "c:@M@NeftaSDK@objc(cs)RenderUIViewController(im)OnCloseVideoClick:",
-            "mangledName": "$s8NeftaSDK22RenderUIViewControllerC17OnCloseVideoClickyySo22UITapGestureRecognizerCF",
-            "moduleName": "NeftaSDK",
-            "isOpen": true,
-            "declAttributes": [
-              "Preconcurrency",
-              "Custom",
-              "ObjC"
-            ],
-            "funcSelfKind": "NonMutating"
-          },
-          {
-            "kind": "Function",
             "name": "OnPause",
             "printedName": "OnPause(pause:)",
             "children": [
@@ -10060,6 +9951,34 @@
             "declKind": "Func",
             "usr": "s:8NeftaSDK22RenderUIViewControllerC6FinishyyF",
             "mangledName": "$s8NeftaSDK22RenderUIViewControllerC6FinishyyF",
+            "moduleName": "NeftaSDK",
+            "isOpen": true,
+            "declAttributes": [
+              "Preconcurrency",
+              "Custom"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "Present",
+            "printedName": "Present(storeView:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "SKStoreProductViewController",
+                "printedName": "StoreKit.SKStoreProductViewController",
+                "usr": "c:objc(cs)SKStoreProductViewController"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:8NeftaSDK22RenderUIViewControllerC7Present9storeViewySo014SKStoreProducthE0C_tF",
+            "mangledName": "$s8NeftaSDK22RenderUIViewControllerC7Present9storeViewySo014SKStoreProducthE0C_tF",
             "moduleName": "NeftaSDK",
             "isOpen": true,
             "declAttributes": [
@@ -29253,6 +29172,35 @@
             "funcSelfKind": "NonMutating"
           },
           {
+            "kind": "Function",
+            "name": "OnClick",
+            "printedName": "OnClick(_:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "UITapGestureRecognizer",
+                "printedName": "UIKit.UITapGestureRecognizer",
+                "usr": "c:objc(cs)UITapGestureRecognizer"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@NeftaSDK@objc(cs)WebController(im)OnClick:",
+            "mangledName": "$s8NeftaSDK13WebControllerC7OnClickyySo22UITapGestureRecognizerCF",
+            "moduleName": "NeftaSDK",
+            "isOpen": true,
+            "declAttributes": [
+              "Preconcurrency",
+              "Custom",
+              "ObjC"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
             "kind": "Constructor",
             "name": "init",
             "printedName": "init(frame:)",
@@ -33943,7 +33891,7 @@
           {
             "kind": "Constructor",
             "name": "init",
-            "printedName": "init(ad:width:height:url:adMarkup:redirectClickUrl:)",
+            "printedName": "init(ad:width:height:url:adMarkup:)",
             "children": [
               {
                 "kind": "TypeNominal",
@@ -33996,25 +33944,11 @@
                   }
                 ],
                 "usr": "s:Sq"
-              },
-              {
-                "kind": "TypeNominal",
-                "name": "Optional",
-                "printedName": "Swift.String?",
-                "children": [
-                  {
-                    "kind": "TypeNominal",
-                    "name": "String",
-                    "printedName": "Swift.String",
-                    "usr": "s:SS"
-                  }
-                ],
-                "usr": "s:Sq"
               }
             ],
             "declKind": "Constructor",
-            "usr": "s:8NeftaSDK13VideoCreativeC2ad5width6height3url0E6Markup16redirectClickUrlAcA3NAdC_S2iSSSgA2Ltcfc",
-            "mangledName": "$s8NeftaSDK13VideoCreativeC2ad5width6height3url0E6Markup16redirectClickUrlAcA3NAdC_S2iSSSgA2Ltcfc",
+            "usr": "s:8NeftaSDK13VideoCreativeC2ad5width6height3url0E6MarkupAcA3NAdC_S2iSSSgAKtcfc",
+            "mangledName": "$s8NeftaSDK13VideoCreativeC2ad5width6height3url0E6MarkupAcA3NAdC_S2iSSSgAKtcfc",
             "moduleName": "NeftaSDK",
             "overriding": true,
             "implicit": true,
@@ -37220,7 +37154,7 @@
           {
             "kind": "Constructor",
             "name": "init",
-            "printedName": "init(ad:width:height:url:adMarkup:redirectClickUrl:)",
+            "printedName": "init(ad:width:height:url:adMarkup:)",
             "children": [
               {
                 "kind": "TypeNominal",
@@ -37273,6 +37207,23 @@
                   }
                 ],
                 "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "s:8NeftaSDK8CreativeC2ad5width6height3url0D6MarkupAcA3NAdC_S2iSSSgAKtcfc",
+            "mangledName": "$s8NeftaSDK8CreativeC2ad5width6height3url0D6MarkupAcA3NAdC_S2iSSSgAKtcfc",
+            "moduleName": "NeftaSDK",
+            "init_kind": "Designated"
+          },
+          {
+            "kind": "Function",
+            "name": "SetClickUrl",
+            "printedName": "SetClickUrl(url:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
               },
               {
                 "kind": "TypeNominal",
@@ -37289,11 +37240,12 @@
                 "usr": "s:Sq"
               }
             ],
-            "declKind": "Constructor",
-            "usr": "s:8NeftaSDK8CreativeC2ad5width6height3url0D6Markup16redirectClickUrlAcA3NAdC_S2iSSSgA2Ltcfc",
-            "mangledName": "$s8NeftaSDK8CreativeC2ad5width6height3url0D6Markup16redirectClickUrlAcA3NAdC_S2iSSSgA2Ltcfc",
+            "declKind": "Func",
+            "usr": "s:8NeftaSDK8CreativeC11SetClickUrl3urlySSSg_tF",
+            "mangledName": "$s8NeftaSDK8CreativeC11SetClickUrl3urlySSSg_tF",
             "moduleName": "NeftaSDK",
-            "init_kind": "Designated"
+            "isOpen": true,
+            "funcSelfKind": "NonMutating"
           },
           {
             "kind": "Function",
@@ -43887,7 +43839,7 @@
           {
             "kind": "Constructor",
             "name": "init",
-            "printedName": "init(ad:width:height:url:adMarkup:redirectClickUrl:)",
+            "printedName": "init(ad:width:height:url:adMarkup:)",
             "children": [
               {
                 "kind": "TypeNominal",
@@ -43940,25 +43892,11 @@
                   }
                 ],
                 "usr": "s:Sq"
-              },
-              {
-                "kind": "TypeNominal",
-                "name": "Optional",
-                "printedName": "Swift.String?",
-                "children": [
-                  {
-                    "kind": "TypeNominal",
-                    "name": "String",
-                    "printedName": "Swift.String",
-                    "usr": "s:SS"
-                  }
-                ],
-                "usr": "s:Sq"
               }
             ],
             "declKind": "Constructor",
-            "usr": "s:8NeftaSDK14StaticCreativeC2ad5width6height3url0E6Markup16redirectClickUrlAcA3NAdC_S2iSSSgA2Ltcfc",
-            "mangledName": "$s8NeftaSDK14StaticCreativeC2ad5width6height3url0E6Markup16redirectClickUrlAcA3NAdC_S2iSSSgA2Ltcfc",
+            "usr": "s:8NeftaSDK14StaticCreativeC2ad5width6height3url0E6MarkupAcA3NAdC_S2iSSSgAKtcfc",
+            "mangledName": "$s8NeftaSDK14StaticCreativeC2ad5width6height3url0E6MarkupAcA3NAdC_S2iSSSgAKtcfc",
             "moduleName": "NeftaSDK",
             "overriding": true,
             "implicit": true,
@@ -44275,7 +44213,7 @@
           {
             "kind": "Constructor",
             "name": "init",
-            "printedName": "init(ad:width:height:adm:redirectClickUrl:)",
+            "printedName": "init(ad:width:height:adm:)",
             "children": [
               {
                 "kind": "TypeNominal",
@@ -44314,25 +44252,11 @@
                   }
                 ],
                 "usr": "s:Sq"
-              },
-              {
-                "kind": "TypeNominal",
-                "name": "Optional",
-                "printedName": "Swift.String?",
-                "children": [
-                  {
-                    "kind": "TypeNominal",
-                    "name": "String",
-                    "printedName": "Swift.String",
-                    "usr": "s:SS"
-                  }
-                ],
-                "usr": "s:Sq"
               }
             ],
             "declKind": "Constructor",
-            "usr": "s:8NeftaSDK11WebCreativeC2ad5width6height3adm16redirectClickUrlAcA3NAdC_S2iSSSgAKtcfc",
-            "mangledName": "$s8NeftaSDK11WebCreativeC2ad5width6height3adm16redirectClickUrlAcA3NAdC_S2iSSSgAKtcfc",
+            "usr": "s:8NeftaSDK11WebCreativeC2ad5width6height3admAcA3NAdC_S2iSSSgtcfc",
+            "mangledName": "$s8NeftaSDK11WebCreativeC2ad5width6height3admAcA3NAdC_S2iSSSgtcfc",
             "moduleName": "NeftaSDK",
             "init_kind": "Designated"
           },
@@ -44440,7 +44364,7 @@
           {
             "kind": "Constructor",
             "name": "init",
-            "printedName": "init(ad:width:height:url:adMarkup:redirectClickUrl:)",
+            "printedName": "init(ad:width:height:url:adMarkup:)",
             "children": [
               {
                 "kind": "TypeNominal",
@@ -44493,25 +44417,11 @@
                   }
                 ],
                 "usr": "s:Sq"
-              },
-              {
-                "kind": "TypeNominal",
-                "name": "Optional",
-                "printedName": "Swift.String?",
-                "children": [
-                  {
-                    "kind": "TypeNominal",
-                    "name": "String",
-                    "printedName": "Swift.String",
-                    "usr": "s:SS"
-                  }
-                ],
-                "usr": "s:Sq"
               }
             ],
             "declKind": "Constructor",
-            "usr": "s:8NeftaSDK11WebCreativeC2ad5width6height3url0E6Markup16redirectClickUrlAcA3NAdC_S2iSSSgA2Ltcfc",
-            "mangledName": "$s8NeftaSDK11WebCreativeC2ad5width6height3url0E6Markup16redirectClickUrlAcA3NAdC_S2iSSSgA2Ltcfc",
+            "usr": "s:8NeftaSDK11WebCreativeC2ad5width6height3url0E6MarkupAcA3NAdC_S2iSSSgAKtcfc",
+            "mangledName": "$s8NeftaSDK11WebCreativeC2ad5width6height3url0E6MarkupAcA3NAdC_S2iSSSgAKtcfc",
             "moduleName": "NeftaSDK",
             "overriding": true,
             "implicit": true,
@@ -46224,140 +46134,119 @@
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
       "kind": "IntegerLiteral",
-      "offset": 1103,
+      "offset": 1059,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
       "kind": "Array",
-      "offset": 1475,
+      "offset": 1431,
       "length": 8,
       "value": "[-1, -1]"
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
       "kind": "Array",
-      "offset": 1534,
+      "offset": 1490,
       "length": 8,
       "value": "[-1, -1]"
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
       "kind": "BooleanLiteral",
-      "offset": 1586,
+      "offset": 1542,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
       "kind": "IntegerLiteral",
-      "offset": 1639,
+      "offset": 1595,
       "length": 2,
       "value": "-1"
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
       "kind": "FloatLiteral",
-      "offset": 1680,
+      "offset": 1636,
       "length": 3,
       "value": "0.0"
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
       "kind": "IntegerLiteral",
-      "offset": 1726,
+      "offset": 1682,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
       "kind": "FloatLiteral",
-      "offset": 1776,
+      "offset": 1732,
       "length": 4,
       "value": "-1.0"
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
-      "kind": "BooleanLiteral",
-      "offset": 1835,
-      "length": 5,
-      "value": "false"
-    },
-    {
-      "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
-      "kind": "BooleanLiteral",
-      "offset": 1891,
-      "length": 5,
-      "value": "false"
-    },
-    {
-      "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
       "kind": "IntegerLiteral",
-      "offset": 1967,
+      "offset": 1807,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
       "kind": "IntegerLiteral",
-      "offset": 2012,
+      "offset": 1852,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
       "kind": "IntegerLiteral",
-      "offset": 2054,
+      "offset": 1894,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
       "kind": "BooleanLiteral",
-      "offset": 2092,
+      "offset": 1932,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
       "kind": "BooleanLiteral",
-      "offset": 2137,
-      "length": 5,
-      "value": "false"
-    },
-    {
-      "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
-      "kind": "BooleanLiteral",
-      "offset": 2213,
+      "offset": 2008,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
       "kind": "IntegerLiteral",
-      "offset": 2450,
+      "offset": 2287,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
       "kind": "IntegerLiteral",
-      "offset": 2479,
+      "offset": 2316,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
       "kind": "BooleanLiteral",
-      "offset": 5905,
+      "offset": 5910,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
       "kind": "BooleanLiteral",
-      "offset": 5985,
+      "offset": 5990,
       "length": 4,
       "value": "true"
     },
@@ -46744,7 +46633,7 @@
       "kind": "StringLiteral",
       "offset": 2562,
       "length": 7,
-      "value": "\"4.2.1\""
+      "value": "\"4.2.2\""
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/NeftaPlugin.swift",

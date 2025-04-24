@@ -76,6 +76,7 @@ namespace AdDemo
 
         public void Load()
         {
+            _isLoadPending = false;
             if (_selectedAdUnit.Id != _currentBannerId)
             {
                 if (_currentBannerId != null)
@@ -91,13 +92,16 @@ namespace AdDemo
 
         public void SetAutoRefresh(bool refresh)
         {
-            if (refresh)
+            if (_currentBannerId != null)
             {
-                MaxSdk.StartBannerAutoRefresh(_currentBannerId);
-            }
-            else
-            {
-                MaxSdk.StopBannerAutoRefresh(_currentBannerId);
+                if (refresh)
+                {
+                    MaxSdk.StartBannerAutoRefresh(_currentBannerId);
+                }
+                else
+                {
+                    MaxSdk.StopBannerAutoRefresh(_currentBannerId);
+                }
             }
         }
 
@@ -130,6 +134,8 @@ namespace AdDemo
         
         private void OnAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
+            _consecutiveAdFail = 0;
+            
             NeftaAdapterEvents.OnExternalMediationRequestLoaded(NeftaAdapterEvents.AdType.Banner, _selectedAdUnit._cpm, _calculatedBidFloor, adInfo);
             
             _setStatus($"Loaded {adInfo.NetworkName} {adInfo.NetworkPlacement}");

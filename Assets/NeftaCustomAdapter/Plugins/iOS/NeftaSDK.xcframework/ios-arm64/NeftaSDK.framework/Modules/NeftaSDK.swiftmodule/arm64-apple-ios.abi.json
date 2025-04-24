@@ -16247,140 +16247,119 @@
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
       "kind": "IntegerLiteral",
-      "offset": 1103,
+      "offset": 1059,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
       "kind": "Array",
-      "offset": 1475,
+      "offset": 1431,
       "length": 8,
       "value": "[-1, -1]"
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
       "kind": "Array",
-      "offset": 1534,
+      "offset": 1490,
       "length": 8,
       "value": "[-1, -1]"
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
       "kind": "BooleanLiteral",
-      "offset": 1586,
+      "offset": 1542,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
       "kind": "IntegerLiteral",
-      "offset": 1639,
+      "offset": 1595,
       "length": 2,
       "value": "-1"
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
       "kind": "FloatLiteral",
-      "offset": 1680,
+      "offset": 1636,
       "length": 3,
       "value": "0.0"
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
       "kind": "IntegerLiteral",
-      "offset": 1726,
+      "offset": 1682,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
       "kind": "FloatLiteral",
-      "offset": 1776,
+      "offset": 1732,
       "length": 4,
       "value": "-1.0"
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
-      "kind": "BooleanLiteral",
-      "offset": 1835,
-      "length": 5,
-      "value": "false"
-    },
-    {
-      "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
-      "kind": "BooleanLiteral",
-      "offset": 1891,
-      "length": 5,
-      "value": "false"
-    },
-    {
-      "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
       "kind": "IntegerLiteral",
-      "offset": 1967,
+      "offset": 1807,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
       "kind": "IntegerLiteral",
-      "offset": 2012,
+      "offset": 1852,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
       "kind": "IntegerLiteral",
-      "offset": 2054,
+      "offset": 1894,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
       "kind": "BooleanLiteral",
-      "offset": 2092,
+      "offset": 1932,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
       "kind": "BooleanLiteral",
-      "offset": 2137,
-      "length": 5,
-      "value": "false"
-    },
-    {
-      "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
-      "kind": "BooleanLiteral",
-      "offset": 2213,
+      "offset": 2008,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
       "kind": "IntegerLiteral",
-      "offset": 2450,
+      "offset": 2287,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
       "kind": "IntegerLiteral",
-      "offset": 2479,
+      "offset": 2316,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
       "kind": "BooleanLiteral",
-      "offset": 5905,
+      "offset": 5910,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/RenderUIViewController.swift",
       "kind": "BooleanLiteral",
-      "offset": 5985,
+      "offset": 5990,
       "length": 4,
       "value": "true"
     },
@@ -16767,7 +16746,7 @@
       "kind": "StringLiteral",
       "offset": 2562,
       "length": 7,
-      "value": "\"4.2.1\""
+      "value": "\"4.2.2\""
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/NeftaPlugin.swift",

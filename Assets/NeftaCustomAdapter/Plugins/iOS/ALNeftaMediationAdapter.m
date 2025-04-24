@@ -19,18 +19,18 @@ NSString * const _mediationProvider = @"applovin-max";
 static NeftaPlugin *_plugin;
 
 + (void)OnExternalMediationRequestLoad:(AdType)adType recommendedAdUnitId:(NSString* _Nullable)recommendedAdUnitId calculatedFloorPrice:(double)calculatedFloorPrice ad:(MAAd * _Nonnull)ad {
-    [NeftaPlugin OnExternalMediationRequest: @"max" adType: adType recommendedAdUnitId: recommendedAdUnitId requestedFloorPrice: -1 calculatedFloorPrice: calculatedFloorPrice adUnitId: ad.adUnitIdentifier revenue: ad.revenue precision: ad.revenuePrecision status: 1];
+    [NeftaPlugin OnExternalMediationRequest: _mediationProvider adType: adType recommendedAdUnitId: recommendedAdUnitId requestedFloorPrice: -1 calculatedFloorPrice: calculatedFloorPrice adUnitId: ad.adUnitIdentifier revenue: ad.revenue precision: ad.revenuePrecision status: 1];
 }
 + (void)OnExternalMediationRequestFail:(AdType)adType recommendedAdUnitId:(NSString* _Nullable)recommendedAdUnitId calculatedFloorPrice:(double)calculatedFloorPrice adUnitIdentifier:(NSString * _Nonnull)adUnitIdentifier error:(MAError * _Nonnull)error {
     int status = 0;
     if (error.code == MAErrorCodeNoFill) {
         status = 2;
     }
-    [NeftaPlugin OnExternalMediationRequest: @"max" adType: adType recommendedAdUnitId: recommendedAdUnitId requestedFloorPrice: -1 calculatedFloorPrice: calculatedFloorPrice adUnitId: adUnitIdentifier revenue: -1 precision: nil status: status];
+    [NeftaPlugin OnExternalMediationRequest: _mediationProvider adType: adType recommendedAdUnitId: recommendedAdUnitId requestedFloorPrice: -1 calculatedFloorPrice: calculatedFloorPrice adUnitId: adUnitIdentifier revenue: -1 precision: nil status: status];
 }
 
 + (void) OnExternalMediationRequestLoad:(AdType)adType requestedFloorPrice:(double)requestedFloorPrice calculatedFloorPrice:(double)calculatedFloorPrice ad:(MAAd *)ad {
-    [NeftaPlugin OnExternalMediationRequest: @"max" adType: adType recommendedAdUnitId: nil requestedFloorPrice: requestedFloorPrice calculatedFloorPrice: calculatedFloorPrice adUnitId: ad.adUnitIdentifier revenue: ad.revenue precision: ad.revenuePrecision status: 1];
+    [NeftaPlugin OnExternalMediationRequest: _mediationProvider adType: adType recommendedAdUnitId: nil requestedFloorPrice: requestedFloorPrice calculatedFloorPrice: calculatedFloorPrice adUnitId: ad.adUnitIdentifier revenue: ad.revenue precision: ad.revenuePrecision status: 1];
 }
 
 + (void) OnExternalMediationRequestFail:(AdType)adType requestedFloorPrice:(double)requestedFloorPrice calculatedFloorPrice:(double)calculatedFloorPrice adUnitIdentifier:(NSString *)adUnitIdentifier error:(MAError *)error {
@@ -38,7 +38,7 @@ static NeftaPlugin *_plugin;
     if (error.code == MAErrorCodeNoFill) {
         status = 2;
     }
-    [NeftaPlugin OnExternalMediationRequest: @"max" adType: adType recommendedAdUnitId: nil requestedFloorPrice: requestedFloorPrice calculatedFloorPrice: calculatedFloorPrice adUnitId: adUnitIdentifier revenue: -1 precision: nil status: status];
+    [NeftaPlugin OnExternalMediationRequest: _mediationProvider adType: adType recommendedAdUnitId: nil requestedFloorPrice: requestedFloorPrice calculatedFloorPrice: calculatedFloorPrice adUnitId: adUnitIdentifier revenue: -1 precision: nil status: status];
 }
 
 + (void) OnExternalMediationImpression:(MAAd*)ad {
@@ -103,7 +103,7 @@ static NeftaPlugin *_plugin;
     if (creativeId != nil) {
         [data setObject: creativeId forKey: @"creative_id"];
     }
-    [NeftaPlugin OnExternalMediationImpression: @"max" data: data];
+    [NeftaPlugin OnExternalMediationImpression: _mediationProvider data: data];
 }
 
 + (void) OnExternalMediationImpressionAsString:(NSString*)network format:(NSString *)format creativeId:(NSString *)creativeId data:(NSString *)data {
@@ -136,7 +136,7 @@ static NeftaPlugin *_plugin;
     }
     [sb appendString: @"\""];
     
-    [NeftaPlugin OnExternalMediationImpressionAsString: @"max" data: sb];
+    [NeftaPlugin OnExternalMediationImpressionAsString: _mediationProvider data: sb];
 }
 
 - (void)initializeWithParameters:(id<MAAdapterInitializationParameters>)parameters completionHandler:(void (^)(MAAdapterInitializationStatus, NSString *_Nullable))completionHandler {
@@ -159,7 +159,7 @@ static NeftaPlugin *_plugin;
 }
 
 - (NSString *)adapterVersion {
-    return @"2.2.1";
+    return @"2.2.2";
 }
 
 - (void)destroy {
