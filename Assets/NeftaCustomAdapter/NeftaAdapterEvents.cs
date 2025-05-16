@@ -175,31 +175,29 @@ namespace NeftaCustomAdapter
 #endif
         }
         
+        /// <summary>
+        /// Should be called when MAX loads any ad (MaxSdkCallbacks.[AdType].OnAdLoadedEvent
+        /// </summary>
+        /// <param name="adType">Ad format of the loaded ad</param>
+        /// <param name="recommendedAdUnitId">Recommended adUnitId, retrieved from "recommended_[AdType]_ad_unit_id"</param>
+        /// <param name="calculatedFloorPrice">Predicted bid floor, retrieved from "calculated_user_floor_price_[AdType]"</param>
+        /// <param name="adInfo">Loaded MAX Ad instance data</param>
         public static void OnExternalMediationRequestLoaded(AdType adType, string recommendedAdUnitId, double calculatedFloorPrice, MaxSdkBase.AdInfo adInfo)
         {
             OnExternalMediationRequest((int) adType, recommendedAdUnitId, -1, calculatedFloorPrice, adInfo.AdUnitIdentifier, adInfo.Revenue, adInfo.RevenuePrecision, 1);
-        }
-
-        public static void OnExternalMediationRequestFailed(AdType adType, string recommendedAdUnitId, double calculatedFloorPrice, string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
-        {
-            OnExternalMediationRequest((int) adType, recommendedAdUnitId, -1, calculatedFloorPrice, adUnitId, -1, null, errorInfo.Code == MaxSdkBase.ErrorCode.NoFill ? 2 : 0);
         }
         
         /// <summary>
         /// Should be called when MAX loads any ad (MaxSdkCallbacks.[AdType].OnAdLoadedEvent
         /// </summary>
-        /// <param name="adType"></param>
-        /// <param name="requestedFloorPrice">The price of </param>
-        /// <param name="calculatedFloorPrice"></param>
-        /// <param name="adInfo"></param>
-        public static void OnExternalMediationRequestLoaded(AdType adType, double requestedFloorPrice, double calculatedFloorPrice, MaxSdkBase.AdInfo adInfo)
+        /// <param name="adType">Ad format of the loaded ad</param>
+        /// <param name="recommendedAdUnitId">Recommended adUnitId, retrieved from "recommended_[AdType]_ad_unit_id"</param>
+        /// <param name="calculatedFloorPrice">Predicted bid floor, retrieved from "calculated_user_floor_price_[AdType]"</param>
+        /// <param name="adUnitId">AdUnitId of the failed ad placement</param>
+        /// <param name="errorInfo">Load fail reason</param>
+        public static void OnExternalMediationRequestFailed(AdType adType, string recommendedAdUnitId, double calculatedFloorPrice, string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
         {
-            OnExternalMediationRequest((int) adType, null, requestedFloorPrice, calculatedFloorPrice, adInfo.AdUnitIdentifier, adInfo.Revenue, adInfo.RevenuePrecision, 1);
-        }
-
-        public static void OnExternalMediationRequestFailed(AdType adType, double requestedFloorPrice, double calculatedFloorPrice, string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
-        {
-            OnExternalMediationRequest((int) adType, null, requestedFloorPrice, calculatedFloorPrice, adUnitId, -1, null, errorInfo.Code == MaxSdkBase.ErrorCode.NoFill ? 2 : 0);
+            OnExternalMediationRequest((int) adType, recommendedAdUnitId, -1, calculatedFloorPrice, adUnitId, -1, null, errorInfo.Code == MaxSdkBase.ErrorCode.NoFill ? 2 : 0);
         }
 
         private static void OnExternalMediationRequest(int adType, string recommendedAdUnitId, double requestedFloorPrice, double calculatedFloorPrice, string adUnitId, double revenue, string precision, int status)

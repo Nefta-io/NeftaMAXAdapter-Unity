@@ -142,6 +142,7 @@ namespace AdDemo
             if (_isLoadRequested)
             {
                 _recommendedAdUnitId = null;
+                _calculatedBidFloor = 0;
                 Load();
             }
         }
