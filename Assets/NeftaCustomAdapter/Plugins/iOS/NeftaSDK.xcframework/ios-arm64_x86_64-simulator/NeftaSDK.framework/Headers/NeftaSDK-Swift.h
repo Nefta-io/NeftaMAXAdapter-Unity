@@ -322,7 +322,6 @@ SWIFT_CLASS("_TtC8NeftaSDK11BidResponse")
 
 SWIFT_CLASS("_TtC8NeftaSDK7Insight")
 @interface Insight : NSObject
-@property (nonatomic, readonly, copy) NSString * _Nullable _status;
 @property (nonatomic, readonly) int64_t _int;
 @property (nonatomic, readonly) double _float;
 @property (nonatomic, readonly, copy) NSString * _Nullable _string;
@@ -711,7 +710,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _No
 @property (nonatomic, strong) NeftaEvents * _Nonnull Events;
 @property (nonatomic, copy) void (^ _Nullable OnReady)(NSDictionary<NSString *, Placement *> * _Nonnull);
 @property (nonatomic, copy) void (^ _Nullable OnBehaviourInsight)(NSDictionary<NSString *, Insight *> * _Nonnull);
-@property (nonatomic, copy) void (^ _Nullable OnBehaviourInsightAsString)(NSString * _Nonnull);
+@property (nonatomic, copy) void (^ _Nullable OnBehaviourInsightAsString)(NSInteger, NSString * _Nonnull);
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable OnLog)(NSString * _Nonnull);)
 + (void (^ _Nullable)(NSString * _Nonnull))OnLog SWIFT_WARN_UNUSED_RESULT;
 + (void)setOnLog:(void (^ _Nullable)(NSString * _Nonnull))value;
@@ -726,8 +725,9 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NeftaPlugin * _Null_un
 - (void)SetTrackingWithIsAuthorized:(BOOL)isAuthorized;
 - (void)RecordWithType:(NSInteger)type category:(NSInteger)category subCategory:(NSInteger)subCategory name:(NSString * _Nullable)name value:(int64_t)value customPayload:(NSString * _Nullable)customPayload;
 - (void)SetPublisherUserIdWithId:(NSString * _Nonnull)id;
-- (void)GetBehaviourInsightWithString:(NSString * _Nonnull)string;
+- (void)GetBehaviourInsightBridge:(NSInteger)requestId string:(NSString * _Nonnull)string;
 - (void)GetBehaviourInsight:(NSArray<NSString *> * _Nonnull)insightList;
+- (void)GetBehaviourInsight:(NSArray<NSString *> * _Nonnull)insightList callback:(void (^ _Nonnull)(NSDictionary<NSString *, Insight *> * _Nonnull))callback;
 - (NSString * _Nonnull)GetNuidWithPresent:(BOOL)present SWIFT_WARN_UNUSED_RESULT;
 + (void)OnExternalMediationRequest:(NSString * _Nonnull)provider adType:(NSInteger)adType recommendedAdUnitId:(NSString * _Nullable)recommendedAdUnitId requestedFloorPrice:(double)requestedFloorPrice calculatedFloorPrice:(double)calculatedFloorPrice adUnitId:(NSString * _Nullable)adUnitId revenue:(double)revenue precision:(NSString * _Nullable)precision status:(NSInteger)status;
 + (void)OnExternalMediationImpression:(NSString * _Nonnull)path data:(NSMutableDictionary * _Nonnull)data;
@@ -1143,7 +1143,6 @@ SWIFT_CLASS("_TtC8NeftaSDK11BidResponse")
 
 SWIFT_CLASS("_TtC8NeftaSDK7Insight")
 @interface Insight : NSObject
-@property (nonatomic, readonly, copy) NSString * _Nullable _status;
 @property (nonatomic, readonly) int64_t _int;
 @property (nonatomic, readonly) double _float;
 @property (nonatomic, readonly, copy) NSString * _Nullable _string;
@@ -1532,7 +1531,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _No
 @property (nonatomic, strong) NeftaEvents * _Nonnull Events;
 @property (nonatomic, copy) void (^ _Nullable OnReady)(NSDictionary<NSString *, Placement *> * _Nonnull);
 @property (nonatomic, copy) void (^ _Nullable OnBehaviourInsight)(NSDictionary<NSString *, Insight *> * _Nonnull);
-@property (nonatomic, copy) void (^ _Nullable OnBehaviourInsightAsString)(NSString * _Nonnull);
+@property (nonatomic, copy) void (^ _Nullable OnBehaviourInsightAsString)(NSInteger, NSString * _Nonnull);
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable OnLog)(NSString * _Nonnull);)
 + (void (^ _Nullable)(NSString * _Nonnull))OnLog SWIFT_WARN_UNUSED_RESULT;
 + (void)setOnLog:(void (^ _Nullable)(NSString * _Nonnull))value;
@@ -1547,8 +1546,9 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NeftaPlugin * _Null_un
 - (void)SetTrackingWithIsAuthorized:(BOOL)isAuthorized;
 - (void)RecordWithType:(NSInteger)type category:(NSInteger)category subCategory:(NSInteger)subCategory name:(NSString * _Nullable)name value:(int64_t)value customPayload:(NSString * _Nullable)customPayload;
 - (void)SetPublisherUserIdWithId:(NSString * _Nonnull)id;
-- (void)GetBehaviourInsightWithString:(NSString * _Nonnull)string;
+- (void)GetBehaviourInsightBridge:(NSInteger)requestId string:(NSString * _Nonnull)string;
 - (void)GetBehaviourInsight:(NSArray<NSString *> * _Nonnull)insightList;
+- (void)GetBehaviourInsight:(NSArray<NSString *> * _Nonnull)insightList callback:(void (^ _Nonnull)(NSDictionary<NSString *, Insight *> * _Nonnull))callback;
 - (NSString * _Nonnull)GetNuidWithPresent:(BOOL)present SWIFT_WARN_UNUSED_RESULT;
 + (void)OnExternalMediationRequest:(NSString * _Nonnull)provider adType:(NSInteger)adType recommendedAdUnitId:(NSString * _Nullable)recommendedAdUnitId requestedFloorPrice:(double)requestedFloorPrice calculatedFloorPrice:(double)calculatedFloorPrice adUnitId:(NSString * _Nullable)adUnitId revenue:(double)revenue precision:(NSString * _Nullable)precision status:(NSInteger)status;
 + (void)OnExternalMediationImpression:(NSString * _Nonnull)path data:(NSMutableDictionary * _Nonnull)data;

@@ -1,7 +1,6 @@
 #if UNITY_IOS
 using System.Runtime.InteropServices;
 #endif
-using System.Collections.Generic;
 using NeftaCustomAdapter;
 using UnityEngine;
 
@@ -19,16 +18,6 @@ namespace AdDemo
 #else // UNITY_ANDROID
         private const string NeftaId = "5643649824063488";
 #endif
-        /*private List<AdConfig> _interstitialAdUnits = new List<AdConfig>
-        {
-            new AdConfig("c9acf50602329bfe", "60bbc7cc56dfa329", 100),
-        };
-        
-        private List<AdConfig> _rewardedAdUnits = new List<AdConfig>
-        {
-            new AdConfig("08304643cb16df3b", "3082ee9199cf59f0", 100),
-        };*/
-        
         private bool _isBannerShown;
 
         [SerializeField] private BannerController _banner;
@@ -43,40 +32,14 @@ namespace AdDemo
             NeftaAdapterEvents.EnableLogging(true);
             NeftaAdapterEvents.Init(NeftaId);
             NeftaAdapterEvents.SetContentRating(NeftaAdapterEvents.ContentRating.MatureAudience);
-
-            NeftaAdapterEvents.BehaviourInsightCallback = OnBehaviourInsight;
-            GetBehaviourInsight();
             
-            _banner.Init(GetBehaviourInsight);
-            _interstitial.Init(GetBehaviourInsight, OnFullScreenAdDisplay);
-            _rewarded.Init(GetBehaviourInsight, OnFullScreenAdDisplay);
+            _banner.Init();
+            _interstitial.Init(OnFullScreenAdDisplay);
+            _rewarded.Init(OnFullScreenAdDisplay);
             
 #if UNITY_EDITOR || !UNITY_IOS
             _stateTime = 1f; // skip IDFA check
 #endif
-        }
-
-        private void GetBehaviourInsight()
-        {
-            NeftaAdapterEvents.GetBehaviourInsight(new string[]
-            {
-                Banner.FloorPrice,
-                Interstitial.AdUnitId, Interstitial.FloorPrice,
-                Rewarded.AdUnitId, Rewarded.FloorPrice
-            });
-        }
-        
-        private void OnBehaviourInsight(Dictionary<string, Insight> behaviourInsight)
-        {
-            foreach (var insight in behaviourInsight)
-            {
-                var insightValue = insight.Value;
-                Debug.Log($"BehaviourInsight {insight.Key} status:{insightValue._status} i:{insightValue._int} f:{insightValue._float} s:{insightValue._string}");
-            }
-            
-            _banner.OnBehaviourInsight(behaviourInsight);
-            _interstitial.OnBehaviourInsight(behaviourInsight);
-            _rewarded.OnBehaviourInsight(behaviourInsight);
         }
 
         private void InitAds()

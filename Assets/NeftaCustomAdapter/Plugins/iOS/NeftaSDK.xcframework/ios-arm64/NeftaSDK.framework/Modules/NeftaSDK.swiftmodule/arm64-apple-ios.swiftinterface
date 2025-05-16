@@ -40,7 +40,6 @@ import os
   @objc deinit
 }
 @_hasMissingDesignatedInitializers @objc public class Insight : ObjectiveC.NSObject {
-  @objc final public let _status: Swift.String?
   @objc final public let _int: Swift.Int64
   @objc final public let _float: Swift.Float64
   @objc final public let _string: Swift.String?
@@ -138,7 +137,7 @@ import os
   }
   public typealias OnReadyBlock = (([Swift.String : NeftaSDK.Placement]) -> Swift.Void)
   public typealias OnBehaviourInsightBlock = (([Swift.String : NeftaSDK.Insight]) -> Swift.Void)
-  public typealias OnBehaviourInsightAsStringBlock = ((Swift.String) -> Swift.Void)
+  public typealias OnBehaviourInsightAsStringBlock = ((Swift.Int, Swift.String) -> Swift.Void)
   public typealias OnLogBlock = ((Swift.String) -> Swift.Void)
   @objc public static let Version: Swift.String
   @objc public static let ContentRating_Unspecified: Swift.String
@@ -165,8 +164,9 @@ import os
   public static func SetDebugTime(offset: Swift.Int)
   @objc public func Record(type: Swift.Int, category: Swift.Int, subCategory: Swift.Int, name: Swift.String?, value: Swift.Int64, customPayload: Swift.String?)
   @objc public func SetPublisherUserId(id: Swift.String)
-  @objc public func GetBehaviourInsight(string: Swift.String)
+  @objc(GetBehaviourInsightBridge:string:) public func GetBehaviourInsightBridge(requestId: Swift.Int, string: Swift.String)
   @objc public func GetBehaviourInsight(_ insightList: [Swift.String])
+  @objc public func GetBehaviourInsight(_ insightList: [Swift.String], callback: @escaping NeftaSDK.NeftaPlugin.OnBehaviourInsightBlock)
   @objc public func GetNuid(present: Swift.Bool) -> Swift.String
   @objc public static func OnExternalMediationRequest(_ provider: Swift.String, adType: Swift.Int, recommendedAdUnitId: Swift.String?, requestedFloorPrice: Swift.Float64, calculatedFloorPrice: Swift.Float64, adUnitId: Swift.String?, revenue: Swift.Float64, precision: Swift.String?, status: Swift.Int)
   @objc public static func OnExternalMediationImpression(_ path: Swift.String, data: Foundation.NSMutableDictionary)

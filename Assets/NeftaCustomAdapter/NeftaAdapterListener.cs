@@ -12,9 +12,9 @@ namespace NeftaCustomAdapter
         {
         }
 
-        public void IOnBehaviourInsight(string behaviourInsight)
+        public void IOnBehaviourInsight(int id, string behaviourInsight)
         {
-            NeftaAdapterEvents.IOnBehaviourInsight(behaviourInsight);
+            NeftaAdapterEvents.IOnBehaviourInsight(id, behaviourInsight);
         }
     }
 }

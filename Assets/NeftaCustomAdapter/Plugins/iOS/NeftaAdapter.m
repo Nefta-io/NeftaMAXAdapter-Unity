@@ -13,7 +13,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    typedef void (*OnBehaviourInsight)(const char *behaviourInsight);
+    typedef void (*OnBehaviourInsight)(int requestId, const char *behaviourInsight);
 
     void EnableLogging(bool enable);
     void NeftaPlugin_Init(const char *appId, OnBehaviourInsight onBehaviourInsight);
@@ -22,7 +22,7 @@ extern "C" {
     void NeftaPlugin_OnExternalMediationImpressionAsString(const char *network, const char *format, const char *creativeId, const char *data);
     const char * NeftaPlugin_GetNuid(void *instance, bool present);
     void NeftaPlugin_SetContentRating(const char *rating);
-    void NeftaPlugin_GetBehaviourInsight(const char *insights);
+    void NeftaPlugin_GetBehaviourInsight(int requestId, const char *insights);
     void NeftaPlugin_SetOverride(const char *root);
 #ifdef __cplusplus
 }
@@ -36,9 +36,9 @@ void NeftaPlugin_EnableLogging(bool enable) {
 
 void NeftaPlugin_Init(const char *appId, OnBehaviourInsight onBehaviourInsight) {
     _plugin = [NeftaPlugin InitWithAppId: [NSString stringWithUTF8String: appId]];
-    _plugin.OnBehaviourInsightAsString = ^void(NSString * _Nonnull behaviourInsight) {
+    _plugin.OnBehaviourInsightAsString = ^void(NSInteger requestId, NSString * _Nonnull behaviourInsight) {
         const char *cBI = [behaviourInsight UTF8String];
-        onBehaviourInsight(cBI);
+        onBehaviourInsight((int)requestId, cBI);
     };
 }
 
@@ -74,8 +74,8 @@ const char * NeftaPlugin_GetNuid(void *instance, bool present) {
     return returnString;
 }
 
-void NeftaPlugin_GetBehaviourInsight(const char *insights) {
-    [_plugin GetBehaviourInsightWithString: [NSString stringWithUTF8String: insights]];
+void NeftaPlugin_GetBehaviourInsight(int requestId, const char *insights) {
+    [_plugin GetBehaviourInsightBridge: requestId string: [NSString stringWithUTF8String: insights]];
 }
 
 void NeftaPlugin_SetOverride(const char *root) {
