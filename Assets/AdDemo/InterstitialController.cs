@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Nefta.Core.Events;
 using NeftaCustomAdapter;
@@ -18,36 +19,24 @@ namespace AdDemo
         
         private const string AdUnitIdInsightName = "recommended_interstitial_ad_unit_id";
         private const string FloorPriceInsightName = "calculated_user_floor_price_interstitial";
-
-        private string _defaultLoadingAdUnitId;
-        private MaxSdkBase.AdInfo _defaultAd;
-        private string _recommendedAdUnitId;
-        private MaxSdkBase.AdInfo _recommendedAd;
         
+        private string _selectedAdUnitId;
+        private string _recommendedAdUnitId;
         private double _calculatedBidFloor;
-        private bool _isRecommendedLoadPending;
+        private Coroutine _fallbackCoroutine;
+        private Queue<string> _statusQueue;
+        private Action<bool> _onFullScreenAdDisplayed;
         
         [SerializeField] private Text _title;
         [SerializeField] private Button _load;
         [SerializeField] private Button _show;
         [SerializeField] private Text _status;
-        
-        private Queue<string> _statusQueue;
-        private Action<bool> _onFullScreenAdDisplayed;
 
-        private void Load()
+        private void GetInsightsAndLoad()
         {
-            SetStatus($"Load default: {_defaultAd} recommended: {_recommendedAd}");
+            NeftaAdapterEvents.GetBehaviourInsight(new string[] { AdUnitIdInsightName, FloorPriceInsightName }, OnBehaviourInsight);
             
-            if (_defaultAd == null)
-            {
-                MaxSdk.LoadInterstitial(_defaultAdUnitId);
-            }
-
-            if (_recommendedAd == null)
-            {
-                NeftaAdapterEvents.GetBehaviourInsight(new string[] { AdUnitIdInsightName, FloorPriceInsightName }, OnBehaviourInsight);
-            }
+            _fallbackCoroutine = StartCoroutine(LoadFallback());
         }
         
         private void OnBehaviourInsight(Dictionary<string, Insight> insights)
@@ -62,56 +51,43 @@ namespace AdDemo
             {
                 _calculatedBidFloor = insight._float;
             }
-            
+
             Debug.Log($"OnBehaviourInsight for Interstitial recommended AdUnit: {_recommendedAdUnitId}, calculated bid floor: {_calculatedBidFloor}");
             
-            if (!String.IsNullOrEmpty(_recommendedAdUnitId) && _defaultAdUnitId != _recommendedAdUnitId)
+            if (_fallbackCoroutine != null)
             {
-                MaxSdk.LoadInterstitial(_recommendedAdUnitId);
+                Load();
             }
         }
         
-        private void OnAdFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo error)
+        private void Load()
         {
-            if (adUnitId == _recommendedAdUnitId)
+            if (_fallbackCoroutine != null)
             {
-                NeftaAdapterEvents.OnExternalMediationRequestFailed(NeftaAdapterEvents.AdType.Interstitial, _recommendedAdUnitId, _calculatedBidFloor, adUnitId, error);
-
-                _recommendedAdUnitId = null;
-                _calculatedBidFloor = 0;
-            }
-            else
-            {
-                NeftaAdapterEvents.OnExternalMediationRequestFailed(NeftaAdapterEvents.AdType.Interstitial, null, 0, adUnitId, error);
-                
-                _defaultLoadingAdUnitId = null;
+                StopCoroutine(_fallbackCoroutine);
+                _fallbackCoroutine = null;
             }
             
-            SetStatus($"Load failed: {error.Message}");
+            _selectedAdUnitId = _recommendedAdUnitId ?? _defaultAdUnitId;
+            MaxSdk.LoadInterstitial(_selectedAdUnitId);
+        }
+        
+        private void OnAdFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
+        {
+            NeftaAdapterEvents.OnExternalMediationRequestFailed(NeftaAdapterEvents.AdType.Interstitial, _recommendedAdUnitId, _calculatedBidFloor, adUnitId, errorInfo);
             
-            // or automatically retry
-            //if (_defaultLoadingAdUnitId == null && _recommendedAdUnitId == null)
-            //{
-            //    Load();
-            //}
+            SetStatus($"Load failed: {errorInfo.Message}");
+            
+            // or automatically retry with a delay
+            //StartCoroutine(ReTryLoad());
         }
 
         private void OnAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
-            if (adUnitId == _recommendedAdUnitId)
-            {
-                NeftaAdapterEvents.OnExternalMediationRequestLoaded(NeftaAdapterEvents.AdType.Interstitial, _recommendedAdUnitId, _calculatedBidFloor, adInfo);
-                
-                _recommendedAd = adInfo;
-            }
-            else
-            {
-                NeftaAdapterEvents.OnExternalMediationRequestLoaded(NeftaAdapterEvents.AdType.Interstitial, null, 0, adInfo);
-
-                _defaultAd = adInfo;
-            }
+            NeftaAdapterEvents.OnExternalMediationRequestLoaded(NeftaAdapterEvents.AdType.Interstitial, _recommendedAdUnitId, _calculatedBidFloor, adInfo);
             
-            SetStatus($"Loaded {adUnitId} at: {adInfo.Revenue}");
+            SetStatus($"Loaded {adUnitId}: {adInfo.NetworkName}");
+
             _show.interactable = true;
         }
         
@@ -136,56 +112,62 @@ namespace AdDemo
         
         private void OnLoadClick()
         {
-            Load();
+            GetInsightsAndLoad();
 
             AddDemoGameEventExample();
         }
         
         private void OnShowClick()
         {
-            SetStatus($"Show default: {_defaultAd} recommended: {_recommendedAd}");
+            if (MaxSdk.IsInterstitialReady(_selectedAdUnitId))
+            {
+                SetStatus("Showing");
+                MaxSdk.ShowInterstitial(_selectedAdUnitId);
+            }
+            else
+            {
+                SetStatus("Ad not ready");
+            }
+            
             _show.interactable = false;
+        }
+        
+        private IEnumerator LoadFallback()
+        {
+            yield return new WaitForSeconds(5f);
 
-            if (_recommendedAd != null)
-            {
-                if (_defaultAd != null && _defaultAd.Revenue > _recommendedAd.Revenue)
-                {
-                    MaxSdk.ShowInterstitial(_defaultAdUnitId);
-                    _defaultAd = null;
-                }
-                else
-                {
-                    MaxSdk.ShowInterstitial(_recommendedAdUnitId);
-                    _recommendedAd = null;
-                }
-            }
-            else if (_defaultAd != null)
-            {
-                MaxSdk.ShowInterstitial(_defaultAdUnitId);
-                _defaultAd = null;
-            }
+            _recommendedAdUnitId = null;
+            _calculatedBidFloor = 0;
+            Load();
+        }
+
+        private IEnumerator ReTryLoad()
+        {
+            yield return new WaitForSeconds(5f);
+            
+            GetInsightsAndLoad();
         }
 
         private void OnShowEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
-            SetStatus("Show");
+            SetStatus("OnShowEvent");
             _onFullScreenAdDisplayed(true);
         }
         
         private void OnAdDisplayFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo, MaxSdkBase.AdInfo adInfo)
         {
-            SetStatus("Display failed");
+            SetStatus("OnAdDisplayFailedEvent");
         }
         
         private void OnAdHiddenEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
-            SetStatus("Hidden");
+            SetStatus("OnAdHiddenEvent");
             _onFullScreenAdDisplayed(false);
         }
         
         private void OnRevenuePaidEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
-            SetStatus($"Paid {adInfo.Revenue}");
+            SetStatus($"OnRevenuePaidEvent {adInfo.Revenue}");
         }
         
         private void SetStatus(string status)
