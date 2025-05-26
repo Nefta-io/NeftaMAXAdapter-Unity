@@ -26,6 +26,7 @@ namespace AdDemo
         private Coroutine _fallbackCoroutine;
         private Queue<string> _statusQueue;
         private Action<bool> _onFullScreenAdDisplayed;
+        private int _consecutiveAdFails;
         
         [SerializeField] private Text _title;
         [SerializeField] private Button _load;
@@ -77,9 +78,9 @@ namespace AdDemo
             NeftaAdapterEvents.OnExternalMediationRequestFailed(NeftaAdapterEvents.AdType.Rewarded, _recommendedAdUnitId, _calculatedBidFloor, adUnitId, errorInfo);
             
             SetStatus($"Load failed {adUnitId}: {errorInfo}");
-
-            // or automatically retry with a delay
-            //StartCoroutine(ReTryLoad());
+            
+            _consecutiveAdFails++;
+            StartCoroutine(ReTryLoad());
         }
         
         private void OnAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
@@ -88,7 +89,17 @@ namespace AdDemo
             
             SetStatus($"Loaded {adUnitId} at: {adInfo.Revenue}");
             
+            _consecutiveAdFails = 0;
             _show.interactable = true;
+        }
+        
+        private IEnumerator ReTryLoad()
+        {
+            // As per MAX recommendations, retry with exponentially higher delays up to 64s
+            // In case you would like to customize fill rate / revenue please contact our customer support
+            yield return new WaitForSeconds(new [] { 0, 2, 4, 8, 32, 64 }[Math.Min(_consecutiveAdFails, 5)]);
+            
+            GetInsightsAndLoad();
         }
         
         public void Init(Action<bool> onFullScreenAdDisplayed)
