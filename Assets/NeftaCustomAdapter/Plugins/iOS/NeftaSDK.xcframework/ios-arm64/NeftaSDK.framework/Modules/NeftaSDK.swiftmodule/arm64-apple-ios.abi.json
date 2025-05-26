@@ -7592,7 +7592,7 @@
           {
             "kind": "Function",
             "name": "OnExternalMediationRequest",
-            "printedName": "OnExternalMediationRequest(_:adType:recommendedAdUnitId:requestedFloorPrice:calculatedFloorPrice:adUnitId:revenue:precision:status:)",
+            "printedName": "OnExternalMediationRequest(_:adType:recommendedAdUnitId:requestedFloorPrice:calculatedFloorPrice:adUnitId:revenue:precision:status:providerStatus:networkStatus:)",
             "children": [
               {
                 "kind": "TypeNominal",
@@ -7676,11 +7676,39 @@
                 "name": "Int",
                 "printedName": "Swift.Int",
                 "usr": "s:Si"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "usr": "s:Sq"
               }
             ],
             "declKind": "Func",
-            "usr": "c:@M@NeftaSDK@objc(cs)NeftaPlugin(cm)OnExternalMediationRequest:adType:recommendedAdUnitId:requestedFloorPrice:calculatedFloorPrice:adUnitId:revenue:precision:status:",
-            "mangledName": "$s8NeftaSDK0A6PluginC26OnExternalMediationRequest_6adType19recommendedAdUnitId19requestedFloorPrice010calculatedoP00hlM07revenue9precision6statusySS_SiSSSgS2dAMSdAMSitFZ",
+            "usr": "c:@M@NeftaSDK@objc(cs)NeftaPlugin(cm)OnExternalMediationRequest:adType:recommendedAdUnitId:requestedFloorPrice:calculatedFloorPrice:adUnitId:revenue:precision:status:providerStatus:networkStatus:",
+            "mangledName": "$s8NeftaSDK0A6PluginC26OnExternalMediationRequest_6adType19recommendedAdUnitId19requestedFloorPrice010calculatedoP00hlM07revenue9precision6status14providerStatus07networkV0ySS_SiSSSgS2dAOSdAOSiA2OtFZ",
             "moduleName": "NeftaSDK",
             "static": true,
             "declAttributes": [
@@ -16806,7 +16834,7 @@
       "kind": "StringLiteral",
       "offset": 3253,
       "length": 7,
-      "value": "\"4.2.3\""
+      "value": "\"4.2.4\""
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/NeftaPlugin.swift",
@@ -17497,21 +17525,21 @@
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/SessionData.swift",
       "kind": "IntegerLiteral",
-      "offset": 1196,
+      "offset": 1336,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/SessionData.swift",
       "kind": "IntegerLiteral",
-      "offset": 1227,
+      "offset": 1367,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/SessionData.swift",
       "kind": "IntegerLiteral",
-      "offset": 1263,
+      "offset": 1403,
       "length": 1,
       "value": "0"
     },

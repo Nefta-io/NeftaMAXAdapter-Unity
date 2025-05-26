@@ -2,7 +2,8 @@
     "name": "NeftaCustomAdapter",
     "rootNamespace": "",
     "references": [
-        "GUID:a4cfc1a18fa3a469b96d885db522f42e"
+        "GUID:a4cfc1a18fa3a469b96d885db522f42e",
+        "GUID:760a4c7888534400e882b82c5b3fba06"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

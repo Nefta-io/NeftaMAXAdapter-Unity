@@ -19,26 +19,16 @@ NSString * const _mediationProvider = @"applovin-max";
 static NeftaPlugin *_plugin;
 
 + (void)OnExternalMediationRequestLoad:(AdType)adType recommendedAdUnitId:(NSString* _Nullable)recommendedAdUnitId calculatedFloorPrice:(double)calculatedFloorPrice ad:(MAAd * _Nonnull)ad {
-    [NeftaPlugin OnExternalMediationRequest: _mediationProvider adType: adType recommendedAdUnitId: recommendedAdUnitId requestedFloorPrice: -1 calculatedFloorPrice: calculatedFloorPrice adUnitId: ad.adUnitIdentifier revenue: ad.revenue precision: ad.revenuePrecision status: 1];
+    [NeftaPlugin OnExternalMediationRequest: _mediationProvider adType: adType recommendedAdUnitId: recommendedAdUnitId requestedFloorPrice: -1 calculatedFloorPrice: calculatedFloorPrice adUnitId: ad.adUnitIdentifier revenue: ad.revenue precision: ad.revenuePrecision status: 1 providerStatus: nil networkStatus: nil];
 }
 + (void)OnExternalMediationRequestFail:(AdType)adType recommendedAdUnitId:(NSString* _Nullable)recommendedAdUnitId calculatedFloorPrice:(double)calculatedFloorPrice adUnitIdentifier:(NSString * _Nonnull)adUnitIdentifier error:(MAError * _Nonnull)error {
     int status = 0;
     if (error.code == MAErrorCodeNoFill) {
         status = 2;
     }
-    [NeftaPlugin OnExternalMediationRequest: _mediationProvider adType: adType recommendedAdUnitId: recommendedAdUnitId requestedFloorPrice: -1 calculatedFloorPrice: calculatedFloorPrice adUnitId: adUnitIdentifier revenue: -1 precision: nil status: status];
-}
-
-+ (void) OnExternalMediationRequestLoad:(AdType)adType requestedFloorPrice:(double)requestedFloorPrice calculatedFloorPrice:(double)calculatedFloorPrice ad:(MAAd *)ad {
-    [NeftaPlugin OnExternalMediationRequest: _mediationProvider adType: adType recommendedAdUnitId: nil requestedFloorPrice: requestedFloorPrice calculatedFloorPrice: calculatedFloorPrice adUnitId: ad.adUnitIdentifier revenue: ad.revenue precision: ad.revenuePrecision status: 1];
-}
-
-+ (void) OnExternalMediationRequestFail:(AdType)adType requestedFloorPrice:(double)requestedFloorPrice calculatedFloorPrice:(double)calculatedFloorPrice adUnitIdentifier:(NSString *)adUnitIdentifier error:(MAError *)error {
-    int status = 0;
-    if (error.code == MAErrorCodeNoFill) {
-        status = 2;
-    }
-    [NeftaPlugin OnExternalMediationRequest: _mediationProvider adType: adType recommendedAdUnitId: nil requestedFloorPrice: requestedFloorPrice calculatedFloorPrice: calculatedFloorPrice adUnitId: adUnitIdentifier revenue: -1 precision: nil status: status];
+    NSString *providerStatus = [NSString stringWithFormat:@"%ld", error.code];
+    NSString *networkStatus = [NSString stringWithFormat:@"%ld", error.mediatedNetworkErrorCode];
+    [NeftaPlugin OnExternalMediationRequest: _mediationProvider adType: adType recommendedAdUnitId: recommendedAdUnitId requestedFloorPrice: -1 calculatedFloorPrice: calculatedFloorPrice adUnitId: adUnitIdentifier revenue: -1 precision: nil status: status providerStatus: providerStatus networkStatus: networkStatus];
 }
 
 + (void) OnExternalMediationImpression:(MAAd*)ad {
@@ -159,7 +149,7 @@ static NeftaPlugin *_plugin;
 }
 
 - (NSString *)adapterVersion {
-    return @"2.2.3";
+    return @"2.2.4";
 }
 
 - (void)destroy {
