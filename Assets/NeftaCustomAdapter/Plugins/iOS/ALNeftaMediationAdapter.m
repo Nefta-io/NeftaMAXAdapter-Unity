@@ -75,14 +75,23 @@ static NeftaPlugin *_plugin;
     }
     NSString* auctionId;
     NSString* creativeId = ad.creativeIdentifier;
-    if ([ad.networkName isEqualToString: @"Nefta"]) {
-        if (ad.format == MAAdFormat.banner || ad.format == MAAdFormat.leader) {
+    int type = 0;
+    BOOL isNeftaNetwork = [ad.networkName isEqualToString: @"Nefta"];
+    if (ad.format == MAAdFormat.banner || ad.format == MAAdFormat.leader) {
+        type = 1;
+        if (isNeftaNetwork) {
             auctionId = ALNeftaBanner.GetLastAuctionId;
             creativeId = ALNeftaBanner.GetLastCreativeId;
-        } else if (ad.format == MAAdFormat.interstitial) {
+        }
+    } else if (ad.format == MAAdFormat.interstitial) {
+        type = 2;
+        if (isNeftaNetwork) {
             auctionId = ALNeftaInterstitial.GetLastAuctionId;
             creativeId = ALNeftaInterstitial.GetLastCreativeId;
-        } else if (ad.format == MAAdFormat.rewarded) {
+        }
+    } else if (ad.format == MAAdFormat.rewarded) {
+        type = 3;
+        if (isNeftaNetwork) {
             auctionId = ALNeftaRewarded.GetLastAuctionId;
             creativeId = ALNeftaRewarded.GetLastCreativeId;
         }
@@ -93,19 +102,28 @@ static NeftaPlugin *_plugin;
     if (creativeId != nil) {
         [data setObject: creativeId forKey: @"creative_id"];
     }
-    [NeftaPlugin OnExternalMediationImpression: _mediationProvider data: data];
+    [NeftaPlugin OnExternalMediationImpression: _mediationProvider data: data adType: type revenue: ad.revenue precision: ad.revenuePrecision];
 }
 
-+ (void) OnExternalMediationImpressionAsString:(NSString*)network format:(NSString *)format creativeId:(NSString *)creativeId data:(NSString *)data {
++ (void) OnExternalMediationImpressionAsString:(NSString*)network format:(NSString *)format creativeId:(NSString *)creativeId data:(NSString *)data revenue:(double)revenue precision:(NSString *)precision {
     NSString *auctionId = nil;
-    if ([network isEqual: @"Nefta"]) {
-        if ([format isEqualToString: MAAdFormat.banner.label] || [format isEqualToString: MAAdFormat.leader.label]) {
+    int type = 0;
+    BOOL isNeftaNetwork = [network isEqualToString: @"Nefta"];
+    if ([format isEqualToString: MAAdFormat.banner.label] || [format isEqualToString: MAAdFormat.leader.label]) {
+        type = 1;
+        if (isNeftaNetwork) {
             auctionId = ALNeftaBanner.GetLastAuctionId;
             creativeId = ALNeftaBanner.GetLastCreativeId;
-        } else if ([format isEqualToString: MAAdFormat.interstitial.label]) {
+        }
+    } else if ([format isEqualToString: MAAdFormat.interstitial.label]) {
+        type = 2;
+        if (isNeftaNetwork) {
             auctionId = ALNeftaInterstitial.GetLastAuctionId;
             creativeId = ALNeftaInterstitial.GetLastCreativeId;
-        } else if ([format isEqualToString: MAAdFormat.rewarded.label]) {
+        }
+    } else if ([format isEqualToString: MAAdFormat.rewarded.label]) {
+        type = 3;
+        if (isNeftaNetwork) {
             auctionId = ALNeftaRewarded.GetLastAuctionId;
             creativeId = ALNeftaRewarded.GetLastCreativeId;
         }
@@ -124,9 +142,12 @@ static NeftaPlugin *_plugin;
         [sb appendString: @"\",\"creative_id\":\""];
         [sb appendString: creativeId];
     }
-    [sb appendString: @"\""];
+    [sb appendString: @"\",\"precision\":\""];
+    [sb appendString: precision];
+    [sb appendString: @"\",\"revenue\":"];
+    [sb appendFormat: @"%f", revenue];
     
-    [NeftaPlugin OnExternalMediationImpressionAsString: _mediationProvider data: sb];
+    [NeftaPlugin OnExternalMediationImpressionAsString: _mediationProvider data: sb adType: type revenue: revenue precision: precision];
 }
 
 - (void)initializeWithParameters:(id<MAAdapterInitializationParameters>)parameters completionHandler:(void (^)(MAAdapterInitializationStatus, NSString *_Nullable))completionHandler {
@@ -149,7 +170,7 @@ static NeftaPlugin *_plugin;
 }
 
 - (NSString *)adapterVersion {
-    return @"2.2.4";
+    return @"2.2.5";
 }
 
 - (void)destroy {

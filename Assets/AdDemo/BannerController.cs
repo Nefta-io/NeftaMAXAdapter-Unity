@@ -16,7 +16,7 @@ namespace AdDemo
 #else // UNITY_ANDROID
         private const string DefaultAdUnitId = "6345b3fa80c73572";
 #endif
-        private const string AdUnitIdInsightName = "recommended_interstitial_ad_unit_id";
+        private const string AdUnitIdInsightName = "recommended_banner_ad_unit_id";
         private const string FloorPriceInsightName = "calculated_user_floor_price_banner";
         
         [SerializeField] private Text _title;
@@ -113,13 +113,8 @@ namespace AdDemo
             
             _show.interactable = false;
             _hide.interactable = true;
-            
-            var type = (Type) Random.Range(0, 7);
-            var status = (Status)Random.Range(0, 3);
-            var source = (Source)Random.Range(0, 7);
-            var value = Random.Range(0, 101);
-            NeftaAdapterEvents.Record(new ProgressionEvent(type, status)
-                { _source = source, _name = $"progression_{type}_{status} {source} {value}", _value = value });
+
+            AddDemoGameEventExample();
         }
         
         private void OnHideClick()
@@ -177,6 +172,16 @@ namespace AdDemo
         {
             _status.text = status;
             Debug.Log($"Banner: {status}");
+        }
+
+        private void AddDemoGameEventExample()
+        {
+            var type = (Type) Random.Range(0, 7);
+            var status = (Status)Random.Range(0, 3);
+            var source = (Source)Random.Range(0, 7);
+            var value = Random.Range(0, 101);
+            NeftaAdapterEvents.Record(new ProgressionEvent(type, status)
+                { _source = source, _name = $"progression_{type}_{status} {source} {value}", _value = value });
         }
     }
 }

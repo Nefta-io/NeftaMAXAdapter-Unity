@@ -44,8 +44,8 @@ namespace NeftaCustomAdapter
 
             public InsightRequest(OnBehaviourInsightCallback callback)
             {
-                _id = _insightId;
-                _insightId++;
+                _id = Interlocked.CompareExchange(ref _insightId, 0, 0);
+                Interlocked.Increment(ref _insightId);
                 _returnContext = SynchronizationContext.Current;
                 _callback = callback;
             }
@@ -74,10 +74,10 @@ namespace NeftaCustomAdapter
         private static extern void NeftaPlugin_OnExternalMediationRequest(string mediationProvider, int adType, string recommendedAdUnitId, double requestedFloorPrice, double calculatedFloorPrice, string adUnitId, double revenue, string precision, int status, string providerStatus, string networkStatus);
 
         [DllImport ("__Internal")]
-        private static extern void NeftaAdapter_OnExternalMediationImpressionAsString(string network, string format, string creativeId, string data);
+        private static extern void NeftaAdapter_OnExternalMediationImpressionAsString(string network, string format, string creativeId, string data, double revenue, string precision);
 
         [DllImport ("__Internal")]
-        private static extern void NeftaPlugin_OnExternalMediationImpressionAsString(string mediationProvider, string data);
+        private static extern void NeftaPlugin_OnExternalMediationImpressionAsString(string mediationProvider, string data, int adType, double revenue, string precision);
 
         [DllImport ("__Internal")]
         private static extern string NeftaPlugin_GetNuid(bool present);
@@ -217,7 +217,7 @@ namespace NeftaCustomAdapter
 #endif
         }
 
-        private static void OnExternalMediationImpression(string adUnitId, MaxSdkBase.AdInfo adInfo)
+        public static void OnExternalMediationImpression(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
             if (adInfo == null)
             {
@@ -227,11 +227,11 @@ namespace NeftaCustomAdapter
             var network = adInfo.NetworkName;
             var format = adInfo.AdFormat;
             var creativeId = adInfo.CreativeIdentifier;
+            var revenue = adInfo.Revenue;
+            var precision = adInfo.RevenuePrecision;
             var sb = new StringBuilder();
             sb.Append("{\"mediation_provider\":\"applovin-max\",\"ad_unit_id\":\"");
             sb.Append(adUnitId);
-            sb.Append("\",\"revenue_precision\":\"");
-            sb.Append(adInfo.RevenuePrecision);
             sb.Append("\",\"placement_name\":\"");
             sb.Append(adInfo.Placement);
             sb.Append("\",\"request_latency\":");
@@ -280,31 +280,42 @@ namespace NeftaCustomAdapter
 
                 sb.Append(",\"waterfall_test_name\":\"");
                 sb.Append(JavaScriptStringEncode(adInfo.WaterfallInfo.TestName));
-
             }
 
-            sb.Append("\",\"revenue\":");
-            sb.Append(adInfo.Revenue.ToString(CultureInfo.InvariantCulture));
+            sb.Append("\"");
+            
             var data = sb.ToString();
 #if UNITY_EDITOR
             _plugin.OnExternalMediationImpression(data);
 #elif UNITY_IOS
-            NeftaAdapter_OnExternalMediationImpressionAsString(network, format, creativeId, data);
+            NeftaAdapter_OnExternalMediationImpressionAsString(network, format, creativeId, data, revenue, precision);
 #elif UNITY_ANDROID
             if (_adapter == null) {
                 _adapter = new AndroidJavaClass("com.applovin.mediation.adapters.NeftaMediationAdapter");
             }
-            _adapter.CallStatic("OnExternalMediationImpressionAsString", network, format, creativeId, data);
+            _adapter.CallStatic("OnExternalMediationImpressionAsString", network, format, creativeId, data, revenue, precision);
 #endif
         }
 
-#if NEFTA_LEVELPLAY
-        public static void OnLevelPlayRequestLoaded(AdType adType, double requestedFloorPrice, double calculatedFloorPrice, com.unity3d.mediation.LevelPlayAdInfo adInfo)
+#if NEFTA_LEVELPLAY || NEFTA_LEVELPLAY_8_0_OR_NEVER
+#if NEFTA_LEVELPLAY_8_0_OR_NEVER
+        public static void OnLevelPlayRequestLoaded(AdType adType, double requestedFloorPrice, double calculatedFloorPrice, Unity.Services.LevelPlay.LevelPlayAdInfo adInfo)
         {
             OnLevelPlayRequest((int)adType, requestedFloorPrice, calculatedFloorPrice, adInfo.AdUnitId, adInfo.Revenue ?? 0, adInfo.Precision, 1, null, null);
         }
+        
+        public static void OnLevelPlayRequestFailed(AdType adType, double requestedFloorPrice, double calculatedFloorPrice, Unity.Services.LevelPlay.LevelPlayAdError error)
+        {
+            var status = 0;
+            if (error.ErrorCode == 509 || error.ErrorCode == 606 || error.ErrorCode == 706 || error.ErrorCode == 1058 || error.ErrorCode == 1158)
+            {
+                status = 2;
+            }
 
-        public static void OnLevelPlayRequestLoaded(AdType adType, double requestedFloorPrice, double calculatedFloorPrice, Unity.Services.LevelPlay.LevelPlayAdInfo adInfo)
+            OnLevelPlayRequest((int)adType, requestedFloorPrice, calculatedFloorPrice, error.AdUnitId, -1, null, status, error.ErrorCode.ToString(CultureInfo.InvariantCulture), null);
+        }
+#else
+        public static void OnLevelPlayRequestLoaded(AdType adType, double requestedFloorPrice, double calculatedFloorPrice, com.unity3d.mediation.LevelPlayAdInfo adInfo)
         {
             OnLevelPlayRequest((int)adType, requestedFloorPrice, calculatedFloorPrice, adInfo.AdUnitId, adInfo.Revenue ?? 0, adInfo.Precision, 1, null, null);
         }
@@ -319,18 +330,7 @@ namespace NeftaCustomAdapter
 
             OnLevelPlayRequest((int)adType, requestedFloorPrice, calculatedFloorPrice, error.AdUnitId, -1, null, status, error.ErrorCode.ToString(CultureInfo.InvariantCulture), null);
         }
-
-        public static void OnLevelPlayRequestFailed(AdType adType, double requestedFloorPrice, double calculatedFloorPrice, Unity.Services.LevelPlay.LevelPlayAdError error)
-        {
-            var status = 0;
-            if (error.ErrorCode == 509 || error.ErrorCode == 606 || error.ErrorCode == 706 || error.ErrorCode == 1058 || error.ErrorCode == 1158)
-            {
-                status = 2;
-            }
-
-            OnLevelPlayRequest((int)adType, requestedFloorPrice, calculatedFloorPrice, error.AdUnitId, -1, null, status, error.ErrorCode.ToString(CultureInfo.InvariantCulture), null);
-        }
-
+#endif
         private static void OnLevelPlayRequest(int adType, double requestedFloorPrice, double calculatedFloorPrice, string adUnitId, double revenue, string precision, int status, string providerStatus, string networkStatus)
         {
 #if UNITY_EDITOR
@@ -344,16 +344,34 @@ namespace NeftaCustomAdapter
 
         public static void OnLevelPlayImpression(IronSourceImpressionData impression)
         {
+            var adType = 0;
+            if (impression.adFormat != null)
+            {
+                var formatLower = impression.adFormat.ToLower();
+                if (formatLower == "banner")
+                {
+                    adType = 1;
+                }
+                else if (formatLower.Contains("inter"))
+                {
+                    adType = 2;
+                }
+                else if (formatLower.Contains("rewarded"))
+                {
+                    adType = 3;
+                }
+            }
+            var revenue = impression.revenue ?? 0;
+            var precision = impression.precision;
 #if UNITY_EDITOR
             _plugin.OnExternalMediationImpression(impression.allData);
 #elif UNITY_IOS
-            NeftaPlugin_OnExternalMediationImpressionAsString("ironsource-levelplay", impression.allData);
+            NeftaPlugin_OnExternalMediationImpressionAsString("ironsource-levelplay", impression.allData, adType, revenue, precision);
 #elif UNITY_ANDROID
-            _plugin.CallStatic("OnExternalMediationImpressionAsString", "ironsource-levelplay", impression.allData);
+            _plugin.CallStatic("OnExternalMediationImpressionAsString", "ironsource-levelplay", impression.allData, adType, revenue, precision);
 #endif
         }
-#endif        
-
+#endif
         public static void GetBehaviourInsight(string[] insightList, OnBehaviourInsightCallback callback=null)
         {
             var request = new InsightRequest(callback ?? BehaviourInsightCallback);

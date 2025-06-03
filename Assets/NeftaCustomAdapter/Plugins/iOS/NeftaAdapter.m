@@ -19,8 +19,8 @@ extern "C" {
     void NeftaPlugin_Init(const char *appId, OnBehaviourInsight onBehaviourInsight);
     void NeftaPlugin_Record(int type, int category, int subCategory, const char *name, long value, const char *customPayload);
     void NeftaPlugin_OnExternalMediationRequest(const char *mediationProvider, int adType, const char *recommendedAdUnitId, double requestedFloorPrice, double calculatedFloorPrice, const char *adUnitId, double revenue, const char *precision, int status, const char *providerStatus, const char *networkStatus);
-    void NeftaAdapter_OnExternalMediationImpressionAsString(const char *network, const char *format, const char *creativeId, const char *data);
-    void NeftaPlugin_OnExternalMediationImpressionAsString(const char *mediationProvider, const char *data);
+    void NeftaAdapter_OnExternalMediationImpressionAsString(const char *network, const char *format, const char *creativeId, const char *data, double revenue, const char *precision);
+    void NeftaPlugin_OnExternalMediationImpressionAsString(const char *mediationProvider, const char *data, int adType, double revenue, const char *precision);
     const char * NeftaPlugin_GetNuid(void *instance, bool present);
     void NeftaPlugin_SetContentRating(const char *rating);
     void NeftaPlugin_GetBehaviourInsight(int requestId, const char *insights);
@@ -59,18 +59,20 @@ void NeftaPlugin_OnExternalMediationRequest(const char *mediationProvider, int a
     [NeftaPlugin OnExternalMediationRequest: mP adType: adType recommendedAdUnitId: r requestedFloorPrice: requestedFloorPrice calculatedFloorPrice: calculatedFloorPrice adUnitId: a revenue: revenue precision: p status: status providerStatus: pS networkStatus: nS];
 }
 
-void NeftaAdapter_OnExternalMediationImpressionAsString(const char *network, const char *format, const char *creativeId, const char *data) {
+void NeftaAdapter_OnExternalMediationImpressionAsString(const char *network, const char *format, const char *creativeId, const char *data, double revenue, const char *precision) {
     NSString *n = network ? [NSString stringWithUTF8String: network] : nil;
     NSString *f = format ? [NSString stringWithUTF8String: format] : nil;
     NSString *c = creativeId ? [NSString stringWithUTF8String: creativeId] : nil;
     NSString *d = data ? [NSString stringWithUTF8String: data] : nil;
-    [ALNeftaMediationAdapter OnExternalMediationImpressionAsString: n format: f creativeId: c data: d];
+    NSString *p = precision ? [NSString stringWithUTF8String: precision] : nil;
+    [ALNeftaMediationAdapter OnExternalMediationImpressionAsString: n format: f creativeId: c data: d revenue: revenue precision: p];
 }
 
-void NeftaPlugin_OnExternalMediationImpressionAsString(const char *mediationProvider, const char *data) {
+void NeftaPlugin_OnExternalMediationImpressionAsString(const char *mediationProvider, const char *data, int adType, double revenue, const char *precision) {
     NSString *mP = mediationProvider ? [NSString stringWithUTF8String: mediationProvider] : nil;
     NSString *d = data ? [NSString stringWithUTF8String: data] : nil;
-    [NeftaPlugin OnExternalMediationImpressionAsString: mP data: d];
+    NSString *p = precision ? [NSString stringWithUTF8String: precision] : nil;
+    [NeftaPlugin OnExternalMediationImpressionAsString: mP data: d adType: adType revenue: revenue precision: p];
 }
 
 void NeftaPlugin_SetContentRating(const char *rating) {

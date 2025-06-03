@@ -169,8 +169,8 @@ import os
   @objc public func GetBehaviourInsight(_ insightList: [Swift.String], callback: @escaping NeftaSDK.NeftaPlugin.OnBehaviourInsightBlock)
   @objc public func GetNuid(present: Swift.Bool) -> Swift.String
   @objc public static func OnExternalMediationRequest(_ provider: Swift.String, adType: Swift.Int, recommendedAdUnitId: Swift.String?, requestedFloorPrice: Swift.Float64, calculatedFloorPrice: Swift.Float64, adUnitId: Swift.String?, revenue: Swift.Float64, precision: Swift.String?, status: Swift.Int, providerStatus: Swift.String?, networkStatus: Swift.String?)
-  @objc public static func OnExternalMediationImpression(_ path: Swift.String, data: Foundation.NSMutableDictionary)
-  @objc public static func OnExternalMediationImpressionAsString(_ path: Swift.String, data: Swift.String)
+  @objc public static func OnExternalMediationImpression(_ path: Swift.String, data: Foundation.NSMutableDictionary, adType: Swift.Int, revenue: Swift.Float64, precision: Swift.String?)
+  @objc public static func OnExternalMediationImpressionAsString(_ path: Swift.String, data: Swift.String, adType: Swift.Int, revenue: Swift.Float64, precision: Swift.String?)
   @objc public static func SetOverride(url: Swift.String?)
   @objc deinit
 }

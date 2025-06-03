@@ -730,8 +730,8 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NeftaPlugin * _Null_un
 - (void)GetBehaviourInsight:(NSArray<NSString *> * _Nonnull)insightList callback:(void (^ _Nonnull)(NSDictionary<NSString *, Insight *> * _Nonnull))callback;
 - (NSString * _Nonnull)GetNuidWithPresent:(BOOL)present SWIFT_WARN_UNUSED_RESULT;
 + (void)OnExternalMediationRequest:(NSString * _Nonnull)provider adType:(NSInteger)adType recommendedAdUnitId:(NSString * _Nullable)recommendedAdUnitId requestedFloorPrice:(double)requestedFloorPrice calculatedFloorPrice:(double)calculatedFloorPrice adUnitId:(NSString * _Nullable)adUnitId revenue:(double)revenue precision:(NSString * _Nullable)precision status:(NSInteger)status providerStatus:(NSString * _Nullable)providerStatus networkStatus:(NSString * _Nullable)networkStatus;
-+ (void)OnExternalMediationImpression:(NSString * _Nonnull)path data:(NSMutableDictionary * _Nonnull)data;
-+ (void)OnExternalMediationImpressionAsString:(NSString * _Nonnull)path data:(NSString * _Nonnull)data;
++ (void)OnExternalMediationImpression:(NSString * _Nonnull)path data:(NSMutableDictionary * _Nonnull)data adType:(NSInteger)adType revenue:(double)revenue precision:(NSString * _Nullable)precision;
++ (void)OnExternalMediationImpressionAsString:(NSString * _Nonnull)path data:(NSString * _Nonnull)data adType:(NSInteger)adType revenue:(double)revenue precision:(NSString * _Nullable)precision;
 + (void)SetOverrideWithUrl:(NSString * _Nullable)url;
 @end
 
