@@ -297,8 +297,8 @@ namespace NeftaCustomAdapter
 #endif
         }
 
-#if NEFTA_LEVELPLAY || NEFTA_LEVELPLAY_8_0_OR_NEVER
-#if NEFTA_LEVELPLAY_8_0_OR_NEVER
+#if NEFTA_LEVELPLAY || NEFTA_LEVELPLAY_8_0_OR_NEWER
+#if NEFTA_LEVELPLAY_8_0_OR_NEWER
         public static void OnLevelPlayRequestLoaded(AdType adType, double requestedFloorPrice, double calculatedFloorPrice, Unity.Services.LevelPlay.LevelPlayAdInfo adInfo)
         {
             OnLevelPlayRequest((int)adType, requestedFloorPrice, calculatedFloorPrice, adInfo.AdUnitId, adInfo.Revenue ?? 0, adInfo.Precision, 1, null, null);
