@@ -70,6 +70,7 @@ namespace AdDemo
             }
             
             _selectedAdUnitId = _recommendedAdUnitId ?? _defaultAdUnitId;
+            MaxSdk.SetInterstitialExtraParameter(_selectedAdUnitId, "disable_auto_retries", "true");
             MaxSdk.LoadInterstitial(_selectedAdUnitId);
         }
         
@@ -97,7 +98,7 @@ namespace AdDemo
         {
             // As per MAX recommendations, retry with exponentially higher delays up to 64s
             // In case you would like to customize fill rate / revenue please contact our customer support
-            yield return new WaitForSeconds(new [] { 0, 2, 4, 8, 32, 64 }[Math.Min(_consecutiveAdFails, 5)]);
+            yield return new WaitForSeconds(new [] { 0, 2, 4, 8, 16, 32, 64 }[Math.Min(_consecutiveAdFails, 6)]);
             
             GetInsightsAndLoad();
         }
@@ -206,7 +207,7 @@ namespace AdDemo
             var category = (ResourceCategory) Random.Range(0, 9);
             var method = (ReceiveMethod)Random.Range(0, 8);
             var value = Random.Range(0, 101);
-            NeftaAdapterEvents.Record(new ReceiveEvent(category) { _method = method, _name = $"receive_{category} {method} {value}", _value = value });
+            new ReceiveEvent(category) { _method = method, _name = $"receive_{category} {method} {value}", _value = value }.Record();
         }
     }
 }

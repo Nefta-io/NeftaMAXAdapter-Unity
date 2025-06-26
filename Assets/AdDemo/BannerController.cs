@@ -180,8 +180,7 @@ namespace AdDemo
             var status = (Status)Random.Range(0, 3);
             var source = (Source)Random.Range(0, 7);
             var value = Random.Range(0, 101);
-            NeftaAdapterEvents.Record(new ProgressionEvent(type, status)
-                { _source = source, _name = $"progression_{type}_{status} {source} {value}", _value = value });
+            new ProgressionEvent(type, status){ _source = source, _name = $"progression_{type}_{status} {source} {value}", _value = value }.Record();
         }
     }
 }
