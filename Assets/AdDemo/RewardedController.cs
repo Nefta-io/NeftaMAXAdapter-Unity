@@ -12,21 +12,17 @@ namespace AdDemo
     public class RewardedController : MonoBehaviour
     {
 #if UNITY_IOS
-        private const string _defaultAdUnitId = "08304643cb16df3b";
+        private const string DefaultAdUnitId = "08304643cb16df3b";
 #else // UNITY_ANDROID
-        private const string _defaultAdUnitId = "3082ee9199cf59f0";
+        private const string DefaultAdUnitId = "3082ee9199cf59f0";
 #endif
-        
-        private const string AdUnitIdInsightName = "recommended_rewarded_ad_unit_id";
-        private const string FloorPriceInsightName = "calculated_user_floor_price_rewarded";
+        private const int TimeoutInSeconds = 5;
         
         private string _selectedAdUnitId;
-        private string _recommendedAdUnitId;
-        private double _calculatedBidFloor;
-        private Coroutine _fallbackCoroutine;
+        private AdInsight _usedInsight;
+        private int _consecutiveAdFails;
         private Queue<string> _statusQueue;
         private Action<bool> _onFullScreenAdDisplayed;
-        private int _consecutiveAdFails;
         
         [SerializeField] private Text _title;
         [SerializeField] private Button _load;
@@ -35,72 +31,49 @@ namespace AdDemo
         
         private void GetInsightsAndLoad()
         {
-            NeftaAdapterEvents.GetBehaviourInsight(new string[] { AdUnitIdInsightName, FloorPriceInsightName }, OnBehaviourInsight);
-            
-            _fallbackCoroutine = StartCoroutine(LoadFallback());
+            NeftaAdapterEvents.GetInsights(Insights.Rewarded, OnInsights, TimeoutInSeconds);
         }
         
-        private void OnBehaviourInsight(Dictionary<string, Insight> insights)
+        private void OnInsights(Insights insights)
         {
-            _recommendedAdUnitId = null;
-            _calculatedBidFloor = 0;
-            if (insights.TryGetValue(AdUnitIdInsightName, out var insight))
+            _selectedAdUnitId = DefaultAdUnitId;
+            _usedInsight = insights._rewarded;
+            if (_usedInsight != null && _usedInsight._adUnit != null)
             {
-                _recommendedAdUnitId = insight._string;
-            }
-            if (insights.TryGetValue(FloorPriceInsightName, out insight))
-            {
-                _calculatedBidFloor = insight._float;
+                _selectedAdUnitId = _usedInsight._adUnit;
             }
             
-            Debug.Log($"OnBehaviourInsight for Rewarded recommended AdUnit: {_recommendedAdUnitId}, calculated bid floor: {_calculatedBidFloor}");
-            
-            if (_fallbackCoroutine != null)
-            {
-                Load();
-            }
-        }
-        
-        private void Load()
-        {
-            if (_fallbackCoroutine != null)
-            {
-                StopCoroutine(_fallbackCoroutine);
-                _fallbackCoroutine = null;
-            }
-            
-            _selectedAdUnitId = _recommendedAdUnitId ?? _defaultAdUnitId;
+            SetStatus($"Loading {_selectedAdUnitId} insights: {_usedInsight}");
             MaxSdk.SetRewardedAdExtraParameter(_selectedAdUnitId, "disable_auto_retries", "true");
             MaxSdk.LoadRewardedAd(_selectedAdUnitId);
         }
         
         private void OnAdFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
         {
-            NeftaAdapterEvents.OnExternalMediationRequestFailed(NeftaAdapterEvents.AdType.Rewarded, _recommendedAdUnitId, _calculatedBidFloor, adUnitId, errorInfo);
-            
+            NeftaAdapterEvents.OnExternalMediationRequestFailed(NeftaAdapterEvents.AdType.Rewarded, _usedInsight, adUnitId, errorInfo);
+
             SetStatus($"Load failed {adUnitId}: {errorInfo}");
             
             _consecutiveAdFails++;
-            StartCoroutine(ReTryLoad());
+            StartCoroutine(RetryLoadWithDelay());
         }
         
-        private void OnAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
-        {
-            NeftaAdapterEvents.OnExternalMediationRequestLoaded(NeftaAdapterEvents.AdType.Rewarded, _recommendedAdUnitId, _calculatedBidFloor, adInfo);
-            
-            SetStatus($"Loaded {adUnitId} at: {adInfo.Revenue}");
-            
-            _consecutiveAdFails = 0;
-            _show.interactable = true;
-        }
-        
-        private IEnumerator ReTryLoad()
+        private IEnumerator RetryLoadWithDelay()
         {
             // As per MAX recommendations, retry with exponentially higher delays up to 64s
             // In case you would like to customize fill rate / revenue please contact our customer support
             yield return new WaitForSeconds(new [] { 0, 2, 4, 8, 16, 32, 64 }[Math.Min(_consecutiveAdFails, 6)]);
-            
             GetInsightsAndLoad();
+        }
+        
+        private void OnAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
+        {
+            NeftaAdapterEvents.OnExternalMediationRequestLoaded(NeftaAdapterEvents.AdType.Rewarded, _usedInsight, adInfo);
+
+            SetStatus($"Loaded {adUnitId} at: {adInfo.Revenue}");
+            
+            _consecutiveAdFails = 0;
+            _show.interactable = true;
         }
         
         public void Init(Action<bool> onFullScreenAdDisplayed)
@@ -126,9 +99,10 @@ namespace AdDemo
         
         private void OnLoadClick()
         {
+            SetStatus("GetInsightsAndLoad...");
             GetInsightsAndLoad();
-
             AddDemoGameEventExample();
+            _load.interactable = false;
         }
         
         private void OnShowClick()
@@ -144,15 +118,6 @@ namespace AdDemo
             }
             
             _show.interactable = false;
-        }
-        
-        private IEnumerator LoadFallback()
-        {
-            yield return new WaitForSeconds(5f);
-
-            _recommendedAdUnitId = null;
-            _calculatedBidFloor = 0;
-            Load();
         }
         
         private void OnAdDisplayFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo, MaxSdkBase.AdInfo adInfo)
@@ -175,6 +140,7 @@ namespace AdDemo
         {
             SetStatus("OnAdHideEvent");
             _onFullScreenAdDisplayed(false);
+            _load.interactable = true;
         }
         
         private void OnAdReceivedRewardEvent(string adUnitId, MaxSdkBase.Reward reward, MaxSdkBase.AdInfo adInfo)

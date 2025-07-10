@@ -39,12 +39,6 @@ import os
   @objc final public let _message: Swift.String
   @objc deinit
 }
-@_hasMissingDesignatedInitializers @objc public class Insight : ObjectiveC.NSObject {
-  @objc final public let _int: Swift.Int64
-  @objc final public let _float: Swift.Float64
-  @objc final public let _string: Swift.String?
-  @objc deinit
-}
 @_hasMissingDesignatedInitializers @objc public class Placement : ObjectiveC.NSObject {
   @objc public enum Types : Swift.Int, Swift.CustomStringConvertible {
     case Uninitialized = 0
@@ -109,6 +103,16 @@ import os
   @objc public func Mute(_ mute: Swift.Bool)
   @objc deinit
 }
+@objc public class AdInsight : ObjectiveC.NSObject {
+  @objc final public let _type: NeftaSDK.Placement.Types
+  @objc public var _floorPrice: Swift.Double
+  @objc public var _adUnit: Swift.String?
+  public init(type: NeftaSDK.Placement.Types, config: [Swift.String : Any])
+  @objc override dynamic public var description: Swift.String {
+    @objc get
+  }
+  @objc deinit
+}
 @_inheritsConvenienceInitializers @objc public class NInterstitial : NeftaSDK.NAd {
   @objc override public init(id: Swift.String)
   @objc deinit
@@ -136,8 +140,8 @@ import os
     @objc deinit
   }
   public typealias OnReadyBlock = (([Swift.String : NeftaSDK.Placement]) -> Swift.Void)
-  public typealias OnBehaviourInsightBlock = (([Swift.String : NeftaSDK.Insight]) -> Swift.Void)
-  public typealias OnBehaviourInsightAsStringBlock = ((Swift.Int, Swift.String) -> Swift.Void)
+  public typealias OnInsightsBlock = ((NeftaSDK.Insights) -> Swift.Void)
+  public typealias OnInsightsAsStringBlock = ((Swift.Int, Swift.String?) -> Swift.Void)
   public typealias OnLogBlock = ((Swift.String) -> Swift.Void)
   @objc public static let Version: Swift.String
   @objc public static let ContentRating_Unspecified: Swift.String
@@ -147,14 +151,13 @@ import os
   @objc public static let ContentRating_MatureAudience: Swift.String
   final public let _info: NeftaSDK.NeftaPlugin.Info
   final public let _state: NeftaSDK.NeftaPlugin.State
-  public static var _rtbUrl: Swift.String
+  public static var _initUrl: Swift.String
   public var _cachedInitRespose: Foundation.Data?
   @objc public var Events: NeftaSDK.NeftaEvents
   public var _placements: [Swift.String : NeftaSDK.Placement]!
   public var _ads: [NeftaSDK.NAd]
   @objc public var OnReady: NeftaSDK.NeftaPlugin.OnReadyBlock?
-  @objc public var OnBehaviourInsight: NeftaSDK.NeftaPlugin.OnBehaviourInsightBlock?
-  @objc public var OnBehaviourInsightAsString: NeftaSDK.NeftaPlugin.OnBehaviourInsightAsStringBlock?
+  @objc public var OnInsightsAsString: NeftaSDK.NeftaPlugin.OnInsightsAsStringBlock?
   @objc public static var OnLog: NeftaSDK.NeftaPlugin.OnLogBlock?
   @objc public static var _instance: NeftaSDK.NeftaPlugin!
   @objc(EnableLogging:) public static func EnableLogging(enable: Swift.Bool)
@@ -164,9 +167,8 @@ import os
   public static func SetDebugTime(offset: Swift.Int)
   @objc public func Record(type: Swift.Int, category: Swift.Int, subCategory: Swift.Int, name: Swift.String?, value: Swift.Int64, customPayload: Swift.String?)
   @objc public func SetPublisherUserId(id: Swift.String)
-  @objc(GetBehaviourInsightBridge:string:) public func GetBehaviourInsightBridge(requestId: Swift.Int, string: Swift.String)
-  @objc public func GetBehaviourInsight(_ insightList: [Swift.String])
-  @objc public func GetBehaviourInsight(_ insightList: [Swift.String], callback: @escaping NeftaSDK.NeftaPlugin.OnBehaviourInsightBlock)
+  @objc(GetInsightsBridge:insights:timeout:) public func GetInsightsBridge(requestId: Swift.Int, insights: Swift.Int, timeout: Swift.Int)
+  @objc(GetInsights:callback:timeout:) public func GetInsights(_ insights: Swift.Int, callback: @escaping NeftaSDK.NeftaPlugin.OnInsightsBlock, timeout: Swift.Int = 0)
   @objc public func GetNuid(present: Swift.Bool) -> Swift.String
   @objc public static func OnExternalMediationRequest(_ provider: Swift.String, adType: Swift.Int, recommendedAdUnitId: Swift.String?, requestedFloorPrice: Swift.Float64, calculatedFloorPrice: Swift.Float64, adUnitId: Swift.String?, revenue: Swift.Float64, precision: Swift.String?, status: Swift.Int, providerStatus: Swift.String?, networkStatus: Swift.String?)
   @objc public static func OnExternalMediationImpression(_ path: Swift.String, data: Foundation.NSMutableDictionary, adType: Swift.Int, revenue: Swift.Float64, precision: Swift.String?)
@@ -312,6 +314,19 @@ import os
   @_Concurrency.MainActor @preconcurrency @objc public func gestureRecognizer(_ gestureRecognizer: UIKit.UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIKit.UIGestureRecognizer) -> Swift.Bool
   @objc deinit
 }
+@_inheritsConvenienceInitializers @objc public class Insights : ObjectiveC.NSObject {
+  @objc public static let None: Swift.Int
+  @objc public static let Churn: Swift.Int
+  @objc public static let Banner: Swift.Int
+  @objc public static let Interstitial: Swift.Int
+  @objc public static let Rewarded: Swift.Int
+  @objc public var _churn: NeftaSDK.Churn?
+  @objc public var _banner: NeftaSDK.AdInsight?
+  @objc public var _interstitial: NeftaSDK.AdInsight?
+  @objc public var _rewarded: NeftaSDK.AdInsight?
+  @objc override dynamic public init()
+  @objc deinit
+}
 @objc public protocol NBannerListener : NeftaSDK.NAdListener {
 }
 @_inheritsConvenienceInitializers @objc public class NRewarded : NeftaSDK.NAd {
@@ -339,6 +354,16 @@ import os
   @objc override public func Show(viewController: UIKit.UIViewController?)
   @objc override public func Close()
   @objc public func Hide()
+  @objc deinit
+}
+@objc public class Churn : ObjectiveC.NSObject {
+  @objc public var _d1_probability: Swift.Double
+  @objc public var _d3_probability: Swift.Double
+  @objc public var _d7_probability: Swift.Double
+  @objc public var _d14_probability: Swift.Double
+  @objc public var _d30_probability: Swift.Double
+  @objc public var _probability_confidence: Swift.String?
+  public init(config: [Swift.String : Any])
   @objc deinit
 }
 @objc public class UnityWrapper : ObjectiveC.NSObject {

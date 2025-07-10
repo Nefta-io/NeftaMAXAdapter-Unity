@@ -22,7 +22,9 @@ namespace NeftaCustomAdapter.Editor
         private string _iosAdapterVersion;
         private string _iosVersion;
         
+        private static PluginImporter _debugAdapterImporter;
         private static PluginImporter _debugPluginImporter;
+        private static PluginImporter _releaseAdapterImporter;
         private static PluginImporter _releasePluginImporter;
         
         [MenuItem("Window/Nefta/Inspect", false, 200)]
@@ -116,7 +118,8 @@ namespace NeftaCustomAdapter.Editor
             }
             EditorGUILayout.Space(5);
             
-            if (_debugPluginImporter == null || _releasePluginImporter == null)
+            if (_debugPluginImporter == null || _releasePluginImporter == null ||
+                _debugAdapterImporter == null || _releaseAdapterImporter == null)
             {
                 EditorGUILayout.HelpBox("This getting Android SDKs", MessageType.Error);
             }
@@ -158,15 +161,29 @@ namespace NeftaCustomAdapter.Editor
         {
             var guid = AssetDatabase.FindAssets("NeftaMaxAdapter-debug")[0];
             var path = AssetDatabase.GUIDToAssetPath(guid);
-            _debugPluginImporter = (PluginImporter) AssetImporter.GetAtPath(path);
+            _debugAdapterImporter = (PluginImporter) AssetImporter.GetAtPath(path);
 
             guid = AssetDatabase.FindAssets("NeftaMaxAdapter-release")[0];
+            path = AssetDatabase.GUIDToAssetPath(guid);
+            _releaseAdapterImporter = (PluginImporter) AssetImporter.GetAtPath(path);
+            
+            guid = AssetDatabase.FindAssets("NeftaPlugin-debug")[0];
+            path = AssetDatabase.GUIDToAssetPath(guid);
+            _debugPluginImporter = (PluginImporter) AssetImporter.GetAtPath(path);
+
+            guid = AssetDatabase.FindAssets("NeftaPlugin-release")[0];
             path = AssetDatabase.GUIDToAssetPath(guid);
             _releasePluginImporter = (PluginImporter) AssetImporter.GetAtPath(path);
         }
 
         public static void TogglePlugins(bool enable)
         {
+            _debugAdapterImporter.SetCompatibleWithPlatform(BuildTarget.Android, enable);
+            _debugAdapterImporter.SaveAndReimport();
+            
+            _releaseAdapterImporter.SetCompatibleWithPlatform(BuildTarget.Android, !enable);
+            _releaseAdapterImporter.SaveAndReimport();
+            
             _debugPluginImporter.SetCompatibleWithPlatform(BuildTarget.Android, enable);
             _debugPluginImporter.SaveAndReimport();
                     
@@ -185,16 +202,22 @@ namespace NeftaCustomAdapter.Editor
 #if UNITY_2021_1_OR_NEWER
         private void GetAndroidVersions()
         {
-            var guids = AssetDatabase.FindAssets("NeftaMaxAdapter");
+            _androidAdapterVersion = GetAarVersion("NeftaMaxAdapter");
+            _androidVersion = GetAarVersion("NeftaPlugin-");
+        }
+
+        private string GetAarVersion(string aarName)
+        {
+            var guids = AssetDatabase.FindAssets(aarName);
             if (guids.Length == 0)
             {
-                _error = "NeftaMaxAdapter AARs not found in project";
-                return;
+                _error = $"{aarName} AARs not found in project";
+                return null;
             }
             if (guids.Length > 2)
             {
-                _error = "Multiple instances of NeftaMaxAdapter AARs found in project";
-                return;
+                _error = $"Multiple instances of {aarName} AARs found in project";
+                return null;
             }
             var aarPath = AssetDatabase.GUIDToAssetPath(guids[0]);
             using ZipArchive aar = ZipFile.OpenRead(aarPath);
@@ -202,7 +225,7 @@ namespace NeftaCustomAdapter.Editor
             if (manifestEntry == null)
             {
                 _error = "Nefta SDK AAR seems to be corrupted";
-                return;
+                return null;
             }
             using Stream manifestStream = manifestEntry.Open();
             XmlDocument manifest = new XmlDocument();
@@ -211,19 +234,9 @@ namespace NeftaCustomAdapter.Editor
             if (root == null)
             {
                 _error = "Nefta SDK AAR seems to be corrupted";
-                return;
+                return null;
             }
-            _androidAdapterVersion = root.Attributes["android:versionName"].Value;
-            var metaNodes = root.SelectNodes("/manifest/application/meta-data");
-            foreach (XmlNode metaNode in metaNodes)
-            {
-                var name = metaNode.Attributes["android:name"];
-                if (name.Value == "NeftaSDKVersion")
-                {
-                    _androidVersion = metaNode.Attributes["android:value"].Value;
-                    break;
-                }
-            }
+            return root.Attributes["android:versionName"].Value;
         }
 #endif
         

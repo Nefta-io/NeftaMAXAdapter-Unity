@@ -10,6 +10,7 @@
 #import "ALNeftaInterstitial.h"
 #import "ALNeftaRewarded.h"
 
+#import <os/log.h>
 #import <AppLovinSDK/AppLovinSDK.h>
 
 NSString * const _mediationProvider = @"applovin-max";
@@ -18,22 +19,34 @@ NSString * const _mediationProvider = @"applovin-max";
 
 static NeftaPlugin *_plugin;
 
-+ (void)OnExternalMediationRequestLoad:(AdType)adType recommendedAdUnitId:(NSString* _Nullable)recommendedAdUnitId calculatedFloorPrice:(double)calculatedFloorPrice ad:(MAAd * _Nonnull)ad {
-    [NeftaPlugin OnExternalMediationRequest: _mediationProvider adType: adType recommendedAdUnitId: recommendedAdUnitId requestedFloorPrice: -1 calculatedFloorPrice: calculatedFloorPrice adUnitId: ad.adUnitIdentifier revenue: ad.revenue precision: ad.revenuePrecision status: 1 providerStatus: nil networkStatus: nil];
++ (void)OnExternalMediationRequestLoad:(AdType)adType ad:(MAAd * _Nonnull)ad usedInsight:(AdInsight * _Nullable)usedInsight {
+    [ALNeftaMediationAdapter OnExternalAdLoadWithProvider: adType adUnitIdentifier: ad.adUnitIdentifier insight: usedInsight revenue: ad.revenue precision: ad.revenuePrecision status: 1 providerStatus: nil networkStatus: nil];
 }
-+ (void)OnExternalMediationRequestFail:(AdType)adType recommendedAdUnitId:(NSString* _Nullable)recommendedAdUnitId calculatedFloorPrice:(double)calculatedFloorPrice adUnitIdentifier:(NSString * _Nonnull)adUnitIdentifier error:(MAError * _Nonnull)error {
++ (void)OnExternalMediationRequestFail:(AdType)adType adUnitIdentifier:(NSString * _Nonnull)adUnitIdentifier usedInsight:(AdInsight * _Nullable)usedInsight error:(MAError * _Nonnull)error {
     int status = 0;
     if (error.code == MAErrorCodeNoFill) {
         status = 2;
     }
     NSString *providerStatus = [NSString stringWithFormat:@"%ld", error.code];
     NSString *networkStatus = [NSString stringWithFormat:@"%ld", error.mediatedNetworkErrorCode];
-    [NeftaPlugin OnExternalMediationRequest: _mediationProvider adType: adType recommendedAdUnitId: recommendedAdUnitId requestedFloorPrice: -1 calculatedFloorPrice: calculatedFloorPrice adUnitId: adUnitIdentifier revenue: -1 precision: nil status: status providerStatus: providerStatus networkStatus: networkStatus];
+    [ALNeftaMediationAdapter OnExternalAdLoadWithProvider: adType adUnitIdentifier: adUnitIdentifier insight: usedInsight revenue: -1 precision: nil status: status providerStatus: providerStatus networkStatus: networkStatus];
+}
++ (void)OnExternalAdLoadWithProvider:(AdType)adType adUnitIdentifier:(NSString *)adUnitIdentifier insight:(AdInsight * _Nullable)insight revenue:(double)revenue precision:(NSString *)precision status:(int)status providerStatus:(NSString *)providerStatus networkStatus:(NSString *)networkStatus {
+    NSString *recommendedAdUnitId = nil;
+    double calculatedFloorPrice = 0;
+    if (insight != nil) {
+        recommendedAdUnitId = insight._adUnit;
+        calculatedFloorPrice = insight._floorPrice;
+        
+        if ((int)adType != insight._type) {
+            NSLog(@"OnExternalMediationRequest reported adType: %ld doesn't match insight adType: %ld", adType, insight._type);
+        }
+    }
+    [NeftaPlugin OnExternalMediationRequest: _mediationProvider adType: (int)adType recommendedAdUnitId: recommendedAdUnitId requestedFloorPrice: -1 calculatedFloorPrice: calculatedFloorPrice adUnitId: adUnitIdentifier revenue: revenue precision: precision status: status providerStatus: providerStatus networkStatus: networkStatus];
 }
 
 + (void) OnExternalMediationImpression:(MAAd*)ad {
     NSMutableDictionary *data = [NSMutableDictionary dictionary];
-    [data setObject: _mediationProvider forKey: @"mediation_provider"];
     [data setObject: ad.format.label forKey: @"format"];
     [data setObject: [NSString stringWithFormat:@"%dx%d", (int)ad.size.width, (int)ad.size.height] forKey: @"size"];
     [data setObject: ad.adUnitIdentifier forKey: @"ad_unit_id"];
@@ -170,7 +183,7 @@ static NeftaPlugin *_plugin;
 }
 
 - (NSString *)adapterVersion {
-    return @"2.2.7";
+    return @"4.3.0";
 }
 
 - (void)destroy {

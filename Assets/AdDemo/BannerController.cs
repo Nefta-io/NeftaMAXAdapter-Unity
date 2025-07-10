@@ -1,5 +1,5 @@
+using System;
 using System.Collections;
-using System.Collections.Generic;
 using Nefta.Core.Events;
 using NeftaCustomAdapter;
 using UnityEngine;
@@ -16,80 +16,68 @@ namespace AdDemo
 #else // UNITY_ANDROID
         private const string DefaultAdUnitId = "6345b3fa80c73572";
 #endif
-        private const string AdUnitIdInsightName = "recommended_banner_ad_unit_id";
-        private const string FloorPriceInsightName = "calculated_user_floor_price_banner";
+        private const int TimeoutInSeconds = 5;
         
         [SerializeField] private Text _title;
         [SerializeField] private Button _show;
         [SerializeField] private Button _hide;
         [SerializeField] private Text _status;
 
-        private string _recommendedAdUnitId;
-        private double _calculatedBidFloor;
-        private bool _isLoadRequested;
-        private string _currentBannerId;
-
+        private string _selectedAdUnitId;
+        private string _currentAdUnitId;
+        private AdInsight _usedInsight;
+        private int _consecutiveAdFails;
+        
         private void GetInsightsAndLoad()
         {
-            _isLoadRequested = true;
-            
-            NeftaAdapterEvents.GetBehaviourInsight(new string[] { FloorPriceInsightName }, OnBehaviourInsight);
-            
-            StartCoroutine(LoadFallback());
+            NeftaAdapterEvents.GetInsights(Insights.Banner, Load, TimeoutInSeconds);
         }
         
-        private void OnBehaviourInsight(Dictionary<string, Insight> insights)
+        private void Load(Insights insights)
         {
-            _recommendedAdUnitId = null;
-            _calculatedBidFloor = 0;
-            if (insights.TryGetValue(AdUnitIdInsightName, out var insight))
+            _selectedAdUnitId = DefaultAdUnitId;
+            _usedInsight = insights._banner;
+            if (_usedInsight != null && _usedInsight._adUnit != null)
             {
-                _recommendedAdUnitId = insight._string;
+                _selectedAdUnitId = _usedInsight._adUnit;
             }
-            if (insights.TryGetValue(FloorPriceInsightName, out insight))
+
+            if (_currentAdUnitId != null)
             {
-                _calculatedBidFloor = insight._float;
+                MaxSdk.DestroyBanner(_currentAdUnitId);
+                _currentAdUnitId = _selectedAdUnitId;
             }
             
-            Debug.Log($"OnBehaviourInsight for Banner calculated bid floor: {_calculatedBidFloor}");
-            
-            if (_isLoadRequested)
-            {
-                Load();
-            }
-        }
-        
-        private void Load()
-        {
-            _isLoadRequested = false;
-            
-            _currentBannerId = DefaultAdUnitId;
-            if (!string.IsNullOrEmpty(_recommendedAdUnitId))
-            {
-                _currentBannerId = _recommendedAdUnitId;
-            }
-            MaxSdk.CreateBanner(_currentBannerId, MaxSdkBase.BannerPosition.TopCenter);
-            MaxSdk.SetBannerExtraParameter(_currentBannerId, "adaptive_banner", "false");
-            MaxSdk.SetBannerExtraParameter(_currentBannerId, "banner_width", "320");
-            MaxSdk.ShowBanner(_currentBannerId);
+            SetStatus($"Loading {_selectedAdUnitId} insights: {_usedInsight}");
+            MaxSdk.CreateBanner(_currentAdUnitId, MaxSdkBase.BannerPosition.TopCenter);
+            MaxSdk.ShowBanner(_currentAdUnitId);
         }
         
         private void OnAdFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
         {
-            NeftaAdapterEvents.OnExternalMediationRequestFailed(NeftaAdapterEvents.AdType.Banner, _recommendedAdUnitId, _calculatedBidFloor, adUnitId, errorInfo);
+            NeftaAdapterEvents.OnExternalMediationRequestFailed(NeftaAdapterEvents.AdType.Banner, _usedInsight, adUnitId, errorInfo);
             
-            _show.interactable = true;
-            _hide.interactable = false;
             SetStatus($"Load failed {adUnitId}: {errorInfo}");
 
-            StartCoroutine(ReTryLoad());
+            _consecutiveAdFails++;
+            StartCoroutine(RetryLoadWithDelay());
+        }
+        
+        private IEnumerator RetryLoadWithDelay()
+        {
+            // As per MAX recommendations, retry with exponentially higher delays up to 64s
+            // In case you would like to customize fill rate / revenue please contact our customer support
+            yield return new WaitForSeconds(new [] { 0, 2, 4, 8, 16, 32, 64 }[Math.Min(_consecutiveAdFails, 6)]);
+            GetInsightsAndLoad();
         }
         
         private void OnAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
-            NeftaAdapterEvents.OnExternalMediationRequestLoaded(NeftaAdapterEvents.AdType.Banner, _recommendedAdUnitId, _calculatedBidFloor, adInfo);
-            
+            NeftaAdapterEvents.OnExternalMediationRequestLoaded(NeftaAdapterEvents.AdType.Banner, _usedInsight, adInfo);
+
             SetStatus($"Loaded {adInfo.NetworkName} {adInfo.NetworkPlacement}");
+            
+            _consecutiveAdFails = 0;
         }
 
         public void Init()
@@ -107,9 +95,8 @@ namespace AdDemo
         
         private void OnShowClick()
         {
-            GetInsightsAndLoad();
-            
             SetStatus("Loading...");
+            GetInsightsAndLoad();
             
             _show.interactable = false;
             _hide.interactable = true;
@@ -119,41 +106,23 @@ namespace AdDemo
         
         private void OnHideClick()
         {
-            MaxSdk.HideBanner(_currentBannerId);
+            MaxSdk.HideBanner(_currentAdUnitId);
+            
             _show.interactable = true;
             _hide.interactable = false;
-        }
-        
-        private IEnumerator LoadFallback()
-        {
-            yield return new WaitForSeconds(5f);
-
-            if (_isLoadRequested)
-            {
-                _recommendedAdUnitId = null;
-                _calculatedBidFloor = 0f;
-                Load();
-            }
-        }
-        
-        private IEnumerator ReTryLoad()
-        {
-            yield return new WaitForSeconds(5f);
-            
-            GetInsightsAndLoad();
         }
 
         public void SetAutoRefresh(bool refresh)
         {
-            if (_currentBannerId != null)
+            if (_currentAdUnitId != null)
             {
                 if (refresh)
                 {
-                    MaxSdk.StartBannerAutoRefresh(_currentBannerId);
+                    MaxSdk.StartBannerAutoRefresh(_currentAdUnitId);
                 }
                 else
                 {
-                    MaxSdk.StopBannerAutoRefresh(_currentBannerId);
+                    MaxSdk.StopBannerAutoRefresh(_currentAdUnitId);
                 }
             }
         }
