@@ -90,7 +90,7 @@ static NeftaPlugin *_plugin;
     NSString* creativeId = ad.creativeIdentifier;
     int type = 0;
     BOOL isNeftaNetwork = [ad.networkName isEqualToString: @"Nefta"];
-    if (ad.format == MAAdFormat.banner || ad.format == MAAdFormat.leader) {
+    if (ad.format == MAAdFormat.banner || ad.format == MAAdFormat.leader || ad.format == MAAdFormat.mrec) {
         type = 1;
         if (isNeftaNetwork) {
             auctionId = ALNeftaBanner.GetLastAuctionId;
@@ -183,7 +183,7 @@ static NeftaPlugin *_plugin;
 }
 
 - (NSString *)adapterVersion {
-    return @"4.3.0";
+    return @"4.3.1";
 }
 
 - (void)destroy {
