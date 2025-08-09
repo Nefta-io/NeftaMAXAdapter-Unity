@@ -49,16 +49,6 @@ namespace AdDemo
         {
             NeftaAdapterEvents.EnableLogging(true);
             NeftaAdapterEvents.Init(NeftaId);
-            NeftaAdapterEvents.SetContentRating(NeftaAdapterEvents.ContentRating.MatureAudience);
-            
-            NeftaAdapterEvents.GetInsights(Insights.Churn | Insights.Interstitial, (insights) =>
-            {
-                Debug.Log("on insight callback");
-                if (insights._interstitial != null)
-                {
-                    Debug.Log("on insight callback: "+ insights._interstitial );
-                } 
-            });
 
             _banner.Init();
             _interstitial.Init(OnFullScreenAdDisplay);

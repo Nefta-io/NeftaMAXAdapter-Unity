@@ -460,58 +460,7 @@ namespace NeftaCustomAdapter
         
         internal static void IOnInsights(int id, string bi)
         {
-            var insights = new Insights();
-            var data = AppLovinMax.ThirdParty.MiniJson.Json.Deserialize(bi) as Dictionary<string, object>;
-            if (data != null)
-            {
-                if (data.TryGetValue("churn", out var churn))
-                {
-                    insights._churn = new Churn();
-                    var churnData = (Dictionary<string, object>)churn;
-                    if (churnData.TryGetValue("d1_probability", out var d1Probability))
-                    {
-                        insights._churn._d1_probability = Convert.ToDouble(d1Probability);
-                    }
-                    if (churnData.TryGetValue("d3_probability", out var d3Probability))
-                    {
-                        insights._churn._d3_probability = Convert.ToDouble(d3Probability);
-                    }
-                    if (churnData.TryGetValue("d7_probability", out var d7Probability))
-                    {
-                        insights._churn._d7_probability = Convert.ToDouble(d7Probability);
-                    }
-                    if (churnData.TryGetValue("d14_probability", out var d14Probability))
-                    {
-                        insights._churn._d14_probability = Convert.ToDouble(d14Probability);
-                    }
-                    if (churnData.TryGetValue("d30_probability", out var d30Probability))
-                    {
-                        insights._churn._d30_probability = Convert.ToDouble(d30Probability);
-                    }
-                    if (churnData.TryGetValue("probability_confidence", out var probabilityConfidence))
-                    {
-                        insights._churn._probability_confidence = (string)probabilityConfidence;
-                    }
-                }
-                
-                if (data.TryGetValue("floor_price", out var floorPrice))
-                {
-                    var floorPriceData = (Dictionary<string, object>)floorPrice;
-                    if (floorPriceData.TryGetValue("banner_configuration", out var banner))
-                    {
-                        insights._banner = ParseFloorPriceConfiguration(banner, AdType.Banner);
-                    }
-                    if (floorPriceData.TryGetValue("interstitial_configuration", out var interstitial))
-                    {
-                        insights._interstitial = ParseFloorPriceConfiguration(interstitial, AdType.Interstitial);
-                    }
-                    if (floorPriceData.TryGetValue("rewarded_configuration", out var rewarded))
-                    {
-                        insights._rewarded = ParseFloorPriceConfiguration(rewarded, AdType.Rewarded);
-                    }
-                }
-            }
-
+            var insights = new Insights(JsonUtility.FromJson<InsightsDto>(bi));
             try
             {
                 lock (_insightRequests)
@@ -532,22 +481,6 @@ namespace NeftaCustomAdapter
             {
                 // ignored
             }
-        }
-        
-        private static AdInsight ParseFloorPriceConfiguration(object floorPriceConfiguration, AdType adType)
-        {
-            var adInsightData = (Dictionary<string, object>)floorPriceConfiguration;
-            AdInsight adInsight = new AdInsight();
-            adInsight._type = adType;
-            if (adInsightData.TryGetValue("floor_price", out var floorPrice))
-            {
-                adInsight._floorPrice = Convert.ToDouble(floorPrice);
-            }
-            if (adInsightData.TryGetValue("ad_unit", out var adUnit))
-            {
-                adInsight._adUnit = (string) adUnit;
-            }
-            return adInsight;
         }
         
         internal static string JavaScriptStringEncode(string value)
