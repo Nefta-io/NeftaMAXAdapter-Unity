@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using Nefta.Core.Events;
 using NeftaCustomAdapter;
 using UnityEngine;
@@ -18,7 +19,6 @@ namespace AdDemo
 #endif
         private const int TimeoutInSeconds = 5;
         
-        private string _selectedAdUnitId;
         private AdInsight _usedInsight;
         private int _consecutiveAdFails;
         private Queue<string> _statusQueue;
@@ -36,16 +36,17 @@ namespace AdDemo
         
         private void Load(Insights insights)
         {
-            _selectedAdUnitId = DefaultAdUnitId;
+            var bidFloor = "0";
             _usedInsight = insights._interstitial;
-            if (_usedInsight != null && _usedInsight._adUnit != null)
+            if (_usedInsight != null)
             {
-                _selectedAdUnitId = _usedInsight._adUnit;
+                bidFloor = _usedInsight._floorPrice.ToString(CultureInfo.InvariantCulture);
             }
             
-            SetStatus($"Loading {_selectedAdUnitId} insights: {_usedInsight}");
-            MaxSdk.SetInterstitialExtraParameter(_selectedAdUnitId, "disable_auto_retries", "true");
-            MaxSdk.LoadInterstitial(_selectedAdUnitId);
+            SetStatus($"Loading {DefaultAdUnitId} insights: {_usedInsight} with floor: {bidFloor}");
+            MaxSdk.SetInterstitialExtraParameter(DefaultAdUnitId, "disable_auto_retries", "true");
+            MaxSdk.SetRewardedAdExtraParameter(DefaultAdUnitId, "jC7Fp", bidFloor);
+            MaxSdk.LoadInterstitial(DefaultAdUnitId);
         }
         
         private void OnAdFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
@@ -105,10 +106,10 @@ namespace AdDemo
         
         private void OnShowClick()
         {
-            if (MaxSdk.IsInterstitialReady(_selectedAdUnitId))
+            if (MaxSdk.IsInterstitialReady(DefaultAdUnitId))
             {
                 SetStatus("Showing");
-                MaxSdk.ShowInterstitial(_selectedAdUnitId);
+                MaxSdk.ShowInterstitial(DefaultAdUnitId);
             }
             else
             {
