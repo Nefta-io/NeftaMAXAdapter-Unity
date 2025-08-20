@@ -45,7 +45,7 @@ namespace AdDemo
             
             SetStatus($"Loading {DefaultAdUnitId} insights: {_usedInsight} with floor: {bidFloor}");
             MaxSdk.SetInterstitialExtraParameter(DefaultAdUnitId, "disable_auto_retries", "true");
-            MaxSdk.SetRewardedAdExtraParameter(DefaultAdUnitId, "jC7Fp", bidFloor);
+            MaxSdk.SetInterstitialExtraParameter(DefaultAdUnitId, "jC7Fp", bidFloor);
             MaxSdk.LoadInterstitial(DefaultAdUnitId);
         }
         
