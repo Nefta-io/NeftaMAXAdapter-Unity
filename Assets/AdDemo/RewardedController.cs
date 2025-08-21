@@ -82,47 +82,54 @@ namespace AdDemo
         
         private void OnAdFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
         {
-            NeftaAdapterEvents.OnExternalMediationRequestFailed(NeftaAdapterEvents.AdType.Rewarded,
-                adUnitId == DynamicAdUnitId ? _dynamicAdUnitInsight : null, adUnitId, errorInfo);
-
             if (adUnitId == DynamicAdUnitId)
             {
+                NeftaAdapterEvents.OnExternalMediationRequestFailed(NeftaAdapterEvents.AdType.Rewarded, _dynamicAdUnitInsight, adUnitId, errorInfo);
+                
                 SetStatus($"Load failed Dynamic {adUnitId}: {errorInfo}");
                 
                 _consecutiveDynamicBidAdFails++;
-                StartCoroutine(RetryGetInsightsAndLoad(true));
+                StartCoroutine(RetryGetInsightsAndLoad());
             }
             else
             {
-                SetStatus($"Load failed Default {adUnitId}: {errorInfo}");
+                NeftaAdapterEvents.OnExternalMediationRequestFailed(NeftaAdapterEvents.AdType.Rewarded, _dynamicAdUnitInsight, adUnitId, errorInfo);
                 
-                StartCoroutine(RetryGetInsightsAndLoad(false));
+                SetStatus($"Load failed Default {adUnitId}: {errorInfo}");
+
+                if (_load.isOn)
+                {
+                    LoadDefault();
+                }
+                else
+                {
+                    _defaultAdState = AdState.None;
+                }
             }
         }
         
-        private IEnumerator RetryGetInsightsAndLoad(bool dynamicBid)
+        private IEnumerator RetryGetInsightsAndLoad()
         {
-            if (dynamicBid)
+            // As per MAX recommendations;
+            // retry with exponentially higher delays up to 64s for ad Units with disabled auto retry.
+            // In case you would like to customize fill rate / revenue please contact our customer support.
+            yield return new WaitForSeconds(new [] { 0, 2, 4, 8, 16, 32, 64 }[Math.Min(_consecutiveDynamicBidAdFails, 6)]);
+            if (_load.isOn)
             {
-                // As per MAX recommendations;
-                // retry with exponentially higher delays up to 64s for ad Units with disabled auto retry.
-                // In case you would like to customize fill rate / revenue please contact our customer support.
-                yield return new WaitForSeconds(new [] { 0, 2, 4, 8, 16, 32, 64 }[Math.Min(_consecutiveDynamicBidAdFails, 6)]);
                 GetInsightsAndLoad();
             }
             else
             {
-                LoadDefault();
+                _dynamicAdState = AdState.None;
             }
         }
         
         private void OnAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
-            NeftaAdapterEvents.OnExternalMediationRequestLoaded(NeftaAdapterEvents.AdType.Rewarded,
-                adUnitId == DynamicAdUnitId ? _dynamicAdUnitInsight : null, adInfo);
-
             if (adUnitId == DynamicAdUnitId)
             {
+                NeftaAdapterEvents.OnExternalMediationRequestLoaded(NeftaAdapterEvents.AdType.Rewarded, _dynamicAdUnitInsight, adInfo);
+                
                 SetStatus($"Loaded Dynamic {adUnitId} at: {adInfo.Revenue}");
                 
                 _consecutiveDynamicBidAdFails = 0;
@@ -130,6 +137,8 @@ namespace AdDemo
             }
             else
             {
+                NeftaAdapterEvents.OnExternalMediationRequestLoaded(NeftaAdapterEvents.AdType.Rewarded, null, adInfo);
+                
                 SetStatus($"Loaded Default {adUnitId} at: {adInfo.Revenue}");
                 
                 _defaultAdState = AdState.Ready;
@@ -171,29 +180,27 @@ namespace AdDemo
         
         private void OnShowClick()
         {
-            var wasShown = false;
-            
+            bool isShown = false;
             if (_dynamicAdState == AdState.Ready)
             {
                 _dynamicAdState = AdState.None;
                 if (MaxSdk.IsRewardedAdReady(DynamicAdUnitId))
                 {
-                    wasShown = true;
                     SetStatus("Showing DynamicAdUnit");
                     MaxSdk.ShowRewardedAd(DynamicAdUnitId);
+                    isShown = true;
                 }
             }
-            if (!wasShown && _defaultAdState == AdState.Ready)
+            if (!isShown && _defaultAdState == AdState.Ready)
             {
                 _defaultAdState = AdState.None;
                 if (MaxSdk.IsRewardedAdReady(DefaultAdUnitId))
                 {
-                    _defaultAdState = AdState.None;
                     SetStatus("Showing DefaultAdUnit");
                     MaxSdk.ShowRewardedAd(DefaultAdUnitId);
                 }
             }
-
+            
             UpdateShowButton();
         }
         
@@ -218,7 +225,7 @@ namespace AdDemo
             SetStatus("OnAdHideEvent");
             _onFullScreenAdDisplayed(false);
             
-            // restart new load cycle
+            // start new load cycle
             if (_load.isOn)
             {
                 StartLoading();   
