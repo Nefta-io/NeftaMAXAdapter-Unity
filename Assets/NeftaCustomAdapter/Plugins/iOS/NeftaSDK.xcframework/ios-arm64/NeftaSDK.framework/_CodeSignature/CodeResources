@@ -18,11 +18,11 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		rk6JtuO1UgF0BAC7q42Gb+1cvZk=
+		yQ4MBUqfPzGdX8K7uX7i/4Wwfr4=
 		</data>
 		<key>Modules/NeftaSDK.swiftmodule/arm64-apple-ios.abi.json</key>
 		<data>
-		G11ZnTD6GhOFKHoP6+GNUelHEOo=
+		3HS/5XUp/UdJzQJhnDN70DIZOis=
 		</data>
 		<key>Modules/NeftaSDK.swiftmodule/arm64-apple-ios.private.swiftinterface</key>
 		<data>
@@ -38,7 +38,7 @@
 		</data>
 		<key>Modules/NeftaSDK.swiftmodule/arm64-apple-ios.swiftmodule</key>
 		<data>
-		rS0b53CnqQCXGtqVZqRcCpdGqR0=
+		sMClTaN4HhxQoeD22aK6UddSnVo=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -80,7 +80,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			EzatuSm3bpMV8kUUII8Re9jEpBIvb0iC0kUv22jmP0c=
+			LVCpsFNwmBas4lsn4L97z3cRAEKMPwrMFi+N5wxDbRk=
 			</data>
 		</dict>
 		<key>Modules/NeftaSDK.swiftmodule/arm64-apple-ios.private.swiftinterface</key>
@@ -108,7 +108,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			jtyZl/zMm2kLphhEy0TlPl59UHEz+W0iES08GjmavMo=
+			/RW4vd4pYwx/BQzQYVW2Ca0KtUDbvHQa0nkGyTDqME8=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>

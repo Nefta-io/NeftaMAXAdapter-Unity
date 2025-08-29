@@ -18475,7 +18475,7 @@
       "kind": "StringLiteral",
       "offset": 3970,
       "length": 7,
-      "value": "\"4.3.0\""
+      "value": "\"4.3.2\""
     },
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/NeftaPlugin.swift",
@@ -18606,7 +18606,7 @@
     {
       "filePath": "\/Users\/tomaztreven\/Projects\/nefta-plugins\/Apple\/NeftaSDK\/NeftaSDK\/NeftaPlugin.swift",
       "kind": "IntegerLiteral",
-      "offset": 18235,
+      "offset": 18309,
       "length": 1,
       "value": "0"
     },
