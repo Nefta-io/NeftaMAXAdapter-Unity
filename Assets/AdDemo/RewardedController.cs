@@ -21,17 +21,15 @@ namespace AdDemo
 #endif
         private const int TimeoutInSeconds = 5;
         
-        private enum AdState
+        private class AdRequest
         {
-            None,
-            Loading,
-            Ready
+            public double? Revenue;
         }
 
-        private AdState _dynamicAdState;
+        private AdRequest _dynamicAdRequest;
         private AdInsight _dynamicAdUnitInsight;
         private int _consecutiveDynamicBidAdFails;
-        private AdState _defaultAdState;
+        private AdRequest _defaultAdRequest;
         
         private Queue<string> _statusQueue;
         private Action<bool> _onFullScreenAdDisplayed;
@@ -43,11 +41,11 @@ namespace AdDemo
         
         private void StartLoading()
         {
-            if (_dynamicAdState == AdState.None)
+            if (_dynamicAdRequest == null)
             {
                 GetInsightsAndLoad();   
             }
-            if (_defaultAdState == AdState.None)
+            if (_defaultAdRequest == null)
             {
                 LoadDefault();   
             }
@@ -55,7 +53,7 @@ namespace AdDemo
 
         private void GetInsightsAndLoad()
         {
-            _dynamicAdState = AdState.Loading;
+            _dynamicAdRequest = new AdRequest();
             NeftaAdapterEvents.GetInsights(Insights.Rewarded, LoadWithInsights, TimeoutInSeconds);
         }
         
@@ -75,7 +73,7 @@ namespace AdDemo
 
         private void LoadDefault()
         {
-            _defaultAdState = AdState.Loading;
+            _defaultAdRequest = new AdRequest();
             SetStatus("Loading Default AdUnit");
             MaxSdk.LoadRewardedAd(DefaultAdUnitId);
         }
@@ -96,14 +94,14 @@ namespace AdDemo
                 NeftaAdapterEvents.OnExternalMediationRequestFailed(NeftaAdapterEvents.AdType.Rewarded, _dynamicAdUnitInsight, adUnitId, errorInfo);
                 
                 SetStatus($"Load failed Default {adUnitId}: {errorInfo}");
-
+                
                 if (_load.isOn)
                 {
                     LoadDefault();
                 }
                 else
                 {
-                    _defaultAdState = AdState.None;
+                    _defaultAdRequest = null;
                 }
             }
         }
@@ -120,7 +118,7 @@ namespace AdDemo
             }
             else
             {
-                _dynamicAdState = AdState.None;
+                _dynamicAdRequest = null;
             }
         }
         
@@ -133,7 +131,7 @@ namespace AdDemo
                 SetStatus($"Loaded Dynamic {adUnitId} at: {adInfo.Revenue}");
                 
                 _consecutiveDynamicBidAdFails = 0;
-                _dynamicAdState = AdState.Ready;
+                _dynamicAdRequest.Revenue = adInfo.Revenue;
             }
             else
             {
@@ -141,7 +139,7 @@ namespace AdDemo
                 
                 SetStatus($"Loaded Default {adUnitId} at: {adInfo.Revenue}");
                 
-                _defaultAdState = AdState.Ready;
+                _defaultAdRequest.Revenue = adInfo.Revenue;
             }
 
             UpdateShowButton();
@@ -181,27 +179,49 @@ namespace AdDemo
         private void OnShowClick()
         {
             bool isShown = false;
-            if (_dynamicAdState == AdState.Ready)
+            if (_dynamicAdRequest.Revenue.HasValue)
             {
-                _dynamicAdState = AdState.None;
-                if (MaxSdk.IsRewardedAdReady(DynamicAdUnitId))
+                if (_defaultAdRequest.Revenue > _dynamicAdRequest.Revenue)
                 {
-                    SetStatus("Showing DynamicAdUnit");
-                    MaxSdk.ShowRewardedAd(DynamicAdUnitId);
-                    isShown = true;
+                    isShown = TryShowDefault();
+                }
+                if (!isShown)
+                {
+                    isShown = TryShowDynamic();
                 }
             }
-            if (!isShown && _defaultAdState == AdState.Ready)
+            if (!isShown && _defaultAdRequest.Revenue.HasValue)
             {
-                _defaultAdState = AdState.None;
-                if (MaxSdk.IsRewardedAdReady(DefaultAdUnitId))
-                {
-                    SetStatus("Showing DefaultAdUnit");
-                    MaxSdk.ShowRewardedAd(DefaultAdUnitId);
-                }
+                TryShowDefault();
             }
             
             UpdateShowButton();
+        }
+
+        private bool TryShowDynamic()
+        {
+            var isShown = false;
+            if (MaxSdk.IsRewardedAdReady(DynamicAdUnitId))
+            {
+                SetStatus("Showing Dynamic");
+                MaxSdk.ShowRewardedAd(DynamicAdUnitId);
+                isShown = true;
+            }
+            _dynamicAdRequest = null;
+            return isShown;
+        }
+        
+        private bool TryShowDefault()
+        {
+            var isShown = false;
+            if (MaxSdk.IsRewardedAdReady(DefaultAdUnitId))
+            {
+                SetStatus("Showing Default");
+                MaxSdk.ShowRewardedAd(DefaultAdUnitId);
+                isShown = true;
+            }
+            _defaultAdRequest = null;
+            return isShown;
         }
         
         private void OnAdDisplayFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo, MaxSdkBase.AdInfo adInfo)
@@ -271,7 +291,8 @@ namespace AdDemo
 
         private void UpdateShowButton()
         {
-            _show.interactable = _dynamicAdState == AdState.Ready || _defaultAdState == AdState.Ready;
+            _show.interactable = _dynamicAdRequest != null && _dynamicAdRequest.Revenue.HasValue ||
+                                 _defaultAdRequest != null && _defaultAdRequest.Revenue.HasValue;
         }
 
         private void AddDemoGameEventExample()
