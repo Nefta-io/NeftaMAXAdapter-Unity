@@ -64,7 +64,7 @@ namespace AdDemo
                 _dynamicAdUnitInsight = insights._rewarded;
                 var bidFloor = _dynamicAdUnitInsight._floorPrice.ToString(CultureInfo.InvariantCulture);
                 
-                SetStatus($"Loading DynamicBid AdUnit with bid floor: {bidFloor}");
+                SetStatus($"Loading Dynamic AdUnit with bid floor: {bidFloor}");
                 MaxSdk.SetRewardedAdExtraParameter(DynamicAdUnitId, "disable_auto_retries", "true");
                 MaxSdk.SetRewardedAdExtraParameter(DynamicAdUnitId, "jC7Fp", bidFloor);
                 MaxSdk.LoadRewardedAd(DynamicAdUnitId);
@@ -91,7 +91,7 @@ namespace AdDemo
             }
             else
             {
-                NeftaAdapterEvents.OnExternalMediationRequestFailed(NeftaAdapterEvents.AdType.Rewarded, _dynamicAdUnitInsight, adUnitId, errorInfo);
+                NeftaAdapterEvents.OnExternalMediationRequestFailed(NeftaAdapterEvents.AdType.Rewarded, null, adUnitId, errorInfo);
                 
                 SetStatus($"Load failed Default {adUnitId}: {errorInfo}");
                 
@@ -179,9 +179,9 @@ namespace AdDemo
         private void OnShowClick()
         {
             bool isShown = false;
-            if (_dynamicAdRequest.Revenue.HasValue)
+            if (_dynamicAdRequest != null && _dynamicAdRequest.Revenue.HasValue)
             {
-                if (_defaultAdRequest.Revenue > _dynamicAdRequest.Revenue)
+                if (_defaultAdRequest != null && _defaultAdRequest.Revenue > _dynamicAdRequest.Revenue)
                 {
                     isShown = TryShowDefault();
                 }
@@ -190,7 +190,7 @@ namespace AdDemo
                     isShown = TryShowDynamic();
                 }
             }
-            if (!isShown && _defaultAdRequest.Revenue.HasValue)
+            if (!isShown && _defaultAdRequest != null && _defaultAdRequest.Revenue.HasValue)
             {
                 TryShowDefault();
             }
