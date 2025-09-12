@@ -18,10 +18,27 @@ typedef NS_ENUM(NSInteger, AdType) {
     AdTypeRewarded = 3
 };
 
-+ (void)OnExternalMediationRequestLoad:(AdType)adType ad:(MAAd * _Nonnull)ad usedInsight:(AdInsight * _Nullable)usedInsight;
-+ (void)OnExternalMediationRequestFail:(AdType)adType adUnitIdentifier:(NSString* _Nonnull)adUnitIdentifier usedInsight:(AdInsight * _Nullable)usedInsight error:(MAError * _Nonnull)error;
++ (void)OnExternalMediationRequestWithBanner:(MAAdView * _Nonnull)banner insight:(AdInsight * _Nullable)insight;
++ (void)OnExternalMediationRequestWithBanner:(MAAdView * _Nonnull)banner;
++ (void)OnExternalMediationRequestWithBanner:(MAAdView * _Nonnull)banner customBidPrice:(double)customBidPrice;
++ (void)OnExternalMediationRequestWithInterstitial:(MAInterstitialAd * _Nonnull)interstitial insight:(AdInsight * _Nullable)insight;
++ (void)OnExternalMediationRequestWithInterstitial:(MAInterstitialAd * _Nonnull)interstitial;
++ (void)OnExternalMediationRequestWithInterstitial:(MAInterstitialAd * _Nonnull)interstitial customBidPrice:(double)customBidPrice;
++ (void)OnExternalMediationRequestWithRewarded:(MARewardedAd * _Nonnull)rewarded insight:(AdInsight * _Nullable)insight;
++ (void)OnExternalMediationRequestWithRewarded:(MARewardedAd * _Nonnull)rewarded;
++ (void)OnExternalMediationRequestWithRewarded:(MARewardedAd * _Nonnull)rewarded customBidPrice:(double)customBidPrice;
+
++ (void)OnExternalMediationRequestLoadWithBanner:(MAAdView * _Nonnull)banner ad:(MAAd * _Nonnull)ad;
++ (void)OnExternalMediationRequestLoadWithInterstitial:(MAInterstitialAd * _Nonnull)interstitial ad:(MAAd * _Nonnull)ad;
++ (void)OnExternalMediationRequestLoadWithRewarded:(MARewardedAd * _Nonnull)rewarded ad:(MAAd * _Nonnull)ad;
+
++ (void)OnExternalMediationRequestFailWithBanner:(MAAdView * _Nonnull)banner error:(MAError * _Nonnull)error;
++ (void)OnExternalMediationRequestFailWithInterstitial:(MAInterstitialAd * _Nonnull)interstitial error:(MAError * _Nonnull)error;
++ (void)OnExternalMediationRequestFailWithRewarded:(MARewardedAd * _Nonnull)rewarded error:(MAError * _Nonnull)error;
+
 + (void)OnExternalMediationImpression:(MAAd* _Nonnull)ad;
-+ (void)OnExternalMediationImpressionAsString:(NSString* _Nonnull)network format:(NSString * _Nonnull)format creativeId:(NSString * _Nullable)creativeId data:(NSString * _Nonnull)data revenue:(double)revenue precision:(NSString * _Nonnull)precision;
++ (void)OnExternalMediationClick:(MAAd* _Nonnull)ad;
+
 @property ALNeftaAd * _Nullable ad;
 @end
 

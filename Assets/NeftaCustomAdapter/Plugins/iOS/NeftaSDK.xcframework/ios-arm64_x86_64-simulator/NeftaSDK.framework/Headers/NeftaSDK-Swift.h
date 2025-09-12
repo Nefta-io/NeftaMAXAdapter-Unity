@@ -311,6 +311,7 @@ enum Types : NSInteger;
 
 SWIFT_CLASS("_TtC8NeftaSDK9AdInsight")
 @interface AdInsight : NSObject
+@property (nonatomic) NSInteger _adOpportunityId;
 @property (nonatomic, readonly) enum Types _type;
 @property (nonatomic) double _floorPrice;
 @property (nonatomic, copy) NSString * _Nullable _adUnit;
@@ -344,6 +345,16 @@ SWIFT_CLASS("_TtC8NeftaSDK5Churn")
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
 
+@class Placement;
+
+SWIFT_CLASS("_TtC8NeftaSDK17InitConfiguration")
+@interface InitConfiguration : NSObject
+@property (nonatomic, copy) NSDictionary<NSString *, Placement *> * _Nullable _placements;
+- (NSArray<NSString *> * _Nullable)GetMediationProviderAdUnits SWIFT_WARN_UNUSED_RESULT;
+- (NSArray<NSString *> * _Nullable)GetMediationProviderAdUnitsWithProvider:(NSString * _Nonnull)provider SWIFT_WARN_UNUSED_RESULT;
+- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
+@end
+
 
 SWIFT_CLASS("_TtC8NeftaSDK8Insights")
 @interface Insights : NSObject
@@ -364,7 +375,6 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger Rewarded;)
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
-@class Placement;
 @protocol NAdListener;
 @class NSData;
 @class UIViewController;
@@ -741,9 +751,11 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _No
 + (NSString * _Nonnull)ContentRating_Teen SWIFT_WARN_UNUSED_RESULT;
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ContentRating_MatureAudience;)
 + (NSString * _Nonnull)ContentRating_MatureAudience SWIFT_WARN_UNUSED_RESULT;
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ExtParam_TestGroup;)
++ (NSString * _Nonnull)ExtParam_TestGroup SWIFT_WARN_UNUSED_RESULT;
 @property (nonatomic, strong) NeftaEvents * _Nonnull Events;
-@property (nonatomic, copy) void (^ _Nullable OnReady)(NSDictionary<NSString *, Placement *> * _Nonnull);
-@property (nonatomic, copy) void (^ _Nullable OnInsightsAsString)(NSInteger, NSString * _Nullable);
+@property (nonatomic, copy) void (^ _Nullable OnReady)(InitConfiguration * _Nonnull);
+@property (nonatomic, copy) void (^ _Nullable OnInsightsAsString)(NSInteger, NSInteger, NSString * _Nullable);
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable OnLog)(NSString * _Nonnull);)
 + (void (^ _Nullable)(NSString * _Nonnull))OnLog SWIFT_WARN_UNUSED_RESULT;
 + (void)setOnLog:(void (^ _Nullable)(NSString * _Nonnull))value;
@@ -756,14 +768,15 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NeftaPlugin * _Null_un
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 - (void)SetContentRatingWithRating:(NSString * _Nonnull)rating;
 - (void)SetTrackingWithIsAuthorized:(BOOL)isAuthorized;
++ (void)SetExtraParameterWithKey:(NSString * _Nonnull)key value:(NSString * _Nonnull)value;
 - (void)RecordWithType:(NSInteger)type category:(NSInteger)category subCategory:(NSInteger)subCategory name:(NSString * _Nullable)name value:(int64_t)value customPayload:(NSString * _Nullable)customPayload;
-- (void)SetPublisherUserIdWithId:(NSString * _Nonnull)id;
-- (void)GetInsightsBridge:(NSInteger)requestId insights:(NSInteger)insights timeout:(NSInteger)timeout;
-- (void)GetInsights:(NSInteger)insights callback:(void (^ _Nonnull)(Insights * _Nonnull))callback timeout:(NSInteger)timeout;
+- (void)GetInsightsBridge:(NSInteger)requestId insights:(NSInteger)insights previousAdOpportunityId:(NSInteger)previousAdOpportunityId timeout:(NSInteger)timeout;
+- (void)GetInsights:(NSInteger)insights previousInsight:(AdInsight * _Nullable)previousInsight callback:(void (^ _Nonnull)(Insights * _Nonnull))callback timeout:(NSInteger)timeout;
 - (NSString * _Nonnull)GetNuidWithPresent:(BOOL)present SWIFT_WARN_UNUSED_RESULT;
-+ (void)OnExternalMediationRequest:(NSString * _Nonnull)provider adType:(NSInteger)adType recommendedAdUnitId:(NSString * _Nullable)recommendedAdUnitId requestedFloorPrice:(double)requestedFloorPrice calculatedFloorPrice:(double)calculatedFloorPrice adUnitId:(NSString * _Nullable)adUnitId revenue:(double)revenue precision:(NSString * _Nullable)precision status:(NSInteger)status providerStatus:(NSString * _Nullable)providerStatus networkStatus:(NSString * _Nullable)networkStatus;
-+ (void)OnExternalMediationImpression:(NSString * _Nonnull)path data:(NSMutableDictionary * _Nonnull)data adType:(NSInteger)adType revenue:(double)revenue precision:(NSString * _Nullable)precision;
-+ (void)OnExternalMediationImpressionAsString:(NSString * _Nonnull)path data:(NSString * _Nonnull)data adType:(NSInteger)adType revenue:(double)revenue precision:(NSString * _Nullable)precision;
++ (void)OnExternalMediationRequest:(NSString * _Nonnull)provider adType:(NSInteger)adType id:(NSString * _Nonnull)id requestedAdUnitId:(NSString * _Nonnull)requestedAdUnitId requestedFloorPrice:(double)requestedFloorPrice adOpportunityId:(NSInteger)adOpportunityId;
++ (void)OnExternalMediationResponse:(NSString * _Nonnull)provider id:(NSString * _Nonnull)id id2:(NSString * _Nullable)id2 revenue:(double)revenue precision:(NSString * _Nullable)precision status:(NSInteger)status providerStatus:(NSString * _Nullable)providerStatus networkStatus:(NSString * _Nullable)networkStatus;
++ (void)OnExternalMediationImpression:(BOOL)isClick provider:(NSString * _Nonnull)provider data:(NSMutableDictionary * _Nullable)data id:(NSString * _Nullable)id id2:(NSString * _Nullable)id2;
++ (void)OnExternalMediationImpressionAsString:(BOOL)isClick provider:(NSString * _Nonnull)provider data:(NSString * _Nonnull)data id:(NSString * _Nullable)id id2:(NSString * _Nullable)id2;
 + (void)SetOverrideWithUrl:(NSString * _Nullable)url;
 @end
 
@@ -1164,6 +1177,7 @@ enum Types : NSInteger;
 
 SWIFT_CLASS("_TtC8NeftaSDK9AdInsight")
 @interface AdInsight : NSObject
+@property (nonatomic) NSInteger _adOpportunityId;
 @property (nonatomic, readonly) enum Types _type;
 @property (nonatomic) double _floorPrice;
 @property (nonatomic, copy) NSString * _Nullable _adUnit;
@@ -1197,6 +1211,16 @@ SWIFT_CLASS("_TtC8NeftaSDK5Churn")
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
 
+@class Placement;
+
+SWIFT_CLASS("_TtC8NeftaSDK17InitConfiguration")
+@interface InitConfiguration : NSObject
+@property (nonatomic, copy) NSDictionary<NSString *, Placement *> * _Nullable _placements;
+- (NSArray<NSString *> * _Nullable)GetMediationProviderAdUnits SWIFT_WARN_UNUSED_RESULT;
+- (NSArray<NSString *> * _Nullable)GetMediationProviderAdUnitsWithProvider:(NSString * _Nonnull)provider SWIFT_WARN_UNUSED_RESULT;
+- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
+@end
+
 
 SWIFT_CLASS("_TtC8NeftaSDK8Insights")
 @interface Insights : NSObject
@@ -1217,7 +1241,6 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger Rewarded;)
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
-@class Placement;
 @protocol NAdListener;
 @class NSData;
 @class UIViewController;
@@ -1594,9 +1617,11 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _No
 + (NSString * _Nonnull)ContentRating_Teen SWIFT_WARN_UNUSED_RESULT;
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ContentRating_MatureAudience;)
 + (NSString * _Nonnull)ContentRating_MatureAudience SWIFT_WARN_UNUSED_RESULT;
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ExtParam_TestGroup;)
++ (NSString * _Nonnull)ExtParam_TestGroup SWIFT_WARN_UNUSED_RESULT;
 @property (nonatomic, strong) NeftaEvents * _Nonnull Events;
-@property (nonatomic, copy) void (^ _Nullable OnReady)(NSDictionary<NSString *, Placement *> * _Nonnull);
-@property (nonatomic, copy) void (^ _Nullable OnInsightsAsString)(NSInteger, NSString * _Nullable);
+@property (nonatomic, copy) void (^ _Nullable OnReady)(InitConfiguration * _Nonnull);
+@property (nonatomic, copy) void (^ _Nullable OnInsightsAsString)(NSInteger, NSInteger, NSString * _Nullable);
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable OnLog)(NSString * _Nonnull);)
 + (void (^ _Nullable)(NSString * _Nonnull))OnLog SWIFT_WARN_UNUSED_RESULT;
 + (void)setOnLog:(void (^ _Nullable)(NSString * _Nonnull))value;
@@ -1609,14 +1634,15 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NeftaPlugin * _Null_un
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 - (void)SetContentRatingWithRating:(NSString * _Nonnull)rating;
 - (void)SetTrackingWithIsAuthorized:(BOOL)isAuthorized;
++ (void)SetExtraParameterWithKey:(NSString * _Nonnull)key value:(NSString * _Nonnull)value;
 - (void)RecordWithType:(NSInteger)type category:(NSInteger)category subCategory:(NSInteger)subCategory name:(NSString * _Nullable)name value:(int64_t)value customPayload:(NSString * _Nullable)customPayload;
-- (void)SetPublisherUserIdWithId:(NSString * _Nonnull)id;
-- (void)GetInsightsBridge:(NSInteger)requestId insights:(NSInteger)insights timeout:(NSInteger)timeout;
-- (void)GetInsights:(NSInteger)insights callback:(void (^ _Nonnull)(Insights * _Nonnull))callback timeout:(NSInteger)timeout;
+- (void)GetInsightsBridge:(NSInteger)requestId insights:(NSInteger)insights previousAdOpportunityId:(NSInteger)previousAdOpportunityId timeout:(NSInteger)timeout;
+- (void)GetInsights:(NSInteger)insights previousInsight:(AdInsight * _Nullable)previousInsight callback:(void (^ _Nonnull)(Insights * _Nonnull))callback timeout:(NSInteger)timeout;
 - (NSString * _Nonnull)GetNuidWithPresent:(BOOL)present SWIFT_WARN_UNUSED_RESULT;
-+ (void)OnExternalMediationRequest:(NSString * _Nonnull)provider adType:(NSInteger)adType recommendedAdUnitId:(NSString * _Nullable)recommendedAdUnitId requestedFloorPrice:(double)requestedFloorPrice calculatedFloorPrice:(double)calculatedFloorPrice adUnitId:(NSString * _Nullable)adUnitId revenue:(double)revenue precision:(NSString * _Nullable)precision status:(NSInteger)status providerStatus:(NSString * _Nullable)providerStatus networkStatus:(NSString * _Nullable)networkStatus;
-+ (void)OnExternalMediationImpression:(NSString * _Nonnull)path data:(NSMutableDictionary * _Nonnull)data adType:(NSInteger)adType revenue:(double)revenue precision:(NSString * _Nullable)precision;
-+ (void)OnExternalMediationImpressionAsString:(NSString * _Nonnull)path data:(NSString * _Nonnull)data adType:(NSInteger)adType revenue:(double)revenue precision:(NSString * _Nullable)precision;
++ (void)OnExternalMediationRequest:(NSString * _Nonnull)provider adType:(NSInteger)adType id:(NSString * _Nonnull)id requestedAdUnitId:(NSString * _Nonnull)requestedAdUnitId requestedFloorPrice:(double)requestedFloorPrice adOpportunityId:(NSInteger)adOpportunityId;
++ (void)OnExternalMediationResponse:(NSString * _Nonnull)provider id:(NSString * _Nonnull)id id2:(NSString * _Nullable)id2 revenue:(double)revenue precision:(NSString * _Nullable)precision status:(NSInteger)status providerStatus:(NSString * _Nullable)providerStatus networkStatus:(NSString * _Nullable)networkStatus;
++ (void)OnExternalMediationImpression:(BOOL)isClick provider:(NSString * _Nonnull)provider data:(NSMutableDictionary * _Nullable)data id:(NSString * _Nullable)id id2:(NSString * _Nullable)id2;
++ (void)OnExternalMediationImpressionAsString:(BOOL)isClick provider:(NSString * _Nonnull)provider data:(NSString * _Nonnull)data id:(NSString * _Nullable)id id2:(NSString * _Nullable)id2;
 + (void)SetOverrideWithUrl:(NSString * _Nullable)url;
 @end
 

@@ -28,9 +28,9 @@ namespace AdDemo
         private AdInsight _usedInsight;
         private int _consecutiveAdFails;
         
-        private void GetInsightsAndLoad()
+        private void GetInsightsAndLoad(AdInsight previousInsight)
         {
-            NeftaAdapterEvents.GetInsights(Insights.Banner, Load, TimeoutInSeconds);
+            NeftaAdapterEvents.GetInsights(Insights.Banner, previousInsight, Load, TimeoutInSeconds);
         }
         
         private void Load(Insights insights)
@@ -55,7 +55,7 @@ namespace AdDemo
         
         private void OnAdFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
         {
-            NeftaAdapterEvents.OnExternalMediationRequestFailed(NeftaAdapterEvents.AdType.Banner, _usedInsight, adUnitId, errorInfo);
+            NeftaAdapterEvents.OnExternalMediationRequestFailed(adUnitId, errorInfo);
             
             SetStatus($"Load failed {adUnitId}: {errorInfo}");
 
@@ -68,12 +68,12 @@ namespace AdDemo
             // As per MAX recommendations, retry with exponentially higher delays up to 64s
             // In case you would like to customize fill rate / revenue please contact our customer support
             yield return new WaitForSeconds(new [] { 0, 2, 4, 8, 16, 32, 64 }[Math.Min(_consecutiveAdFails, 6)]);
-            GetInsightsAndLoad();
+            GetInsightsAndLoad(_usedInsight);
         }
         
         private void OnAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
-            NeftaAdapterEvents.OnExternalMediationRequestLoaded(NeftaAdapterEvents.AdType.Banner, _usedInsight, adInfo);
+            NeftaAdapterEvents.OnExternalMediationRequestLoaded(adInfo);
 
             SetStatus($"Loaded {adInfo.NetworkName} {adInfo.NetworkPlacement}");
             
@@ -96,7 +96,7 @@ namespace AdDemo
         private void OnShowClick()
         {
             SetStatus("Loading...");
-            GetInsightsAndLoad();
+            GetInsightsAndLoad(null);
             
             _show.interactable = false;
             _hide.interactable = true;
@@ -140,7 +140,7 @@ namespace AdDemo
         private void SetStatus(string status)
         {
             _status.text = status;
-            Debug.Log($"Banner: {status}");
+            Debug.Log($"NeftaPluginMAX Banner: {status}");
         }
 
         private void AddDemoGameEventExample()

@@ -1,7 +1,6 @@
 using Unity.Services.LevelPlay;
 using UnityEngine;
 
-// Example for IronSource Unity.
 public class LevelPlaySample : MonoBehaviour
 {
     private LevelPlayBannerAd bannerAd;
@@ -21,18 +20,11 @@ public class LevelPlaySample : MonoBehaviour
     string interstitialAdUnitId = "unexpected_platform";
 #endif
 
-
-
     public void Start()
     {
-        Debug.Log("unity-script: IronSource.Agent.validateIntegration");
         IronSource.Agent.validateIntegration();
-
-        Debug.Log("unity-script: unity version" + IronSource.unityVersion());
-
-        // SDK init
-        Debug.Log("unity-script: LevelPlay SDK initialization");
-        LevelPlay.Init(appKey,adFormats:new []{com.unity3d.mediation.LevelPlayAdFormat.REWARDED});
+        
+        LevelPlay.Init(appKey);
 
         LevelPlay.OnInitSuccess += SdkInitializationCompletedEvent;
         LevelPlay.OnInitFailed += SdkInitializationFailedEvent;

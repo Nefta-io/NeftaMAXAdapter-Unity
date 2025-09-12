@@ -13,24 +13,24 @@ namespace AdDemo
     public class RewardedController : MonoBehaviour
     {
 #if UNITY_IOS
-        private const string DefaultAdUnitId = "08304643cb16df3b";
         private const string DynamicAdUnitId = "7c6097e4101586b0";
+        private const string DefaultAdUnitId = "08304643cb16df3b";
 #else // UNITY_ANDROID
-        private const string DefaultAdUnitId = "3082ee9199cf59f0";
         private const string DynamicAdUnitId = "c164298ebdd0c008";
+        private const string DefaultAdUnitId = "3082ee9199cf59f0";
 #endif
         private const int TimeoutInSeconds = 5;
-        
+
         private class AdRequest
         {
             public double? Revenue;
         }
 
         private AdRequest _dynamicAdRequest;
-        private AdInsight _dynamicAdUnitInsight;
-        private int _consecutiveDynamicBidAdFails;
+        private AdInsight _dynamicInsight;
+        private int _consecutiveDynamicAdFails;
         private AdRequest _defaultAdRequest;
-        
+
         private Queue<string> _statusQueue;
         private Action<bool> _onFullScreenAdDisplayed;
         
@@ -43,7 +43,7 @@ namespace AdDemo
         {
             if (_dynamicAdRequest == null)
             {
-                GetInsightsAndLoad();   
+                GetInsightsAndLoad(null);   
             }
             if (_defaultAdRequest == null)
             {
@@ -51,57 +51,55 @@ namespace AdDemo
             }
         }
 
-        private void GetInsightsAndLoad()
+        private void GetInsightsAndLoad(AdInsight previousInsight)
         {
             _dynamicAdRequest = new AdRequest();
-            NeftaAdapterEvents.GetInsights(Insights.Rewarded, LoadWithInsights, TimeoutInSeconds);
+            NeftaAdapterEvents.GetInsights(Insights.Rewarded, previousInsight, LoadWithInsights, TimeoutInSeconds);
         }
         
         private void LoadWithInsights(Insights insights)
         {
-            if (insights._rewarded != null)
+            _dynamicInsight = insights._rewarded;
+            if (_dynamicInsight != null)
             {
-                _dynamicAdUnitInsight = insights._rewarded;
-                var bidFloor = _dynamicAdUnitInsight._floorPrice.ToString(CultureInfo.InvariantCulture);
+                var bidFloor = _dynamicInsight._floorPrice.ToString(CultureInfo.InvariantCulture);
                 
-                SetStatus($"Loading Dynamic AdUnit with bid floor: {bidFloor}");
+                SetStatus($"Loading Dynamic Rewarded with floor: {bidFloor}");
                 MaxSdk.SetRewardedAdExtraParameter(DynamicAdUnitId, "disable_auto_retries", "true");
                 MaxSdk.SetRewardedAdExtraParameter(DynamicAdUnitId, "jC7Fp", bidFloor);
                 MaxSdk.LoadRewardedAd(DynamicAdUnitId);
+                
+                NeftaAdapterEvents.OnExternalMediationRequest(NeftaAdapterEvents.AdType.Rewarded, DynamicAdUnitId, _dynamicInsight);
             }
         }
 
         private void LoadDefault()
         {
             _defaultAdRequest = new AdRequest();
-            SetStatus("Loading Default AdUnit");
+            SetStatus("Loading Default Rewarded");
             MaxSdk.LoadRewardedAd(DefaultAdUnitId);
+
+            NeftaAdapterEvents.OnExternalMediationRequest(NeftaAdapterEvents.AdType.Rewarded, DefaultAdUnitId);
         }
         
         private void OnAdFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
         {
+            NeftaAdapterEvents.OnExternalMediationRequestFailed(adUnitId, errorInfo);
             if (adUnitId == DynamicAdUnitId)
             {
-                NeftaAdapterEvents.OnExternalMediationRequestFailed(NeftaAdapterEvents.AdType.Rewarded, _dynamicAdUnitInsight, adUnitId, errorInfo);
-                
                 SetStatus($"Load failed Dynamic {adUnitId}: {errorInfo}");
                 
-                _consecutiveDynamicBidAdFails++;
+                _consecutiveDynamicAdFails++;
                 StartCoroutine(RetryGetInsightsAndLoad());
             }
             else
             {
-                NeftaAdapterEvents.OnExternalMediationRequestFailed(NeftaAdapterEvents.AdType.Rewarded, null, adUnitId, errorInfo);
-                
                 SetStatus($"Load failed Default {adUnitId}: {errorInfo}");
-                
+
+                _defaultAdRequest = null;
                 if (_load.isOn)
                 {
                     LoadDefault();
-                }
-                else
-                {
-                    _defaultAdRequest = null;
                 }
             }
         }
@@ -111,10 +109,10 @@ namespace AdDemo
             // As per MAX recommendations;
             // retry with exponentially higher delays up to 64s for ad Units with disabled auto retry.
             // In case you would like to customize fill rate / revenue please contact our customer support.
-            yield return new WaitForSeconds(new [] { 0, 2, 4, 8, 16, 32, 64 }[Math.Min(_consecutiveDynamicBidAdFails, 6)]);
+            yield return new WaitForSeconds(new [] { 0, 2, 4, 8, 16, 32, 64 }[Math.Min(_consecutiveDynamicAdFails, 6)]);
             if (_load.isOn)
             {
-                GetInsightsAndLoad();
+                GetInsightsAndLoad(_dynamicInsight);
             }
             else
             {
@@ -124,25 +122,29 @@ namespace AdDemo
         
         private void OnAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
+            NeftaAdapterEvents.OnExternalMediationRequestLoaded(adInfo);
             if (adUnitId == DynamicAdUnitId)
             {
-                NeftaAdapterEvents.OnExternalMediationRequestLoaded(NeftaAdapterEvents.AdType.Rewarded, _dynamicAdUnitInsight, adInfo);
-                
                 SetStatus($"Loaded Dynamic {adUnitId} at: {adInfo.Revenue}");
-                
-                _consecutiveDynamicBidAdFails = 0;
+
+                _consecutiveDynamicAdFails = 0;
                 _dynamicAdRequest.Revenue = adInfo.Revenue;
             }
             else
             {
-                NeftaAdapterEvents.OnExternalMediationRequestLoaded(NeftaAdapterEvents.AdType.Rewarded, null, adInfo);
-                
                 SetStatus($"Loaded Default {adUnitId} at: {adInfo.Revenue}");
                 
                 _defaultAdRequest.Revenue = adInfo.Revenue;
             }
 
             UpdateShowButton();
+        }
+        
+        private void OnAdClickedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
+        {
+            NeftaAdapterEvents.OnExternalMediationClick(adUnitId, adInfo);
+            
+            SetStatus("OnAdClickedEvent");
         }
         
         public void Init(Action<bool> onFullScreenAdDisplayed)
@@ -179,9 +181,9 @@ namespace AdDemo
         private void OnShowClick()
         {
             bool isShown = false;
-            if (_dynamicAdRequest != null && _dynamicAdRequest.Revenue.HasValue)
+            if (_dynamicAdRequest.Revenue >= 0)
             {
-                if (_defaultAdRequest != null && _defaultAdRequest.Revenue > _dynamicAdRequest.Revenue)
+                if (_defaultAdRequest.Revenue > _dynamicAdRequest.Revenue)
                 {
                     isShown = TryShowDefault();
                 }
@@ -190,7 +192,7 @@ namespace AdDemo
                     isShown = TryShowDynamic();
                 }
             }
-            if (!isShown && _defaultAdRequest != null && _defaultAdRequest.Revenue.HasValue)
+            if (!isShown && _defaultAdRequest.Revenue >= 0)
             {
                 TryShowDefault();
             }
@@ -203,7 +205,7 @@ namespace AdDemo
             var isShown = false;
             if (MaxSdk.IsRewardedAdReady(DynamicAdUnitId))
             {
-                SetStatus("Showing Dynamic");
+                SetStatus("Showing Dynamic Rewarded");
                 MaxSdk.ShowRewardedAd(DynamicAdUnitId);
                 isShown = true;
             }
@@ -216,7 +218,7 @@ namespace AdDemo
             var isShown = false;
             if (MaxSdk.IsRewardedAdReady(DefaultAdUnitId))
             {
-                SetStatus("Showing Default");
+                SetStatus("Showing Default Rewarded");
                 MaxSdk.ShowRewardedAd(DefaultAdUnitId);
                 isShown = true;
             }
@@ -233,11 +235,6 @@ namespace AdDemo
         {
             SetStatus("OnAdDisplayedEvent");
             _onFullScreenAdDisplayed(true);
-        }
-        
-        private void OnAdClickedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
-        {
-            SetStatus("OnAdClickedEvent");
         }
         
         private void OnAdHideEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
@@ -284,7 +281,7 @@ namespace AdDemo
                     var status = _statusQueue.Dequeue();
                     
                     _status.text = status;
-                    Debug.Log($"Integration Rewarded: {status}");
+                    Debug.Log($"NeftaPluginMAX Rewarded: {status}");
                 }
             }
         }

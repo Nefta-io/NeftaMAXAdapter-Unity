@@ -27,8 +27,8 @@ namespace AdDemo
         }
         
         private AdRequest _dynamicAdRequest;
-        private AdInsight _dynamicAdUnitInsight;
-        private int _consecutiveDynamicBidAdFails;
+        private AdInsight _dynamicInsight;
+        private int _consecutiveDynamicAdFails;
         private AdRequest _defaultAdRequest;
         
         private Queue<string> _statusQueue;
@@ -43,7 +43,7 @@ namespace AdDemo
         {
             if (_dynamicAdRequest == null)
             {
-                GetInsightsAndLoad();   
+                GetInsightsAndLoad(null);   
             }
             if (_defaultAdRequest == null)
             {
@@ -51,57 +51,55 @@ namespace AdDemo
             }
         }
 
-        private void GetInsightsAndLoad()
+        private void GetInsightsAndLoad(AdInsight previousInsight)
         {
             _dynamicAdRequest = new AdRequest();
-            NeftaAdapterEvents.GetInsights(Insights.Interstitial, LoadWithInsights, TimeoutInSeconds);
+            NeftaAdapterEvents.GetInsights(Insights.Interstitial, previousInsight, LoadWithInsights, TimeoutInSeconds);
         }
         
         private void LoadWithInsights(Insights insights)
         {
-            if (insights._interstitial != null)
+            _dynamicInsight = insights._interstitial;
+            if (_dynamicInsight != null)
             {
-                _dynamicAdUnitInsight = insights._interstitial;
-                var bidFloor = _dynamicAdUnitInsight._floorPrice.ToString(CultureInfo.InvariantCulture);
-            
-                SetStatus($"Loading Dynamic AdUnit with bid floor: {bidFloor}");
+                var bidFloor = _dynamicInsight._floorPrice.ToString(CultureInfo.InvariantCulture);
+                
+                SetStatus($"Loading Dynamic Interstitial with floor: {bidFloor}");
                 MaxSdk.SetInterstitialExtraParameter(DynamicAdUnitId, "disable_auto_retries", "true");
                 MaxSdk.SetInterstitialExtraParameter(DynamicAdUnitId, "jC7Fp", bidFloor);
                 MaxSdk.LoadInterstitial(DynamicAdUnitId);
+
+                NeftaAdapterEvents.OnExternalMediationRequest(NeftaAdapterEvents.AdType.Interstitial, DynamicAdUnitId, _dynamicInsight);
             }
         }
         
         private void LoadDefault()
         {
             _defaultAdRequest = new AdRequest();
-            SetStatus("Loading Default AdUnit");
+            SetStatus("Loading Default Interstitial");
             MaxSdk.LoadInterstitial(DefaultAdUnitId);
+            
+            NeftaAdapterEvents.OnExternalMediationRequest(NeftaAdapterEvents.AdType.Interstitial, DefaultAdUnitId);
         }
         
         private void OnAdFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
         {
+            NeftaAdapterEvents.OnExternalMediationRequestFailed(adUnitId, errorInfo);
             if (adUnitId == DynamicAdUnitId)
             {
-                NeftaAdapterEvents.OnExternalMediationRequestFailed(NeftaAdapterEvents.AdType.Interstitial, _dynamicAdUnitInsight, adUnitId, errorInfo);
-            
                 SetStatus($"Load failed Dynamic {adUnitId}: {errorInfo}");
-
-                _consecutiveDynamicBidAdFails++;
+                
+                _consecutiveDynamicAdFails++;
                 StartCoroutine(RetryGetInsightsAndLoad());
             }
             else
             {
-                NeftaAdapterEvents.OnExternalMediationRequestFailed(NeftaAdapterEvents.AdType.Interstitial, null, adUnitId, errorInfo);
-            
                 SetStatus($"Load failed Default {adUnitId}: {errorInfo}");
 
+                _defaultAdRequest = null;
                 if (_load.isOn)
                 {
                     LoadDefault();
-                }
-                else
-                {
-                    _defaultAdRequest = null;
                 }
             }
         }
@@ -110,10 +108,10 @@ namespace AdDemo
         {
             // As per MAX recommendations, retry with exponentially higher delays up to 64s
             // In case you would like to customize fill rate / revenue please contact our customer support
-            yield return new WaitForSeconds(new [] { 0, 2, 4, 8, 16, 32, 64 }[Math.Min(_consecutiveDynamicBidAdFails, 6)]);
+            yield return new WaitForSeconds(new [] { 0, 2, 4, 8, 16, 32, 64 }[Math.Min(_consecutiveDynamicAdFails, 6)]);
             if (_load.isOn)
             {
-                GetInsightsAndLoad();
+                GetInsightsAndLoad(_dynamicInsight);
             }
             else
             {
@@ -123,25 +121,29 @@ namespace AdDemo
 
         private void OnAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
+            NeftaAdapterEvents.OnExternalMediationRequestLoaded(adInfo);
             if (adUnitId == DynamicAdUnitId)
             {
-                NeftaAdapterEvents.OnExternalMediationRequestLoaded(NeftaAdapterEvents.AdType.Interstitial, _dynamicAdUnitInsight, adInfo);
+                SetStatus($"Loaded Dynamic {adUnitId} at: {adInfo.Revenue}");
 
-                SetStatus($"Loaded Dynamic {adUnitId}: {adInfo.NetworkName}");
-                
-                _consecutiveDynamicBidAdFails = 0;
+                _consecutiveDynamicAdFails = 0;
                 _dynamicAdRequest.Revenue = adInfo.Revenue;
             }
             else
             {
-                NeftaAdapterEvents.OnExternalMediationRequestLoaded(NeftaAdapterEvents.AdType.Interstitial, null, adInfo);
-
-                SetStatus($"Loaded Default {adUnitId}: {adInfo.NetworkName}");
+                SetStatus($"Loaded Default {adUnitId} at: {adInfo.Revenue}");
                 
                 _defaultAdRequest.Revenue = adInfo.Revenue;
             }
-            
+
             UpdateShowButton();
+        }
+
+        private void OnAdClickEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
+        {
+            NeftaAdapterEvents.OnExternalMediationClick(adUnitId, adInfo);
+            
+            SetStatus($"On Ad clicked {adUnitId}");
         }
         
         public void Init(Action<bool> onFullScreenAdDisplayed)
@@ -155,6 +157,7 @@ namespace AdDemo
             MaxSdkCallbacks.Interstitial.OnAdDisplayFailedEvent += OnAdDisplayFailedEvent;
             MaxSdkCallbacks.Interstitial.OnAdHiddenEvent += OnAdHiddenEvent;
             MaxSdkCallbacks.Interstitial.OnAdRevenuePaidEvent += OnRevenuePaidEvent;
+            MaxSdkCallbacks.Interstitial.OnAdClickedEvent += OnAdClickEvent;
             
             _title.text = "Interstitial";
             _load.onValueChanged.AddListener(OnLoadChanged);
@@ -200,7 +203,7 @@ namespace AdDemo
             var isShown = false;
             if (MaxSdk.IsInterstitialReady(DynamicAdUnitId))
             {
-                SetStatus("Showing Dynamic");
+                SetStatus("Showing Dynamic Interstitial");
                 MaxSdk.ShowInterstitial(DynamicAdUnitId);
                 isShown = true;
             }
@@ -213,7 +216,7 @@ namespace AdDemo
             var isShown = false;
             if (MaxSdk.IsInterstitialReady(DefaultAdUnitId))
             {
-                SetStatus("Showing Default");
+                SetStatus("Showing Default Interstitial");
                 MaxSdk.ShowInterstitial(DefaultAdUnitId);
                 isShown = true;
             }
@@ -271,7 +274,7 @@ namespace AdDemo
                     var status = _statusQueue.Dequeue();
                     
                     _status.text = status;
-                    Debug.Log($"Integration Interstitial: {status}");
+                    Debug.Log($"NeftaPluginMAX Interstitial: {status}");
                 }
             }
         }

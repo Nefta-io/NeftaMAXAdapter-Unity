@@ -104,10 +104,14 @@ import os
   @objc deinit
 }
 @objc public class AdInsight : ObjectiveC.NSObject {
+  @objc public var _adOpportunityId: Swift.Int
+  public var _auctionId: Swift.Int
   @objc final public let _type: NeftaSDK.Placement.Types
   @objc public var _floorPrice: Swift.Double
   @objc public var _adUnit: Swift.String?
-  public init(type: NeftaSDK.Placement.Types, config: [Swift.String : Any])
+  public init(type: NeftaSDK.Placement.Types, adOpportunityId: Swift.Int)
+  public func Parse(config: [Swift.String : Any]) -> NeftaSDK.AdInsight
+  public func OnNewAuction()
   @objc override dynamic public var description: Swift.String {
     @objc get
   }
@@ -139,9 +143,9 @@ import os
     public var _nuid: Swift.String
     @objc deinit
   }
-  public typealias OnReadyBlock = (([Swift.String : NeftaSDK.Placement]) -> Swift.Void)
+  public typealias OnReadyBlock = ((NeftaSDK.InitConfiguration) -> Swift.Void)
   public typealias OnInsightsBlock = ((NeftaSDK.Insights) -> Swift.Void)
-  public typealias OnInsightsAsStringBlock = ((Swift.Int, Swift.String?) -> Swift.Void)
+  public typealias OnInsightsAsStringBlock = ((Swift.Int, Swift.Int, Swift.String?) -> Swift.Void)
   public typealias OnLogBlock = ((Swift.String) -> Swift.Void)
   @objc public static let Version: Swift.String
   @objc public static let ContentRating_Unspecified: Swift.String
@@ -149,6 +153,7 @@ import os
   @objc public static let ContentRating_ParentalGuidance: Swift.String
   @objc public static let ContentRating_Teen: Swift.String
   @objc public static let ContentRating_MatureAudience: Swift.String
+  @objc public static let ExtParam_TestGroup: Swift.String
   final public let _info: NeftaSDK.NeftaPlugin.Info
   final public let _state: NeftaSDK.NeftaPlugin.State
   public static var _initUrl: Swift.String
@@ -164,15 +169,16 @@ import os
   @objc public static func Init(appId: Swift.String) -> NeftaSDK.NeftaPlugin
   @objc public func SetContentRating(rating: Swift.String)
   @objc public func SetTracking(isAuthorized: Swift.Bool)
+  @objc public static func SetExtraParameter(key: Swift.String, value: Swift.String)
   public static func SetDebugTime(offset: Swift.Int)
   @objc public func Record(type: Swift.Int, category: Swift.Int, subCategory: Swift.Int, name: Swift.String?, value: Swift.Int64, customPayload: Swift.String?)
-  @objc public func SetPublisherUserId(id: Swift.String)
-  @objc(GetInsightsBridge:insights:timeout:) public func GetInsightsBridge(requestId: Swift.Int, insights: Swift.Int, timeout: Swift.Int)
-  @objc(GetInsights:callback:timeout:) public func GetInsights(_ insights: Swift.Int, callback: @escaping NeftaSDK.NeftaPlugin.OnInsightsBlock, timeout: Swift.Int = 0)
+  @objc(GetInsightsBridge:insights:previousAdOpportunityId:timeout:) public func GetInsightsBridge(requestId: Swift.Int, insights: Swift.Int, previousAdOpportunityId: Swift.Int, timeout: Swift.Int)
+  @objc(GetInsights:previousInsight:callback:timeout:) public func GetInsights(_ insights: Swift.Int, previousInsight: NeftaSDK.AdInsight?, callback: @escaping NeftaSDK.NeftaPlugin.OnInsightsBlock, timeout: Swift.Int = 0)
   @objc public func GetNuid(present: Swift.Bool) -> Swift.String
-  @objc public static func OnExternalMediationRequest(_ provider: Swift.String, adType: Swift.Int, recommendedAdUnitId: Swift.String?, requestedFloorPrice: Swift.Float64, calculatedFloorPrice: Swift.Float64, adUnitId: Swift.String?, revenue: Swift.Float64, precision: Swift.String?, status: Swift.Int, providerStatus: Swift.String?, networkStatus: Swift.String?)
-  @objc public static func OnExternalMediationImpression(_ path: Swift.String, data: Foundation.NSMutableDictionary, adType: Swift.Int, revenue: Swift.Float64, precision: Swift.String?)
-  @objc public static func OnExternalMediationImpressionAsString(_ path: Swift.String, data: Swift.String, adType: Swift.Int, revenue: Swift.Float64, precision: Swift.String?)
+  @objc public static func OnExternalMediationRequest(_ provider: Swift.String, adType: Swift.Int, id: Swift.String, requestedAdUnitId: Swift.String, requestedFloorPrice: Swift.Float64, adOpportunityId: Swift.Int)
+  @objc public static func OnExternalMediationResponse(_ provider: Swift.String, id: Swift.String, id2: Swift.String?, revenue: Swift.Float64, precision: Swift.String?, status: Swift.Int, providerStatus: Swift.String?, networkStatus: Swift.String?)
+  @objc public static func OnExternalMediationImpression(_ isClick: Swift.Bool, provider: Swift.String, data: Foundation.NSMutableDictionary?, id: Swift.String?, id2: Swift.String?)
+  @objc public static func OnExternalMediationImpressionAsString(_ isClick: Swift.Bool, provider: Swift.String, data: Swift.String, id: Swift.String?, id2: Swift.String?)
   @objc public static func SetOverride(url: Swift.String?)
   @objc deinit
 }
@@ -364,6 +370,13 @@ import os
   @objc public var _d30_probability: Swift.Double
   @objc public var _probability_confidence: Swift.String?
   public init(config: [Swift.String : Any])
+  @objc deinit
+}
+@_inheritsConvenienceInitializers @objc public class InitConfiguration : ObjectiveC.NSObject {
+  @objc public var _placements: [Swift.String : NeftaSDK.Placement]?
+  @objc public func GetMediationProviderAdUnits() -> [Swift.String]?
+  @objc public func GetMediationProviderAdUnits(provider: Swift.String) -> [Swift.String]?
+  @objc override dynamic public init()
   @objc deinit
 }
 @objc public class UnityWrapper : ObjectiveC.NSObject {

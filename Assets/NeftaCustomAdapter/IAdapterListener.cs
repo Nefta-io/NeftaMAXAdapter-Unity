@@ -3,7 +3,7 @@ namespace NeftaCustomAdapter
 {
     public interface IAdapterListener
     {
-        void IOnInsights(int id, string insights);
+        void IOnInsights(int id, int adapterResponseType, string adapterRerponse);
     }
 }
 #endif

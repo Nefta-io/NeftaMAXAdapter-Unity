@@ -15,11 +15,9 @@ namespace AdDemo
 
         private readonly string[] _adUnits = new string[] {
             // interstitials
-            "c9acf50602329bfe",
-            "e5dc3548d4a0913f",
+            "78b66d4cd80ca1e7",
             // rewarded
-            "08304643cb16df3b",
-            "7c6097e4101586b0",
+            "7c6097e4101586b0"
         };
         
         [DllImport("__Internal")]
@@ -29,11 +27,9 @@ namespace AdDemo
 
         private readonly string[] _adUnits = new string[] {
             // interstitials
-            "60bbc7cc56dfa329",
             "850bcc93f949090c",
             // rewarded
-            "3082ee9199cf59f",
-            "c164298ebdd0c008",
+            "c164298ebdd0c008"
         };
 #endif
         private bool _isBannerShown;
@@ -48,6 +44,8 @@ namespace AdDemo
         private void Awake()
         {
             NeftaAdapterEvents.EnableLogging(true);
+            NeftaAdapterEvents.SetExtraParameter(NeftaAdapterEvents.ExtParams.TestGroup, "split-unity-max");
+            NeftaAdapterEvents.SetExtraParameter("param1", "arg2");
             NeftaAdapterEvents.Init(NeftaId);
 
             _banner.Init();
