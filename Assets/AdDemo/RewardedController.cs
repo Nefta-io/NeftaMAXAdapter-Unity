@@ -181,9 +181,10 @@ namespace AdDemo
         private void OnShowClick()
         {
             bool isShown = false;
-            if (_dynamicAdRequest.Revenue >= 0)
+            if (_dynamicAdRequest != null && _dynamicAdRequest.Revenue.HasValue)
             {
-                if (_defaultAdRequest.Revenue > _dynamicAdRequest.Revenue)
+                if (_defaultAdRequest != null && _defaultAdRequest.Revenue.HasValue &&
+                    _defaultAdRequest.Revenue > _dynamicAdRequest.Revenue)
                 {
                     isShown = TryShowDefault();
                 }
@@ -192,7 +193,7 @@ namespace AdDemo
                     isShown = TryShowDynamic();
                 }
             }
-            if (!isShown && _defaultAdRequest.Revenue >= 0)
+            if (!isShown && _defaultAdRequest != null && _defaultAdRequest.Revenue >= 0)
             {
                 TryShowDefault();
             }

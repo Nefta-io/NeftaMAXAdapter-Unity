@@ -181,7 +181,8 @@ namespace AdDemo
             bool isShown = false;
             if (_dynamicAdRequest != null && _dynamicAdRequest.Revenue.HasValue)
             {
-                if (_defaultAdRequest != null && _defaultAdRequest.Revenue > _dynamicAdRequest.Revenue)
+                if (_defaultAdRequest != null && _defaultAdRequest.Revenue.HasValue &&
+                    _defaultAdRequest.Revenue > _dynamicAdRequest.Revenue)
                 {
                     isShown = TryShowDefault();
                 }
