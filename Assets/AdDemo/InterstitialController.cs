@@ -32,7 +32,6 @@ namespace AdDemo
         private AdRequest _defaultAdRequest;
         
         private Queue<string> _statusQueue;
-        private Action<bool> _onFullScreenAdDisplayed;
         
         [SerializeField] private Text _title;
         [SerializeField] private Toggle _load;
@@ -146,10 +145,9 @@ namespace AdDemo
             SetStatus($"On Ad clicked {adUnitId}");
         }
         
-        public void Init(Action<bool> onFullScreenAdDisplayed)
+        public void Init()
         {
             _statusQueue = new Queue<string>();
-            _onFullScreenAdDisplayed = onFullScreenAdDisplayed;
             
             MaxSdkCallbacks.Interstitial.OnAdLoadedEvent += OnAdLoadedEvent;
             MaxSdkCallbacks.Interstitial.OnAdLoadFailedEvent += OnAdFailedEvent;
@@ -228,7 +226,6 @@ namespace AdDemo
         private void OnShowEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
             SetStatus("OnShowEvent");
-            _onFullScreenAdDisplayed(true);
         }
         
         private void OnAdDisplayFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo, MaxSdkBase.AdInfo adInfo)
@@ -239,7 +236,6 @@ namespace AdDemo
         private void OnAdHiddenEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
             SetStatus("OnAdHiddenEvent");
-            _onFullScreenAdDisplayed(false);
             
             // start new load cycle
             if (_load.isOn)

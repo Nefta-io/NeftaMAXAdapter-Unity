@@ -8,8 +8,6 @@ namespace AdDemo
 {
     public class AdDemoController : MonoBehaviour
     {
-        private const string MaxSdkKey = "IAhBswbDpMg9GhQ8NEKffzNrXQP1H4ABNFvUA7ePIz2xmarVFcy_VB8UfGnC9IPMOgpQ3p8G5hBMebJiTHv3P9";
-
 #if UNITY_IOS
         private const string NeftaId = "5763106043068416";
 
@@ -32,9 +30,7 @@ namespace AdDemo
             "c164298ebdd0c008"
         };
 #endif
-        private bool _isBannerShown;
-
-        [SerializeField] private BannerController _banner;
+        
         [SerializeField] private InterstitialController _interstitial;
         [SerializeField] private RewardedController _rewarded;
 
@@ -47,10 +43,9 @@ namespace AdDemo
             NeftaAdapterEvents.SetExtraParameter(NeftaAdapterEvents.ExtParams.TestGroup, "split-unity-max");
             NeftaAdapterEvents.SetExtraParameter("param1", "arg2");
             NeftaAdapterEvents.Init(NeftaId);
-
-            _banner.Init();
-            _interstitial.Init(OnFullScreenAdDisplay);
-            _rewarded.Init(OnFullScreenAdDisplay);
+            
+            _interstitial.Init();
+            _rewarded.Init();
             
 #if UNITY_EDITOR || !UNITY_IOS
             _stateTime = 1f; // skip IDFA check
@@ -64,6 +59,7 @@ namespace AdDemo
                 Debug.Log("MAX SDK Initialized");
             };
             
+            MaxSdk.SetVerboseLogging(true);
             MaxSdk.SetExtraParameter("disable_b2b_ad_unit_ids", string.Join(",", _adUnits));
             MaxSdk.InitializeSdk();
         }
@@ -82,11 +78,6 @@ namespace AdDemo
                     InitAds();
                 }
             }
-        }
-
-        private void OnFullScreenAdDisplay(bool displayed)
-        {
-            _banner.SetAutoRefresh(!displayed);
         }
     }
 }
