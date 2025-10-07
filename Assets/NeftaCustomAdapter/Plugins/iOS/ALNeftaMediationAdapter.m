@@ -188,7 +188,7 @@ static NeftaPlugin *_plugin;
 }
 
 - (NSString *)adapterVersion {
-    return @"4.4.0";
+    return @"4.4.2";
 }
 
 - (void)destroy {

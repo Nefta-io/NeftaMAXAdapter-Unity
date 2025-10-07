@@ -38,6 +38,11 @@ namespace NeftaCustomAdapter
         public struct ExtParams
         {
             public const string TestGroup = "test_group";
+            public const string AttributionSource = "attribution_source";
+            public const string AttributionCampaign = "attribution_campaign";
+            public const string AttributionAdset = "attribution_adset";
+            public const string AttributionCreative = "attribution_creative";
+            public const string AttributionIncentivized = "attribution_incentivized";
         }
 
         private class InsightRequest
@@ -129,12 +134,10 @@ namespace NeftaCustomAdapter
         
         public static Action<string[]> OnReady;
 
-        public static void Init(string appId, bool sendAdEvents = true)
+        public static void Init(string appId, bool sendAdEvents=true, bool simulateAdsInEditor=false)
         {
 #if UNITY_EDITOR
-            var pluginGameObject = new GameObject("_NeftaPlugin");
-            UnityEngine.Object.DontDestroyOnLoad(pluginGameObject);
-            _plugin = NeftaPlugin.Init(pluginGameObject, appId);
+            _plugin = NeftaPlugin.Init(appId, simulateAdsInEditor);
             _plugin._adapterListener = new NeftaAdapterListener();
 #elif UNITY_IOS
             NeftaPlugin_Init(appId, OnInsights);
@@ -146,9 +149,10 @@ namespace NeftaCustomAdapter
 #endif
             if (sendAdEvents)
             {
-                MaxSdkCallbacks.Banner.OnAdRevenuePaidEvent += OnExternalMediationImpression;
                 MaxSdkCallbacks.Interstitial.OnAdRevenuePaidEvent += OnExternalMediationImpression;
+                MaxSdkCallbacks.Interstitial.OnAdClickedEvent += OnExternalMediationClick;
                 MaxSdkCallbacks.Rewarded.OnAdRevenuePaidEvent += OnExternalMediationImpression;
+                MaxSdkCallbacks.Rewarded.OnAdClickedEvent += OnExternalMediationClick;
             }
 
             _insightRequests = new List<InsightRequest>();

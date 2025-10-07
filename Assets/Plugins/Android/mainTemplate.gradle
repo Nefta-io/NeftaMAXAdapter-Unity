@@ -4,7 +4,6 @@ apply plugin: 'com.android.library'
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 // Android Resolver Dependencies Start
-    implementation 'androidx.lifecycle:lifecycle-process:2.4.1' // Assets/NeftaCustomAdapter/Editor/Dependencies.xml:4
     implementation 'com.applovin:applovin-sdk:13.0.1' // Assets/MaxSdk/AppLovin/Editor/Dependencies.xml:4
     implementation 'com.google.android.gms:play-services-ads-identifier:18.1.0' // Assets/LevelPlay/Editor/IronSourceSDKDependencies.xml:12
     implementation 'com.unity3d.ads:unity-ads:4.14.2' // Assets/LevelPlay/Editor/ISUnityAdsAdapterDependencies.xml:12

@@ -1,7 +1,7 @@
 // swift-interface-format-version: 1.0
-// swift-compiler-version: Apple Swift version 6.0 effective-5.10 (swiftlang-6.0.0.9.10 clang-1600.0.26.2)
-// swift-module-flags: -target arm64-apple-ios11.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -Onone -enable-bare-slash-regex -module-name NeftaSDK
-// swift-module-flags-ignorable: -no-verify-emitted-module-interface
+// swift-compiler-version: Apple Swift version 6.2 effective-5.10 (swiftlang-6.2.0.19.9 clang-1700.3.19.1)
+// swift-module-flags: -target arm64-apple-ios11.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -Onone -enable-experimental-feature DebugDescriptionMacro -enable-bare-slash-regex -module-name NeftaSDK
+// swift-module-flags-ignorable: -no-verify-emitted-module-interface -formal-cxx-interoperability-mode=off -interface-compiler-version 6.2
 import AVKit
 import AdSupport
 import CoreTelephony
@@ -29,7 +29,9 @@ import os
     case Response = 300
     case NoFill = 301
     case Parse = 302
+    #if compiler(>=5.3) && $NonescapableTypes
     public init?(rawValue: Swift.Int)
+    #endif
     public typealias RawValue = Swift.Int
     public var rawValue: Swift.Int {
       get
@@ -48,7 +50,9 @@ import os
     public var description: Swift.String {
       get
     }
+    #if compiler(>=5.3) && $NonescapableTypes
     public init?(rawValue: Swift.Int)
+    #endif
     public typealias RawValue = Swift.Int
     public var rawValue: Swift.Int {
       get
@@ -61,7 +65,9 @@ import os
   @objc deinit
 }
 @objc public protocol NAdListener : ObjectiveC.NSObjectProtocol {
+  #if compiler(>=5.3) && $NonescapableTypes
   @objc optional func OnBid(ad: NeftaSDK.NAd, bidResponse: NeftaSDK.BidResponse?, error: NeftaSDK.NError?)
+  #endif
   @objc optional func OnLoadStart(ad: NeftaSDK.NAd)
   @objc func OnLoadFail(ad: NeftaSDK.NAd, error: NeftaSDK.NError)
   @objc func OnLoad(ad: NeftaSDK.NAd, width: Swift.Int, height: Swift.Int)
@@ -95,7 +101,9 @@ import os
   @objc public func LoadWithBidResponse(bidResponse: Foundation.Data)
   @objc public func Load()
   @objc(ShowThreaded:) public func ShowThreaded(viewController: UIKit.UIViewController)
+  #if compiler(>=5.3) && $NonescapableTypes
   @objc(Show:) public func Show(viewController: UIKit.UIViewController?)
+  #endif
   @objc public func CloseThreaded()
   @objc public func Close()
   @objc public func SetFloorPrice(floorPrice: Swift.Float)
@@ -143,10 +151,10 @@ import os
     public var _nuid: Swift.String
     @objc deinit
   }
-  public typealias OnReadyBlock = ((NeftaSDK.InitConfiguration) -> Swift.Void)
-  public typealias OnInsightsBlock = ((NeftaSDK.Insights) -> Swift.Void)
-  public typealias OnInsightsAsStringBlock = ((Swift.Int, Swift.Int, Swift.String?) -> Swift.Void)
-  public typealias OnLogBlock = ((Swift.String) -> Swift.Void)
+  public typealias OnReadyBlock = (NeftaSDK.InitConfiguration) -> Swift.Void
+  public typealias OnInsightsBlock = (NeftaSDK.Insights) -> Swift.Void
+  public typealias OnInsightsAsStringBlock = (Swift.Int, Swift.Int, Swift.String?) -> Swift.Void
+  public typealias OnLogBlock = (Swift.String) -> Swift.Void
   @objc public static let Version: Swift.String
   @objc public static let ContentRating_Unspecified: Swift.String
   @objc public static let ContentRating_General: Swift.String
@@ -154,6 +162,11 @@ import os
   @objc public static let ContentRating_Teen: Swift.String
   @objc public static let ContentRating_MatureAudience: Swift.String
   @objc public static let ExtParam_TestGroup: Swift.String
+  @objc public static let ExtParam_AttributionSource: Swift.String
+  @objc public static let ExtParam_AttributionCampaign: Swift.String
+  @objc public static let ExtParam_AttributionAdset: Swift.String
+  @objc public static let ExtParam_AttributionCreative: Swift.String
+  @objc public static let ExtParam_AttributionIncentivized: Swift.String
   final public let _info: NeftaSDK.NeftaPlugin.Info
   final public let _state: NeftaSDK.NeftaPlugin.State
   public static var _initUrl: Swift.String
@@ -171,15 +184,27 @@ import os
   @objc public func SetTracking(isAuthorized: Swift.Bool)
   @objc public static func SetExtraParameter(key: Swift.String, value: Swift.String)
   public static func SetDebugTime(offset: Swift.Int)
+  #if compiler(>=5.3) && $NonescapableTypes
   @objc public func Record(type: Swift.Int, category: Swift.Int, subCategory: Swift.Int, name: Swift.String?, value: Swift.Int64, customPayload: Swift.String?)
+  #endif
   @objc(GetInsightsBridge:insights:previousAdOpportunityId:timeout:) public func GetInsightsBridge(requestId: Swift.Int, insights: Swift.Int, previousAdOpportunityId: Swift.Int, timeout: Swift.Int)
+  #if compiler(>=5.3) && $NonescapableTypes
   @objc(GetInsights:previousInsight:callback:timeout:) public func GetInsights(_ insights: Swift.Int, previousInsight: NeftaSDK.AdInsight?, callback: @escaping NeftaSDK.NeftaPlugin.OnInsightsBlock, timeout: Swift.Int = 0)
+  #endif
   @objc public func GetNuid(present: Swift.Bool) -> Swift.String
   @objc public static func OnExternalMediationRequest(_ provider: Swift.String, adType: Swift.Int, id: Swift.String, requestedAdUnitId: Swift.String, requestedFloorPrice: Swift.Float64, adOpportunityId: Swift.Int)
+  #if compiler(>=5.3) && $NonescapableTypes
   @objc public static func OnExternalMediationResponse(_ provider: Swift.String, id: Swift.String, id2: Swift.String?, revenue: Swift.Float64, precision: Swift.String?, status: Swift.Int, providerStatus: Swift.String?, networkStatus: Swift.String?)
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
   @objc public static func OnExternalMediationImpression(_ isClick: Swift.Bool, provider: Swift.String, data: Foundation.NSMutableDictionary?, id: Swift.String?, id2: Swift.String?)
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
   @objc public static func OnExternalMediationImpressionAsString(_ isClick: Swift.Bool, provider: Swift.String, data: Swift.String, id: Swift.String?, id2: Swift.String?)
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
   @objc public static func SetOverride(url: Swift.String?)
+  #endif
   @objc deinit
 }
 @_hasMissingDesignatedInitializers @objc public class NeftaEvents : ObjectiveC.NSObject {
@@ -191,7 +216,9 @@ import os
     public var _name: Swift.String {
       get
     }
+    #if compiler(>=5.3) && $NonescapableTypes
     public init?(rawValue: Swift.Int)
+    #endif
     public typealias RawValue = Swift.Int
     public var rawValue: Swift.Int {
       get
@@ -205,7 +232,9 @@ import os
     case PlayerLevel = 4
     case Task = 5
     case Other = 6
+    #if compiler(>=5.3) && $NonescapableTypes
     public init?(rawValue: Swift.Int)
+    #endif
     public typealias RawValue = Swift.Int
     public var rawValue: Swift.Int {
       get
@@ -215,7 +244,9 @@ import os
     case Start = 0
     case Complete = 1
     case Fail = 2
+    #if compiler(>=5.3) && $NonescapableTypes
     public init?(rawValue: Swift.Int)
+    #endif
     public typealias RawValue = Swift.Int
     public var rawValue: Swift.Int {
       get
@@ -229,18 +260,26 @@ import os
     case Social = 4
     case SpecialEvent = 5
     case Other = 6
+    #if compiler(>=5.3) && $NonescapableTypes
     public var _name: Swift.String? {
       get
     }
+    #endif
+    #if compiler(>=5.3) && $NonescapableTypes
     public init?(rawValue: Swift.Int)
+    #endif
     public typealias RawValue = Swift.Int
     public var rawValue: Swift.Int {
       get
     }
   }
   @objc public func AddProgressionEvent(status: NeftaSDK.NeftaEvents.ProgressionStatus, type: NeftaSDK.NeftaEvents.ProgressionType, source: NeftaSDK.NeftaEvents.ProgressionSource)
+  #if compiler(>=5.3) && $NonescapableTypes
   @objc public func AddProgressionEvent(status: NeftaSDK.NeftaEvents.ProgressionStatus, type: NeftaSDK.NeftaEvents.ProgressionType, source: NeftaSDK.NeftaEvents.ProgressionSource, name: Swift.String?, value: Swift.Int64)
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
   @objc public func AddProgressionEvent(status: NeftaSDK.NeftaEvents.ProgressionStatus, type: NeftaSDK.NeftaEvents.ProgressionType, source: NeftaSDK.NeftaEvents.ProgressionSource, name: Swift.String?, value: Swift.Int64, customPayload: Swift.String?)
+  #endif
   @objc public enum ResourceCategory : Swift.Int {
     case Other = 0
     case SoftCurrency = 1
@@ -251,7 +290,9 @@ import os
     case CoreItem = 6
     case Chest = 7
     case Experience = 8
+    #if compiler(>=5.3) && $NonescapableTypes
     public init?(rawValue: Swift.Int)
+    #endif
     public typealias RawValue = Swift.Int
     public var rawValue: Swift.Int {
       get
@@ -266,18 +307,26 @@ import os
     case Iap = 5
     case Create = 6
     case Other = 7
+    #if compiler(>=5.3) && $NonescapableTypes
     public var _name: Swift.String? {
       get
     }
+    #endif
+    #if compiler(>=5.3) && $NonescapableTypes
     public init?(rawValue: Swift.Int)
+    #endif
     public typealias RawValue = Swift.Int
     public var rawValue: Swift.Int {
       get
     }
   }
   @objc public func AddReceiveEvent(category: NeftaSDK.NeftaEvents.ResourceCategory, method: NeftaSDK.NeftaEvents.ReceiveMethod)
+  #if compiler(>=5.3) && $NonescapableTypes
   @objc public func AddReceiveEvent(category: NeftaSDK.NeftaEvents.ResourceCategory, method: NeftaSDK.NeftaEvents.ReceiveMethod, name: Swift.String?, quantity: Swift.Int64)
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
   @objc public func AddReceiveEvent(category: NeftaSDK.NeftaEvents.ResourceCategory, method: NeftaSDK.NeftaEvents.ReceiveMethod, name: Swift.String?, quantity: Swift.Int64, customPayload: Swift.String?)
+  #endif
   @objc public enum SpendMethod : Swift.Int {
     case Undefined = 0
     case Boost = 1
@@ -287,20 +336,30 @@ import os
     case Upgrade = 5
     case Shop = 6
     case Other = 7
+    #if compiler(>=5.3) && $NonescapableTypes
     public var _name: Swift.String? {
       get
     }
+    #endif
+    #if compiler(>=5.3) && $NonescapableTypes
     public init?(rawValue: Swift.Int)
+    #endif
     public typealias RawValue = Swift.Int
     public var rawValue: Swift.Int {
       get
     }
   }
   @objc public func AddSpendEvent(category: NeftaSDK.NeftaEvents.ResourceCategory, method: NeftaSDK.NeftaEvents.SpendMethod)
+  #if compiler(>=5.3) && $NonescapableTypes
   @objc public func AddSpendEvent(category: NeftaSDK.NeftaEvents.ResourceCategory, method: NeftaSDK.NeftaEvents.SpendMethod, name: Swift.String?, quantity: Swift.Int64)
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
   @objc public func AddSpendEvent(category: NeftaSDK.NeftaEvents.ResourceCategory, method: NeftaSDK.NeftaEvents.SpendMethod, name: Swift.String?, quantity: Swift.Int64, customPayload: Swift.String?)
+  #endif
   @objc public func AddPurchaseEvent(name: Swift.String, price: Foundation.Decimal, currency: Swift.String)
+  #if compiler(>=5.3) && $NonescapableTypes
   @objc public func AddPurchaseEvent(name: Swift.String, price: Foundation.Decimal, currency: Swift.String, customPayload: Swift.String?)
+  #endif
   @objc deinit
 }
 @objc public protocol NInterstitialListener : NeftaSDK.NAdListener {
@@ -311,11 +370,19 @@ import os
 @_hasMissingDesignatedInitializers @objc @_Concurrency.MainActor @preconcurrency public class WebController : UIKit.UIView, WebKit.WKNavigationDelegate, WebKit.WKUIDelegate, WebKit.WKScriptMessageHandler, UIKit.UIGestureRecognizerDelegate {
   @_Concurrency.MainActor @preconcurrency @objc override dynamic public func layoutSubviews()
   @_Concurrency.MainActor @preconcurrency @objc override dynamic public func didMoveToSuperview()
+  #if compiler(>=5.3) && $NonescapableTypes
   @_Concurrency.MainActor @preconcurrency @objc public func webView(_ webView: WebKit.WKWebView, didFail navigation: WebKit.WKNavigation!, withError error: any Swift.Error)
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
   @_Concurrency.MainActor @preconcurrency @objc public func webView(_ webView: WebKit.WKWebView, didFailProvisionalNavigation navigation: WebKit.WKNavigation!, withError error: any Swift.Error)
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
   @_Concurrency.MainActor @preconcurrency @objc public func webView(_ webView: WebKit.WKWebView, didFinish navigation: WebKit.WKNavigation!)
+  #endif
   @_Concurrency.MainActor @preconcurrency @objc public func webView(_ webView: WebKit.WKWebView, decidePolicyFor navigationAction: WebKit.WKNavigationAction, decisionHandler: @escaping (WebKit.WKNavigationActionPolicy) -> Swift.Void)
+  #if compiler(>=5.3) && $NonescapableTypes
   @_Concurrency.MainActor @preconcurrency @objc public func webView(_ webView: WebKit.WKWebView, createWebViewWith configuration: WebKit.WKWebViewConfiguration, for navigationAction: WebKit.WKNavigationAction, windowFeatures: WebKit.WKWindowFeatures) -> WebKit.WKWebView?
+  #endif
   @_Concurrency.MainActor @preconcurrency @objc public func userContentController(_ userContentController: WebKit.WKUserContentController, didReceive message: WebKit.WKScriptMessage)
   @_Concurrency.MainActor @preconcurrency @objc public func gestureRecognizer(_ gestureRecognizer: UIKit.UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIKit.UIGestureRecognizer) -> Swift.Bool
   @objc deinit
@@ -344,7 +411,9 @@ import os
     case None = 0
     case Top = 1
     case Bottom = 2
+    #if compiler(>=5.3) && $NonescapableTypes
     public init?(rawValue: Swift.Int)
+    #endif
     public typealias RawValue = Swift.Int
     public var rawValue: Swift.Int {
       get
@@ -355,9 +424,15 @@ import os
   @objc public init(id: Swift.String, parent: UIKit.UIView)
   @objc public init(id: Swift.String, position: NeftaSDK.NBanner.Position)
   @objc(SetAutoRefresh:) public func SetAutoRefresh(autoRefresh: Swift.Bool)
+  #if compiler(>=5.3) && $NonescapableTypes
   @objc(GracefulShow:) public func GracefulShow(viewController: UIKit.UIViewController?) -> UIKit.UIView?
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
   @objc public func GetView() -> UIKit.UIView?
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
   @objc override public func Show(viewController: UIKit.UIViewController?)
+  #endif
   @objc override public func Close()
   @objc public func Hide()
   @objc deinit
@@ -374,17 +449,21 @@ import os
 }
 @_inheritsConvenienceInitializers @objc public class InitConfiguration : ObjectiveC.NSObject {
   @objc public var _placements: [Swift.String : NeftaSDK.Placement]?
+  #if compiler(>=5.3) && $NonescapableTypes
   @objc public func GetMediationProviderAdUnits() -> [Swift.String]?
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
   @objc public func GetMediationProviderAdUnits(provider: Swift.String) -> [Swift.String]?
+  #endif
   @objc override dynamic public init()
   @objc deinit
 }
 @objc public class UnityWrapper : ObjectiveC.NSObject {
-  public typealias IOnReadyBlock = ((Swift.String) -> Swift.Void)
-  public typealias IOnBidBlock = ((Swift.String, Swift.Float, Swift.Int) -> Swift.Void)
-  public typealias IOnFailBlock = ((Swift.String, Swift.Int, Swift.String?) -> Swift.Void)
-  public typealias IOnLoadBlock = ((Swift.String, Swift.Int, Swift.Int) -> Swift.Void)
-  public typealias IOnChangeBlock = ((Swift.String) -> Swift.Void)
+  public typealias IOnReadyBlock = (Swift.String) -> Swift.Void
+  public typealias IOnBidBlock = (Swift.String, Swift.Float, Swift.Int) -> Swift.Void
+  public typealias IOnFailBlock = (Swift.String, Swift.Int, Swift.String?) -> Swift.Void
+  public typealias IOnLoadBlock = (Swift.String, Swift.Int, Swift.Int) -> Swift.Void
+  public typealias IOnChangeBlock = (Swift.String) -> Swift.Void
   @objc public var IOnReady: NeftaSDK.UnityWrapper.IOnReadyBlock?
   @objc public var IOnBid: NeftaSDK.UnityWrapper.IOnBidBlock?
   @objc public var IOnLoadStart: NeftaSDK.UnityWrapper.IOnChangeBlock?
@@ -402,7 +481,9 @@ import os
   @objc public func Mute(id: Swift.String, mute: Swift.Bool)
   @objc public func CreateBanner(id: Swift.String, position: Swift.Int, autoRefresh: Swift.Bool)
   @objc public func Bid(id: Swift.String)
+  #if compiler(>=5.3) && $NonescapableTypes
   @objc(GetPartialBidRequestAsString:) public func GetPartialBidRequestAsString(id: Swift.String) -> Swift.String?
+  #endif
   @objc public func Load(id: Swift.String)
   @objc public func LoadWithBidResponse(id: Swift.String, bidResponse: Foundation.Data)
   @objc public func CanShow(id: Swift.String) -> Swift.Int

@@ -139,7 +139,7 @@ PlayerSettings:
   loadStoreDebugModeEnabled: 0
   visionOSBundleVersion: 1.0
   tvOSBundleVersion: 1.0
-  bundleVersion: 4.4.0
+  bundleVersion: 4.4.2
   preloadedAssets: []
   metroInputSource: 0
   wsaTransparentSwapchain: 0
@@ -856,7 +856,7 @@ PlayerSettings:
   webGLMemoryGeometricGrowthCap: 96
   webGLPowerPreference: 2
   scriptingDefineSymbols:
-    Android: NEFTA_LEVELPLAY_8_0_OR_NEWER;LEVELPLAY_DEPENDENCIES_INSTALLED
+    Android: LEVELPLAY_DEPENDENCIES_INSTALLED
     iPhone: NEFTA_LEVELPLAY_8_0_OR_NEWER;LEVELPLAY_DEPENDENCIES_INSTALLED
   additionalCompilerArguments: {}
   platformArchitecture: {}

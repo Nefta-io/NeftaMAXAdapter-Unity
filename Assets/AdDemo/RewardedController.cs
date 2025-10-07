@@ -139,13 +139,6 @@ namespace AdDemo
             UpdateShowButton();
         }
         
-        private void OnAdClickedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
-        {
-            NeftaAdapterEvents.OnExternalMediationClick(adUnitId, adInfo);
-            
-            SetStatus("OnAdClickedEvent");
-        }
-        
         public void Init()
         {
             _statusQueue = new Queue<string>();
@@ -254,6 +247,11 @@ namespace AdDemo
         private void OnAdRevenuePaidEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
             SetStatus($"OnAdRevenuePaidEvent {adInfo.Revenue}");
+        }
+        
+        private void OnAdClickedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
+        {
+            SetStatus("OnAdClickedEvent");
         }
         
         private void SetStatus(string status)

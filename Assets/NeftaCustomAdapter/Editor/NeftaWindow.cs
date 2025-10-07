@@ -4,11 +4,6 @@ using System.IO.Compression;
 using System.Xml;
 using UnityEditor;
 using UnityEngine;
-#if UNITY_IOS
-using System.Collections.Generic;
-using System.Linq;
-using UnityEditor.Callbacks;
-#endif
 
 namespace NeftaCustomAdapter.Editor
 {
@@ -32,50 +27,6 @@ namespace NeftaCustomAdapter.Editor
         {
             GetWindow(typeof(NeftaWindow), false, "Nefta");
         }
-
-#if UNITY_IOS
-        [PostProcessBuild(0)]
-        public static void NeftaPostProcessPlist(BuildTarget buildTarget, string path)
-        {
-            if (buildTarget == BuildTarget.iOS)
-            {
-                var plistPath = Path.Combine(path, "Info.plist");
-                var plist = new UnityEditor.iOS.Xcode.PlistDocument();
-                plist.ReadFromFile(plistPath);
-
-                plist.root.values.TryGetValue("SKAdNetworkItems", out var skAdNetworkItems);
-                var existingSkAdNetworkIds = new HashSet<string>();
-
-                if (skAdNetworkItems != null && skAdNetworkItems.GetType() == typeof(UnityEditor.iOS.Xcode.PlistElementArray))
-                {
-                    var plistElementDictionaries = skAdNetworkItems.AsArray().values
-                        .Where(plistElement => plistElement.GetType() == typeof(UnityEditor.iOS.Xcode.PlistElementDict));
-                    foreach (var plistElement in plistElementDictionaries)
-                    {
-                        UnityEditor.iOS.Xcode.PlistElement existingId;
-                        plistElement.AsDict().values.TryGetValue("SKAdNetworkIdentifier", out existingId);
-                        if (existingId == null || existingId.GetType() != typeof(UnityEditor.iOS.Xcode.PlistElementString)
-                                               || string.IsNullOrEmpty(existingId.AsString())) continue;
-
-                        existingSkAdNetworkIds.Add(existingId.AsString());
-                    }
-                }
-                else
-                {
-                    skAdNetworkItems = plist.root.CreateArray("SKAdNetworkItems");
-                }
-
-                const string neftaSkAdNetworkId = "2lj985962l.adattributionkit";
-                if (!existingSkAdNetworkIds.Contains(neftaSkAdNetworkId))
-                {
-                    var skAdNetworkItemDict = skAdNetworkItems.AsArray().AddDict();
-                    skAdNetworkItemDict.SetString("SKAdNetworkIdentifier", neftaSkAdNetworkId);
-                }
-
-                plist.WriteToFile(plistPath);
-            }
-        }
-#endif
         
         public void OnEnable()
         {

@@ -24,7 +24,7 @@ namespace Editor
             };
             
             NeftaWindow.TryGetPluginImporters();
-            NeftaWindow.TogglePlugins(true);
+            NeftaWindow.TogglePlugins(false);
             
             EditorUserBuildSettings.exportAsGoogleAndroidProject = false;
             
