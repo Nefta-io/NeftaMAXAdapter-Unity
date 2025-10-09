@@ -59,6 +59,7 @@ namespace AdDemo
         private void LoadWithInsights(Insights insights)
         {
             _dynamicInsight = insights._interstitial;
+            SetStatus($"LoadWithInsights: {insights}");
             if (_dynamicInsight != null)
             {
                 var bidFloor = _dynamicInsight._floorPrice.ToString(CultureInfo.InvariantCulture);
@@ -69,6 +70,10 @@ namespace AdDemo
                 MaxSdk.LoadInterstitial(DynamicAdUnitId);
 
                 NeftaAdapterEvents.OnExternalMediationRequest(NeftaAdapterEvents.AdType.Interstitial, DynamicAdUnitId, _dynamicInsight);
+            }
+            else
+            {
+                _dynamicAdRequest = null;
             }
         }
         
