@@ -24,11 +24,13 @@ namespace AdDemo
         private class AdRequest
         {
             public double? Revenue;
+            public readonly float LoadStart = Time.realtimeSinceStartup;
         }
 
         private AdRequest _dynamicAdRequest;
         private AdInsight _dynamicInsight;
         private int _consecutiveDynamicAdFails;
+        private int _consecutiveDefaultAdFails;
         private AdRequest _defaultAdRequest;
 
         private Queue<string> _statusQueue;
@@ -59,7 +61,7 @@ namespace AdDemo
         private void LoadWithInsights(Insights insights)
         {
             _dynamicInsight = insights._rewarded;
-            SetStatus($"LoadWithInsights: {insights}");
+            SetStatus($"LoadWithInsights: {_dynamicInsight}");
             if (_dynamicInsight != null)
             {
                 var bidFloor = _dynamicInsight._floorPrice.ToString(CultureInfo.InvariantCulture);
@@ -100,20 +102,14 @@ namespace AdDemo
             {
                 SetStatus($"Load failed Default {adUnitId}: {errorInfo}");
 
-                _defaultAdRequest = null;
-                if (_load.isOn)
-                {
-                    LoadDefault();
-                }
+                _consecutiveDefaultAdFails++;
+                StartCoroutine(RetryDefaultLoad());
             }
         }
         
         private IEnumerator RetryGetInsightsAndLoad()
         {
-            // As per MAX recommendations;
-            // retry with exponentially higher delays up to 64s for ad Units with disabled auto retry.
-            // In case you would like to customize fill rate / revenue please contact our customer support.
-            yield return new WaitForSeconds(new [] { 0, 2, 4, 8, 16, 32, 64 }[Math.Min(_consecutiveDynamicAdFails, 6)]);
+            yield return new WaitForSeconds(GetMinWaitTime(_consecutiveDynamicAdFails));
             if (_load.isOn)
             {
                 GetInsightsAndLoad(_dynamicInsight);
@@ -122,6 +118,38 @@ namespace AdDemo
             {
                 _dynamicAdRequest = null;
             }
+        }
+        
+        private IEnumerator RetryDefaultLoad()
+        {
+            if (_defaultAdRequest != null)
+            {
+                // In rare cases where mediation returns failed load early (OnAdFailedEvent is invoked in ms after load):
+                // Make sure to wait at least 2 seconds since <see cref="LoadDefault()"/>
+                // (This is different from delay on dynamic track, where the delay starts from <see cref="OnAdFailedEvent()"/>
+                var timeSinceAdLoad = Time.realtimeSinceStartup - _defaultAdRequest.LoadStart;
+                var remainingWaitTime = GetMinWaitTime(_consecutiveDefaultAdFails) - timeSinceAdLoad;
+                if (remainingWaitTime > 0)
+                {
+                    yield return new WaitForSeconds(remainingWaitTime);
+                }   
+            }
+            
+            if (_load.isOn)
+            {
+                LoadDefault();
+            }
+            else
+            {
+                _defaultAdRequest = null;
+            }
+        }
+
+        private float GetMinWaitTime(int numberOfConsecutiveFails)
+        {
+            // As per MAX recommendations, retry with exponentially higher delays up to 64s
+            // In case you would like to customize fill rate / revenue please contact our customer support
+            return new [] { 0, 2, 4, 8, 16, 32, 64 }[Math.Min(numberOfConsecutiveFails, 6)];
         }
         
         private void OnAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
@@ -138,6 +166,7 @@ namespace AdDemo
             {
                 SetStatus($"Loaded Default {adUnitId} at: {adInfo.Revenue}");
                 
+                _consecutiveDefaultAdFails = 0;
                 _defaultAdRequest.Revenue = adInfo.Revenue;
             }
 
