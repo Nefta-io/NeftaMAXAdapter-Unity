@@ -69,9 +69,8 @@ namespace AdDemo
                 SetStatus($"Loading Dynamic Interstitial with floor: {bidFloor}");
                 MaxSdk.SetInterstitialExtraParameter(DynamicAdUnitId, "disable_auto_retries", "true");
                 MaxSdk.SetInterstitialExtraParameter(DynamicAdUnitId, "jC7Fp", bidFloor);
-                MaxSdk.LoadInterstitial(DynamicAdUnitId);
-
                 NeftaAdapterEvents.OnExternalMediationRequest(NeftaAdapterEvents.AdType.Interstitial, DynamicAdUnitId, _dynamicInsight);
+                MaxSdk.LoadInterstitial(DynamicAdUnitId);
             }
             else
             {
@@ -83,9 +82,8 @@ namespace AdDemo
         {
             _defaultAdRequest = new AdRequest();
             SetStatus("Loading Default Interstitial");
-            MaxSdk.LoadInterstitial(DefaultAdUnitId);
-            
             NeftaAdapterEvents.OnExternalMediationRequest(NeftaAdapterEvents.AdType.Interstitial, DefaultAdUnitId);
+            MaxSdk.LoadInterstitial(DefaultAdUnitId);
         }
         
         private void OnAdFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
@@ -126,7 +124,7 @@ namespace AdDemo
             {
                 // In rare cases where mediation returns failed load early (OnAdFailedEvent is invoked in ms after load):
                 // Make sure to wait at least 2 seconds since <see cref="LoadDefault()"/>
-                // (This is different from delay on dynamic track, where the delay starts from <see cref="OnAdFailedEvent()"/>
+                // (This is different from delay on dynamic track, where the delay starts from <see cref="OnAdFailedEvent()"/>)
                 var timeSinceAdLoad = Time.realtimeSinceStartup - _defaultAdRequest.LoadStart;
                 var remainingWaitTime = GetMinWaitTime(_consecutiveDefaultAdFails) - timeSinceAdLoad;
                 if (remainingWaitTime > 0)

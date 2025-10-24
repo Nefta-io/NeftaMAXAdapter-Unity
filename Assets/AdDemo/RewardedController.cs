@@ -69,9 +69,8 @@ namespace AdDemo
                 SetStatus($"Loading Dynamic Rewarded with floor: {bidFloor}");
                 MaxSdk.SetRewardedAdExtraParameter(DynamicAdUnitId, "disable_auto_retries", "true");
                 MaxSdk.SetRewardedAdExtraParameter(DynamicAdUnitId, "jC7Fp", bidFloor);
-                MaxSdk.LoadRewardedAd(DynamicAdUnitId);
-                
                 NeftaAdapterEvents.OnExternalMediationRequest(NeftaAdapterEvents.AdType.Rewarded, DynamicAdUnitId, _dynamicInsight);
+                MaxSdk.LoadRewardedAd(DynamicAdUnitId);
             }
             else
             {
@@ -83,9 +82,8 @@ namespace AdDemo
         {
             _defaultAdRequest = new AdRequest();
             SetStatus("Loading Default Rewarded");
-            MaxSdk.LoadRewardedAd(DefaultAdUnitId);
-
             NeftaAdapterEvents.OnExternalMediationRequest(NeftaAdapterEvents.AdType.Rewarded, DefaultAdUnitId);
+            MaxSdk.LoadRewardedAd(DefaultAdUnitId);
         }
         
         private void OnAdFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
@@ -126,7 +124,7 @@ namespace AdDemo
             {
                 // In rare cases where mediation returns failed load early (OnAdFailedEvent is invoked in ms after load):
                 // Make sure to wait at least 2 seconds since <see cref="LoadDefault()"/>
-                // (This is different from delay on dynamic track, where the delay starts from <see cref="OnAdFailedEvent()"/>
+                // (This is different from delay on dynamic track, where the delay starts from <see cref="OnAdFailedEvent()"/>)
                 var timeSinceAdLoad = Time.realtimeSinceStartup - _defaultAdRequest.LoadStart;
                 var remainingWaitTime = GetMinWaitTime(_consecutiveDefaultAdFails) - timeSinceAdLoad;
                 if (remainingWaitTime > 0)
