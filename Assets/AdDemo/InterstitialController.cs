@@ -96,7 +96,7 @@ namespace AdDemo
                 else
                 {
                     adRequest.ConsecutiveAdFails++;
-                    StartCoroutine(RetryGetInsightsAndLoad(adRequest));
+                    StartCoroutine(RetryLoad(adRequest));
                 }
             }, TimeoutInSeconds);
         }
@@ -120,7 +120,7 @@ namespace AdDemo
             SetStatus($"Load Failed {adRequest.AdUnitId}: {errorInfo}");
             
             adRequest.ConsecutiveAdFails++;
-            StartCoroutine(RetryGetInsightsAndLoad(adRequest));
+            StartCoroutine(RetryLoad(adRequest));
             
             _isFirstResponseReceived = true;
             if (_load.isOn)
@@ -150,7 +150,7 @@ namespace AdDemo
             }
         }
         
-        private IEnumerator RetryGetInsightsAndLoad(AdRequest adRequest)
+        private IEnumerator RetryLoad(AdRequest adRequest)
         {
             yield return new WaitForSeconds(GetMinWaitTime(adRequest.ConsecutiveAdFails));
 
