@@ -110,6 +110,11 @@ namespace AdDemo
                     SetStatus($"Loading {adRequest.AdUnitId} as Optimized with {bidFloor}");
                     SimLoad(adRequest.AdUnitId);
                 }
+                else
+                {
+                    adRequest.ConsecutiveAdFails++;
+                    StartCoroutine(RetryGetInsightsAndLoad(adRequest));
+                }
             }, TimeoutInSeconds);
         }
         

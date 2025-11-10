@@ -81,7 +81,7 @@ namespace AdDemo
             NeftaAdapterEvents.GetInsights(Insights.Interstitial, adRequest.Insight, (Insights insights) => {
                 var insight = insights._interstitial;
                 SetStatus($"Load with Insights: {insight}");
-                if (insight != null && _load.isOn)
+                if (insight != null)
                 {
                     adRequest.Insight = insight;
                     var bidFloor = insight._floorPrice.ToString(CultureInfo.InvariantCulture);
@@ -92,6 +92,11 @@ namespace AdDemo
                     
                     SetStatus($"Loading {adRequest.AdUnitId} as Optimized with floor: {bidFloor}");
                     MaxSdk.LoadInterstitial(adRequest.AdUnitId);
+                }
+                else
+                {
+                    adRequest.ConsecutiveAdFails++;
+                    StartCoroutine(RetryGetInsightsAndLoad(adRequest));
                 }
             }, TimeoutInSeconds);
         }
