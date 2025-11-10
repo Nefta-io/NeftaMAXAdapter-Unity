@@ -119,12 +119,14 @@ namespace AdDemo
             var adRequest = adUnitId == _adRequestA.AdUnitId ? _adRequestA : _adRequestB;
             SetStatus($"Load Failed {adRequest.AdUnitId}: {errorInfo}");
             
-            _isFirstResponseReceived = true;
             adRequest.ConsecutiveAdFails++;
-            
-            StartLoading();
-            
             StartCoroutine(RetryGetInsightsAndLoad(adRequest));
+            
+            _isFirstResponseReceived = true;
+            if (_load.isOn)
+            {
+                StartLoading();
+            }
         }
         
         private void OnAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
@@ -134,15 +136,18 @@ namespace AdDemo
             var adRequest = adUnitId == _adRequestA.AdUnitId ? _adRequestA : _adRequestB;
             SetStatus($"Loaded {adRequest.AdUnitId} at: {adInfo.Revenue}");
 
-            _isFirstResponseReceived = true;
             adRequest.Insight = null;
             adRequest.ConsecutiveAdFails = 0;
             adRequest.Revenue = adInfo.Revenue;
             adRequest.State = State.Ready;
 
             UpdateShowButton();
-            
-            StartLoading();
+
+            _isFirstResponseReceived = true;
+            if (_load.isOn)
+            {
+                StartLoading();
+            }
         }
         
         private IEnumerator RetryGetInsightsAndLoad(AdRequest adRequest)
