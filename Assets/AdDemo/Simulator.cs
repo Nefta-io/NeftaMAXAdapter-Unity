@@ -18,7 +18,7 @@ namespace AdDemo
         private void Awake()
         {
             _toggle.onValueChanged.AddListener(OnSimulationModeChanged);
-            //_toggle.isOn = true;
+            _toggle.isOn = false;
         }
 
         private void OnSimulationModeChanged(bool isOn)

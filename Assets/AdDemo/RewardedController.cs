@@ -100,7 +100,7 @@ namespace AdDemo
         {
             adRequest.State = State.Loading;
                         
-            SetStatus("Loading Default Rewarded");
+            SetStatus($"Loading {adRequest.AdUnitId} as Default");
             
             NeftaAdapterEvents.OnExternalMediationRequest(NeftaAdapterEvents.AdType.Rewarded, adRequest.AdUnitId);
             
@@ -217,10 +217,10 @@ namespace AdDemo
             adRequest.State = State.Idle;
             adRequest.Revenue = 0;
             
-            if (MaxSdk.IsInterstitialReady(adRequest.AdUnitId))
+            if (MaxSdk.IsRewardedAdReady(adRequest.AdUnitId))
             {
                 SetStatus($"Showing {adRequest.AdUnitId}");
-                MaxSdk.ShowInterstitial(adRequest.AdUnitId);
+                MaxSdk.ShowRewardedAd(adRequest.AdUnitId);
                 return true;
             }
             return false;
