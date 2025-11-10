@@ -13,133 +13,141 @@ namespace AdDemo
     public class InterstitialController : MonoBehaviour
     {
 #if UNITY_IOS
-        private const string DynamicAdUnitId = "78b66d4cd80ca1e7";
-        private const string DefaultAdUnitId = "c9acf50602329bfe";
+        private const string AdUnitIdA = "78b66d4cd80ca1e7";
+        private const string AdUnitIdB = "c9acf50602329bfe";
 #else // UNITY_ANDROID
-        private const string DynamicAdUnitId = "850bcc93f949090c";
-        private const string DefaultAdUnitId = "60bbc7cc56dfa329";
+        private const string AdUnitIdA = "850bcc93f949090c";
+        private const string AdUnitIdB = "60bbc7cc56dfa329";
 #endif
         private const int TimeoutInSeconds = 5;
+
+        private enum State
+        {
+            Idle,
+            LoadingWithInsights,
+            Loading,
+            Ready
+        }
         
         private class AdRequest
         {
-            public double? Revenue;
-            public readonly float LoadStart = Time.realtimeSinceStartup;
+            public readonly string AdUnitId;
+            public State State;
+            public AdInsight Insight;
+            public double Revenue;
+            public int ConsecutiveAdFails;
+
+            public AdRequest(string adUnitId)
+            {
+                AdUnitId = adUnitId;
+            }
         }
         
-        private AdRequest _dynamicAdRequest;
-        private AdInsight _dynamicInsight;
-        private int _consecutiveDynamicAdFails;
-        private int _consecutiveDefaultAdFails;
-        private AdRequest _defaultAdRequest;
+        private AdRequest _adRequestA;
+        private AdRequest _adRequestB;
+        private bool _isFirstResponseReceived;
         
         private Queue<string> _statusQueue;
-        
-        [SerializeField] private Text _title;
+
         [SerializeField] private Toggle _load;
         [SerializeField] private Button _show;
         [SerializeField] private Text _status;
         
         private void StartLoading()
         {
-            if (_dynamicAdRequest == null)
-            {
-                GetInsightsAndLoad(null);   
-            }
-            if (_defaultAdRequest == null)
-            {
-                LoadDefault();   
-            }
+            Load(_adRequestA, _adRequestB.State);
+            Load(_adRequestB, _adRequestA.State);
         }
 
-        private void GetInsightsAndLoad(AdInsight previousInsight)
+        private void Load(AdRequest request, State otherState)
         {
-            _dynamicAdRequest = new AdRequest();
-            NeftaAdapterEvents.GetInsights(Insights.Interstitial, previousInsight, LoadWithInsights, TimeoutInSeconds);
-        }
-        
-        private void LoadWithInsights(Insights insights)
-        {
-            _dynamicInsight = insights._interstitial;
-            SetStatus($"LoadWithInsights: {_dynamicInsight}");
-            if (_dynamicInsight != null)
+            if (request.State == State.Idle)
             {
-                var bidFloor = _dynamicInsight._floorPrice.ToString(CultureInfo.InvariantCulture);
-                
-                SetStatus($"Loading Dynamic Interstitial with floor: {bidFloor}");
-                MaxSdk.SetInterstitialExtraParameter(DynamicAdUnitId, "disable_auto_retries", "true");
-                MaxSdk.SetInterstitialExtraParameter(DynamicAdUnitId, "jC7Fp", bidFloor);
-                NeftaAdapterEvents.OnExternalMediationRequest(NeftaAdapterEvents.AdType.Interstitial, DynamicAdUnitId, _dynamicInsight);
-                MaxSdk.LoadInterstitial(DynamicAdUnitId);
-            }
-            else
-            {
-                _dynamicAdRequest = null;
+                if (otherState != State.LoadingWithInsights)
+                {
+                    GetInsightsAndLoad(request); 
+                }
+                else if (_isFirstResponseReceived)
+                {
+                    LoadDefault(request);
+                }
             }
         }
         
-        private void LoadDefault()
+        private void GetInsightsAndLoad(AdRequest adRequest)
         {
-            _defaultAdRequest = new AdRequest();
-            SetStatus("Loading Default Interstitial");
-            NeftaAdapterEvents.OnExternalMediationRequest(NeftaAdapterEvents.AdType.Interstitial, DefaultAdUnitId);
-            MaxSdk.LoadInterstitial(DefaultAdUnitId);
+            adRequest.State = State.LoadingWithInsights;
+            
+            NeftaAdapterEvents.GetInsights(Insights.Interstitial, adRequest.Insight, (Insights insights) => {
+                var insight = insights._interstitial;
+                SetStatus($"Load with Insights: {insight}");
+                if (insight != null && _load.isOn)
+                {
+                    adRequest.Insight = insight;
+                    var bidFloor = insight._floorPrice.ToString(CultureInfo.InvariantCulture);
+                    MaxSdk.SetInterstitialExtraParameter(adRequest.AdUnitId, "disable_auto_retries", "true");
+                    MaxSdk.SetInterstitialExtraParameter(adRequest.AdUnitId, "jC7Fp", bidFloor);
+                    
+                    NeftaAdapterEvents.OnExternalMediationRequest(NeftaAdapterEvents.AdType.Interstitial, adRequest.AdUnitId, insight);
+                    
+                    SetStatus($"Loading {adRequest.AdUnitId} as Optimized with floor: {bidFloor}");
+                    MaxSdk.LoadInterstitial(adRequest.AdUnitId);
+                }
+            }, TimeoutInSeconds);
+        }
+        
+        private void LoadDefault(AdRequest adRequest)
+        {
+            adRequest.State = State.Loading;
+            
+            SetStatus($"Loading {adRequest.AdUnitId} as Default");
+            
+            NeftaAdapterEvents.OnExternalMediationRequest(NeftaAdapterEvents.AdType.Interstitial, adRequest.AdUnitId);
+            
+            MaxSdk.LoadInterstitial(adRequest.AdUnitId);
         }
         
         private void OnAdFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
         {
             NeftaAdapterEvents.OnExternalMediationRequestFailed(adUnitId, errorInfo);
-            if (adUnitId == DynamicAdUnitId)
-            {
-                SetStatus($"Load failed Dynamic {adUnitId}: {errorInfo}");
-                
-                _consecutiveDynamicAdFails++;
-                StartCoroutine(RetryGetInsightsAndLoad());
-            }
-            else
-            {
-                SetStatus($"Load failed Default {adUnitId}: {errorInfo}");
+            
+            var adRequest = adUnitId == _adRequestA.AdUnitId ? _adRequestA : _adRequestB;
+            SetStatus($"Load Failed {adRequest.AdUnitId}: {errorInfo}");
 
-                _consecutiveDefaultAdFails++;
-                StartCoroutine(RetryDefaultLoad());
-            }
+            _isFirstResponseReceived = true;
+            adRequest.ConsecutiveAdFails++;
+            
+            StartLoading();
+            
+            StartCoroutine(RetryGetInsightsAndLoad(adRequest));
         }
         
-        private IEnumerator RetryGetInsightsAndLoad()
+        private void OnAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
-            yield return new WaitForSeconds(GetMinWaitTime(_consecutiveDynamicAdFails));
-            if (_load.isOn)
-            {
-                GetInsightsAndLoad(_dynamicInsight);
-            }
-            else
-            {
-                _dynamicAdRequest = null;
-            }
-        }
+            NeftaAdapterEvents.OnExternalMediationRequestLoaded(adInfo);
 
-        private IEnumerator RetryDefaultLoad()
-        {
-            if (_defaultAdRequest != null)
-            {
-                // In rare cases where mediation returns failed load early (OnAdFailedEvent is invoked in ms after load):
-                // Make sure to wait at least 2 seconds since <see cref="LoadDefault()"/>
-                // (This is different from delay on dynamic track, where the delay starts from <see cref="OnAdFailedEvent()"/>)
-                var timeSinceAdLoad = Time.realtimeSinceStartup - _defaultAdRequest.LoadStart;
-                var remainingWaitTime = GetMinWaitTime(_consecutiveDefaultAdFails) - timeSinceAdLoad;
-                if (remainingWaitTime > 0)
-                {
-                    yield return new WaitForSeconds(remainingWaitTime);
-                }   
-            }
+            var adRequest = adUnitId == _adRequestA.AdUnitId ? _adRequestA : _adRequestB;
+            SetStatus($"Loaded {adRequest.AdUnitId} at: {adInfo.Revenue}");
+
+            _isFirstResponseReceived = true;
+            adRequest.Insight = null;
+            adRequest.ConsecutiveAdFails = 0;
+            adRequest.Revenue = adInfo.Revenue;
+            adRequest.State = State.Ready;
+
+            UpdateShowButton();
             
+            StartLoading();
+        }
+        
+        private IEnumerator RetryGetInsightsAndLoad(AdRequest adRequest)
+        {
+            yield return new WaitForSeconds(GetMinWaitTime(adRequest.ConsecutiveAdFails));
+
+            adRequest.State = State.Idle;
             if (_load.isOn)
             {
-                LoadDefault();
-            }
-            else
-            {
-                _defaultAdRequest = null;
+                StartLoading();
             }
         }
 
@@ -149,41 +157,22 @@ namespace AdDemo
             // In case you would like to customize fill rate / revenue please contact our customer support
             return new [] { 0, 2, 4, 8, 16, 32, 64 }[Math.Min(numberOfConsecutiveFails, 6)];
         }
-
-        private void OnAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
-        {
-            NeftaAdapterEvents.OnExternalMediationRequestLoaded(adInfo);
-            if (adUnitId == DynamicAdUnitId)
-            {
-                SetStatus($"Loaded Dynamic {adUnitId} at: {adInfo.Revenue}");
-
-                _consecutiveDynamicAdFails = 0;
-                _dynamicAdRequest.Revenue = adInfo.Revenue;
-            }
-            else
-            {
-                SetStatus($"Loaded Default {adUnitId} at: {adInfo.Revenue}");
-
-                _consecutiveDefaultAdFails = 0;
-                _defaultAdRequest.Revenue = adInfo.Revenue;
-            }
-
-            UpdateShowButton();
-        }
         
-        public void Init()
+        private void Awake()
         {
+            _adRequestA = new AdRequest(AdUnitIdA);
+            _adRequestB = new AdRequest(AdUnitIdB);
+            
             _statusQueue = new Queue<string>();
             
             MaxSdkCallbacks.Interstitial.OnAdLoadedEvent += OnAdLoadedEvent;
             MaxSdkCallbacks.Interstitial.OnAdLoadFailedEvent += OnAdFailedEvent;
-            MaxSdkCallbacks.Interstitial.OnAdDisplayedEvent += OnShowEvent;
             MaxSdkCallbacks.Interstitial.OnAdDisplayFailedEvent += OnAdDisplayFailedEvent;
+            MaxSdkCallbacks.Interstitial.OnAdDisplayedEvent += OnAdDisplayedEvent;
             MaxSdkCallbacks.Interstitial.OnAdHiddenEvent += OnAdHiddenEvent;
             MaxSdkCallbacks.Interstitial.OnAdRevenuePaidEvent += OnRevenuePaidEvent;
             MaxSdkCallbacks.Interstitial.OnAdClickedEvent += OnAdClickEvent;
             
-            _title.text = "Interstitial";
             _load.onValueChanged.AddListener(OnLoadChanged);
             _show.onClick.AddListener(OnShowClick);
             
@@ -196,67 +185,66 @@ namespace AdDemo
             {
                 StartLoading();   
             }
+            else
+            {
+                if (_adRequestA.State != State.Ready)
+                {
+                    _adRequestA.State = State.Idle;
+                }
+
+                if (_adRequestB.State != State.Ready)
+                {
+                    _adRequestB.State = State.Idle;
+                }
+            }
             
             AddDemoGameEventExample();
         }
         
         private void OnShowClick()
         {
-            bool isShown = false;
-            if (_dynamicAdRequest != null && _dynamicAdRequest.Revenue.HasValue)
+            var isShown = false;
+            if (_adRequestA.State == State.Ready)
             {
-                if (_defaultAdRequest != null && _defaultAdRequest.Revenue.HasValue &&
-                    _defaultAdRequest.Revenue > _dynamicAdRequest.Revenue)
+                if (_adRequestB.State == State.Ready && _adRequestB.Revenue > _adRequestA.Revenue)
                 {
-                    isShown = TryShowDefault();
+                    isShown = TryShow(_adRequestB);
                 }
                 if (!isShown)
                 {
-                    isShown = TryShowDynamic();
+                    isShown = TryShow(_adRequestA);
                 }
             }
-            if (!isShown && _defaultAdRequest != null && _defaultAdRequest.Revenue.HasValue)
+            if (!isShown && _adRequestB.State == State.Ready)
             {
-                TryShowDefault();
+                TryShow(_adRequestB);
             }
             
             UpdateShowButton();
         }
         
-        private bool TryShowDynamic()
+        private bool TryShow(AdRequest adRequest)
         {
-            var isShown = false;
-            if (MaxSdk.IsInterstitialReady(DynamicAdUnitId))
+            adRequest.State = State.Idle;
+            adRequest.Revenue = 0;
+            
+            if (MaxSdk.IsInterstitialReady(adRequest.AdUnitId))
             {
-                SetStatus("Showing Dynamic Interstitial");
-                MaxSdk.ShowInterstitial(DynamicAdUnitId);
-                isShown = true;
+                SetStatus($"Showing {adRequest.AdUnitId}");
+                MaxSdk.ShowInterstitial(adRequest.AdUnitId);
+                return true;
             }
-            _dynamicAdRequest = null;
-            return isShown;
-        }
-        
-        private bool TryShowDefault()
-        {
-            var isShown = false;
-            if (MaxSdk.IsInterstitialReady(DefaultAdUnitId))
-            {
-                SetStatus("Showing Default Interstitial");
-                MaxSdk.ShowInterstitial(DefaultAdUnitId);
-                isShown = true;
-            }
-            _defaultAdRequest = null;
-            return isShown;
-        }
-
-        private void OnShowEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
-        {
-            SetStatus("OnShowEvent");
+            return false;
         }
         
         private void OnAdDisplayFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo, MaxSdkBase.AdInfo adInfo)
         {
             SetStatus("OnAdDisplayFailedEvent");
+        }
+        
+        private void OnAdDisplayedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
+        {
+            SetStatus("OnAdDisplayedEvent");
         }
         
         private void OnAdHiddenEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
@@ -309,8 +297,7 @@ namespace AdDemo
         
         private void UpdateShowButton()
         {
-            _show.interactable = _dynamicAdRequest != null && _dynamicAdRequest.Revenue.HasValue ||
-                                 _defaultAdRequest != null && _defaultAdRequest.Revenue.HasValue;
+            _show.interactable = _adRequestA.State == State.Ready || _adRequestB.State == State.Ready;
         }
 
         private void AddDemoGameEventExample()

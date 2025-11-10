@@ -44,9 +44,6 @@ namespace AdDemo
             NeftaAdapterEvents.SetExtraParameter("param1", "arg2");
             NeftaAdapterEvents.Init(NeftaId);
             
-            _interstitial.Init();
-            _rewarded.Init();
-            
 #if UNITY_EDITOR || !UNITY_IOS
             _stateTime = 1f; // skip IDFA check
 #endif

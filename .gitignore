@@ -23,3 +23,5 @@
 *.apk
 .gradle
 .idea
+
+AppLovinSettings.asset*
