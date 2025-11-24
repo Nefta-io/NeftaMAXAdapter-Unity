@@ -14,8 +14,10 @@ namespace AdDemo
         private readonly string[] _adUnits = new string[] {
             // interstitials
             "78b66d4cd80ca1e7",
+            "c9acf50602329bfe",
             // rewarded
-            "7c6097e4101586b0"
+            "7c6097e4101586b0",
+            "08304643cb16df3b"
         };
         
         [DllImport("__Internal")]
@@ -26,8 +28,10 @@ namespace AdDemo
         private readonly string[] _adUnits = new string[] {
             // interstitials
             "850bcc93f949090c",
+            "60bbc7cc56dfa329",
             // rewarded
-            "c164298ebdd0c008"
+            "c164298ebdd0c008",
+            "3082ee9199cf59f0"
         };
 #endif
         
@@ -41,7 +45,6 @@ namespace AdDemo
         {
             NeftaAdapterEvents.EnableLogging(true);
             NeftaAdapterEvents.SetExtraParameter(NeftaAdapterEvents.ExtParams.TestGroup, "split-unity-max");
-            NeftaAdapterEvents.SetExtraParameter("param1", "arg2");
             NeftaAdapterEvents.Init(NeftaId);
             
 #if UNITY_EDITOR || !UNITY_IOS
