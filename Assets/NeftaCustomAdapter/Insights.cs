@@ -39,7 +39,9 @@ namespace NeftaCustomAdapter
     
     public class AdInsight
     {
+        public int _requestId;
         public int _adOpportunityId;
+        public int _auctionId;
         public NeftaAdapterEvents.AdType _type;
         public double _floorPrice;
         public string _adUnit;
@@ -47,14 +49,16 @@ namespace NeftaCustomAdapter
         public AdInsight(NeftaAdapterEvents.AdType type, AdConfigurationDto dto)
         {
             _type = type;
+            _requestId = dto.request_id;
             _adOpportunityId = dto.ad_opportunity_id;
+            _auctionId = dto.auction_id;
             _floorPrice = dto.floor_price;
             _adUnit = dto.ad_unit;
         }
 
         public override string ToString()
         {
-            return $"AdInsight[type: {_type}, recommendedAdUnit: {_adUnit}, floorPrice: {_floorPrice} adOpportunityId: {_adOpportunityId}]";
+            return $"AdInsight[type: {_type}, recommendedAdUnit: {_adUnit}, floorPrice: {_floorPrice} adOpportunityId: {_adOpportunityId} auctionId: {_auctionId}]";
         }
     }
 }

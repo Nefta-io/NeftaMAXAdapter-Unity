@@ -12,9 +12,9 @@ namespace NeftaCustomAdapter
         {
         }
         
-        public void IOnReady(string adUnits)
+        public void IOnReady(string initConfig)
         {
-            NeftaAdapterEvents.IOnReady(adUnits);
+            NeftaAdapterEvents.IOnReady(initConfig);
         }
 
         public void IOnInsights(int id, int adapterResponseType, string adapterResponse)

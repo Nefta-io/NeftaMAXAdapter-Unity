@@ -31,7 +31,9 @@ namespace NeftaCustomAdapter
     [Serializable]
     public class AdConfigurationDto
     {
+        public int request_id;
         public int ad_opportunity_id;
+        public int auction_id;
         public double floor_price;
         public string ad_unit;
     }

@@ -244,6 +244,10 @@ namespace AdDemo
                 MaxSdk.ShowInterstitial(adRequest.AdUnitId);
                 return true;
             }
+            if (_load.isOn)
+            {
+                StartLoading();   
+            }
             return false;
         }
         

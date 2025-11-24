@@ -49,7 +49,6 @@ namespace AdDemo
         [SerializeField] private Text _status;
         
         [Header("Track A")]
-        [SerializeField] private Text _aStatus;
         [SerializeField] private Image _aFill2Renderer;
         [SerializeField] private Button _aFill2;
         [SerializeField] private Image _aFill1Renderer;
@@ -58,9 +57,9 @@ namespace AdDemo
         [SerializeField] private Button _aNoFill;
         [SerializeField] private Image _aOtherRenderer;
         [SerializeField] private Button _aOther;
+        [SerializeField] private Text _aStatus;
         
         [Header("Track B")]
-        [SerializeField] private Text _bStatus;
         [SerializeField] private Image _bFill2Renderer;
         [SerializeField] private Button _bFill2;
         [SerializeField] private Image _bFill1Renderer;
@@ -69,6 +68,7 @@ namespace AdDemo
         [SerializeField] private Button _bNoFill;
         [SerializeField] private Image _bOtherRenderer;
         [SerializeField] private Button _bOther;
+        [SerializeField] private Text _bStatus;
         
         private void StartLoading()
         {
@@ -262,12 +262,16 @@ namespace AdDemo
                 SimShow(adRequest.AdUnitId);
                 return true;
             }
+            if (_load.isOn)
+            {
+                StartLoading();   
+            }
             return false;
         }
 
-        private void OnShowEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
+        private void OnAdDisplayedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
-            SetStatus("OnShowEvent");
+            SetStatus("OnAdDisplayedEvent");
         }
         
         private void OnAdHiddenEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
@@ -336,11 +340,13 @@ namespace AdDemo
                 ToggleTrackB(true);
                 _bStatus.text = $"{adUnitId} loading " + (_simBFloor >= 0 ? "as Optimized": "as Default");
             }
+
         }
 
         private bool SimIsReady(string adUnitId)
         {
-            return true;
+            return adUnitId == _adRequestA.AdUnitId && _simAAdInfo != null ||
+                   adUnitId == _adRequestB.AdUnitId && _simBAdInfo != null;
         }
 
         private void SimShow(string adUnitId)
@@ -352,7 +358,7 @@ namespace AdDemo
             var simulatorAdPrefab = Resources.Load<SimulatorAd>("SimulatorAd");
             var simAd = Instantiate(simulatorAdPrefab, _rootRect);
             simAd.Init(_isRewarded ? "Rewarded" : "Interstitial",
-                () => { OnShowEvent(adUnitId, adInfo); },
+                () => { OnAdDisplayedEvent(adUnitId, adInfo); },
                 () => { OnAdClickEvent(adUnitId, adInfo); },
                 _isRewarded ? () =>
                 {
@@ -380,30 +386,63 @@ namespace AdDemo
         private MaxSdkBase.AdInfo _simAAdInfo;
         private double _simBFloor = -1;
         private MaxSdkBase.AdInfo _simBAdInfo; 
-        private void SimOnAdLoadedEvent(AdRequest adRequest, double revenue)
+        private void SimOnAdLoadedEvent(AdRequest request, double revenue)
         {
+            if (request == _adRequestA && _simAAdInfo != null)
+            {
+                _simAAdInfo = null;
+                if (revenue >= 2)
+                {
+                    _aFill2Renderer.color = DefaultColor;
+                    _aFill2.interactable = false;
+                }
+                else
+                {
+                    _aFill1Renderer.color = DefaultColor;
+                    _aFill1.interactable = false;
+                }
+                return;
+            }
+            if (request == _adRequestB && _simBAdInfo != null)
+            {
+                _simBAdInfo = null;
+                if (revenue >= 2)
+                {
+                    _bFill2Renderer.color = DefaultColor;
+                    _bFill2.interactable = false;
+                }
+                else
+                {
+                    _bFill1Renderer.color = DefaultColor;
+                    _bFill1.interactable = false;
+                }
+                return;
+            }
+            
             var adInfo = new MaxSdkBase.AdInfo(new Dictionary<string, object>()
             {
-                { "adUnitId", adRequest.AdUnitId },
+                { "adUnitId", request.AdUnitId },
                 { "adFormat", _isRewarded ? "REWARDED" : "INTER" },
                 { "networkName", "simulator" },
                 { "revenue", revenue },
                 { "revenuePrecision", "exact" }
             });
-            if (adRequest == _adRequestA)
+            if (request == _adRequestA)
             {
                 _simAAdInfo = adInfo;
                 ToggleTrackA(false);
                 if (revenue >= 2)
                 {
                     _aFill2Renderer.color = FillColor;
+                    _aFill2.interactable = true;
                 }
                 else
                 {
                     _aFill1Renderer.color = FillColor;
+                    _aFill1.interactable = true;
                 }
                 _simAFloor = -1;
-                _aStatus.text = $"{adRequest.AdUnitId} loaded {revenue}";
+                _aStatus.text = $"{request.AdUnitId} loaded {revenue}";
             }
             else
             {
@@ -412,16 +451,18 @@ namespace AdDemo
                 if (revenue >= 2)
                 {
                     _bFill2Renderer.color = FillColor;
+                    _bFill2.interactable = true;
                 }
                 else
                 {
                     _bFill1Renderer.color = FillColor;
+                    _bFill1.interactable = true;
                 }
                 _simBFloor = -1;
-                _bStatus.text = $"{adRequest.AdUnitId} loaded {revenue}";
+                _bStatus.text = $"{request.AdUnitId} loaded {revenue}";
             }
             
-            OnAdLoadedEvent(adRequest.AdUnitId, adInfo);
+            OnAdLoadedEvent(request.AdUnitId, adInfo);
         }
 
         private void ToggleTrackA(bool isOn)
@@ -467,6 +508,7 @@ namespace AdDemo
                     _aOtherRenderer.color = NoFillColor;
                 }
                 _simAFloor = -1;
+                _aStatus.text = $"{adRequest.AdUnitId} failed";
                 ToggleTrackA(false);
             }
             else
@@ -479,7 +521,8 @@ namespace AdDemo
                 {
                     _bOtherRenderer.color = NoFillColor;
                 }
-                _simAFloor = -1;
+                _simBFloor = -1;
+                _bStatus.text = $"{adRequest.AdUnitId} failed";
                 ToggleTrackB(false);
             }
             

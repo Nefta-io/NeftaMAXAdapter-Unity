@@ -5,7 +5,10 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/AdDemo/AdDemoScene.unity
     guid: d751acd2c41b34bce9b0959a1633577a
+  - enabled: 1
+    path: Assets/AdDemo/AdDemoSimulatorScene.unity
+    guid: 8fae8a38d92d946049091f5aa6a1a092
   m_configObjects: {}

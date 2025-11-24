@@ -233,6 +233,10 @@ namespace AdDemo
                 MaxSdk.ShowRewardedAd(adRequest.AdUnitId);
                 return true;
             }
+            if (_load.isOn)
+            {
+                StartLoading();   
+            }
             return false;
         }
         

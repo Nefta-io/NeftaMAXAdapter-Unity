@@ -45,6 +45,8 @@ namespace NeftaCustomAdapter
             public const string AttributionIncentivized = "attribution_incentivized";
         }
 
+        private const string _mediationProvider = "applovin-max";
+
         private class InsightRequest
         {
             public int _id;
@@ -83,7 +85,7 @@ namespace NeftaCustomAdapter
         private static extern void NeftaPlugin_Record(int type, int category, int subCategory, string nameValue, long value, string customPayload);
 
         [DllImport ("__Internal")]
-        private static extern void NeftaPlugin_OnExternalMediationRequest(string provider, int adType, string id, string requestedAdUnitId, double requestedFloorPrice, int adOpportunityId);
+        private static extern void NeftaPlugin_OnExternalMediationRequest(string provider, int adType, string id, string requestedAdUnitId, double requestedFloorPrice, int requestId);
 
         [DllImport ("__Internal")]
         private static extern void NeftaPlugin_OnExternalMediationResponse(string provider, string id, string id2, double revenue, string precision, int status, string providerStatus, string networkStatus);
@@ -98,7 +100,7 @@ namespace NeftaCustomAdapter
         private static extern void NeftaPlugin_SetContentRating(string rating);
         
         [DllImport ("__Internal")]
-        private static extern void NeftaPlugin_GetInsights(int requestId, int insights, int previousAdOpportunityId, int timeoutInSeconds);
+        private static extern void NeftaPlugin_GetInsights(int requestId, int insights, int previousRequestId, int timeoutInSeconds);
         
         [DllImport ("__Internal")]
         private static extern void NeftaPlugin_SetOverride(string root);
@@ -144,8 +146,7 @@ namespace NeftaCustomAdapter
 #elif UNITY_ANDROID
             AndroidJavaClass unityClass = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
             var unityActivity = unityClass.GetStatic<AndroidJavaObject>("currentActivity");
-
-            _plugin = NeftaPluginClass.CallStatic<AndroidJavaObject>("Init", unityActivity, appId, new NeftaAdapterListener());
+            _plugin = NeftaPluginClass.CallStatic<AndroidJavaObject>("Init", unityActivity, appId, new NeftaAdapterListener(), "unity-applovin-max");
 #endif
             if (sendAdEvents)
             {
@@ -192,21 +193,21 @@ namespace NeftaCustomAdapter
         
         public static void OnExternalMediationRequest(AdType adType, string requestedAdUnitId, AdInsight usedInsight, double customBidFloor=-1)
         {
-            var adOpportunityId = -1;
+            var requestId = -1;
             if (usedInsight != null)
             {
-                adOpportunityId = usedInsight._adOpportunityId;
+                requestId = usedInsight._requestId;
                 if (customBidFloor < 0)
                 {
                     customBidFloor = usedInsight._floorPrice;
                 }
             }
-            OnExternalMediationRequest("applovin-max", adType, requestedAdUnitId, requestedAdUnitId, customBidFloor, adOpportunityId);
+            OnExternalMediationRequest(_mediationProvider, adType, requestedAdUnitId, requestedAdUnitId, customBidFloor, requestId);
         }
         
         public static void OnExternalMediationRequest(AdType adType, string requestedAdUnitId, double requestedFloorPrice=-1)
         {
-            OnExternalMediationRequest("applovin-max", adType, requestedAdUnitId, requestedAdUnitId, requestedFloorPrice, -1);
+            OnExternalMediationRequest(_mediationProvider, adType, requestedAdUnitId, requestedAdUnitId, requestedFloorPrice, -1);
         }
 
         /// <summary>
@@ -216,7 +217,7 @@ namespace NeftaCustomAdapter
         /// <param name="adInfo">Loaded MAX Ad instance data</param>
         public static void OnExternalMediationRequestLoaded(MaxSdkBase.AdInfo adInfo)
         {
-            OnExternalMediationResponse("applovin-max", adInfo.AdUnitIdentifier, null, adInfo.Revenue, adInfo.RevenuePrecision, 1, null, null);
+            OnExternalMediationResponse(_mediationProvider, adInfo.AdUnitIdentifier, null, adInfo.Revenue, adInfo.RevenuePrecision, 1, null, null);
         }
 
         /// <summary>
@@ -229,17 +230,17 @@ namespace NeftaCustomAdapter
         {
             var providerStatus = ((int)errorInfo.Code).ToString(CultureInfo.InvariantCulture);
             var networkStatus = errorInfo.MediatedNetworkErrorCode.ToString(CultureInfo.InvariantCulture);
-            OnExternalMediationResponse("applovin-max", adUnitId, null, -1, null, errorInfo.Code == MaxSdkBase.ErrorCode.NoFill ? 2 : 0, providerStatus, networkStatus);
+            OnExternalMediationResponse(_mediationProvider, adUnitId, null, -1, null, errorInfo.Code == MaxSdkBase.ErrorCode.NoFill ? 2 : 0, providerStatus, networkStatus);
         }
         
-        private static void OnExternalMediationRequest(string provider, AdType adType, string id, string requestedAdUnitId, double requestedFloorPrice, int adOpportunityId)
+        private static void OnExternalMediationRequest(string provider, AdType adType, string id, string requestedAdUnitId, double requestedFloorPrice, int requestId)
         {
 #if UNITY_EDITOR
-            _plugin.OnExternalMediationRequest(provider, (int)adType, id, requestedAdUnitId, requestedFloorPrice, adOpportunityId);
+            _plugin.OnExternalMediationRequest(provider, (int)adType, id, requestedAdUnitId, requestedFloorPrice, requestId);
 #elif UNITY_IOS
-            NeftaPlugin_OnExternalMediationRequest(provider, (int)adType, id, requestedAdUnitId, requestedFloorPrice, adOpportunityId);
+            NeftaPlugin_OnExternalMediationRequest(provider, (int)adType, id, requestedAdUnitId, requestedFloorPrice, requestId);
 #elif UNITY_ANDROID
-            _plugin.CallStatic("OnExternalMediationRequest", provider, (int)adType, id, requestedAdUnitId, requestedFloorPrice, adOpportunityId);
+            _plugin.CallStatic("OnExternalMediationRequest", provider, (int)adType, id, requestedAdUnitId, requestedFloorPrice, requestId);
 #endif
         }
 
@@ -337,7 +338,7 @@ namespace NeftaCustomAdapter
             sb.Append("\"");
             
             var data = sb.ToString();
-            OnExternalMediationImpression(isClick, "applovin-max", data, adUnitId, null);
+            OnExternalMediationImpression(isClick, _mediationProvider, data, adUnitId, null);
         }
 
         private static void OnExternalMediationImpression(bool isClick, string provider, string data, string id, string id2)
@@ -354,10 +355,10 @@ namespace NeftaCustomAdapter
         public static void GetInsights(int insights, AdInsight previousInsight, OnInsightsCallback callback, int timeoutInSeconds=0)
         {
             var id = 0;
-            var previousAdOpportunityId = -1;
+            var previousRequestId = -1;
             if (previousInsight != null)
             {
-                previousAdOpportunityId = previousInsight._adOpportunityId;
+                previousRequestId = previousInsight._requestId;
             }
             lock (_insightRequests)
             {
@@ -368,11 +369,11 @@ namespace NeftaCustomAdapter
             }
             
 #if UNITY_EDITOR
-            _plugin.GetInsights(id, insights, previousAdOpportunityId, timeoutInSeconds);
+            _plugin.GetInsights(id, insights, previousRequestId, timeoutInSeconds);
 #elif UNITY_IOS
-            NeftaPlugin_GetInsights(id, insights, previousAdOpportunityId, timeoutInSeconds);
+            NeftaPlugin_GetInsights(id, insights, previousRequestId, timeoutInSeconds);
 #elif UNITY_ANDROID
-            _plugin.Call("GetInsightsBridge", id, insights, previousAdOpportunityId, timeoutInSeconds);
+            _plugin.Call("GetInsightsBridge", id, insights, previousRequestId, timeoutInSeconds);
 #endif
         }
         
@@ -438,14 +439,14 @@ namespace NeftaCustomAdapter
 #endif
         }
         
-        internal static void IOnReady(string response)
+        internal static void IOnReady(string initConfig)
         {
             if (OnReady != null)
             {
                 string[] adUnits = null;
-                if (response != null)
+                if (initConfig != null)
                 {
-                    adUnits = response.Split(',');
+                    adUnits = initConfig.Split(',');
                 }
                 OnReady.Invoke(adUnits);
             }
@@ -470,7 +471,7 @@ namespace NeftaCustomAdapter
             {
                 insights._rewarded = new AdInsight(AdType.Rewarded, JsonUtility.FromJson<AdConfigurationDto>(adapterResponse));
             }
-     
+            
             try
             {
                 lock (_insightRequests)

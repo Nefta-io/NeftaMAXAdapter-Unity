@@ -19,12 +19,12 @@ extern "C" {
     void NeftaPlugin_SetExtraParameter(const char *key, const char *value);
     void NeftaPlugin_Init(const char *appId, OnInsights onInsights);
     void NeftaPlugin_Record(int type, int category, int subCategory, const char *name, long value, const char *customPayload);
-    void NeftaPlugin_OnExternalMediationRequest(const char *provider, int adType, const char *id0, const char *requestedAdUnitId, double requestedFloorPrice, int adOpportunityId);
+    void NeftaPlugin_OnExternalMediationRequest(const char *provider, int adType, const char *id0, const char *requestedAdUnitId, double requestedFloorPrice, int requestId);
     void NeftaPlugin_OnExternalMediationResponse(const char *provider, const char *id0, const char *id2, double revenue, const char *precision, int status, const char *providerStatus, const char *networkStatus);
     void NeftaPlugin_OnExternalMediationImpressionAsString(bool isClick, const char *provider, const char *data, const char *id0, const char *id2);
     const char * NeftaPlugin_GetNuid(void *instance, bool present);
     void NeftaPlugin_SetContentRating(const char *rating);
-    void NeftaPlugin_GetInsights(int requestId, int insights, int previousAdOpportunityId, int timeoutInSeconds);
+    void NeftaPlugin_GetInsights(int requestId, int insights, int previousRequestId, int timeoutInSeconds);
     void NeftaPlugin_SetOverride(const char *root);
 #ifdef __cplusplus
 }
@@ -43,7 +43,7 @@ void NeftaPlugin_SetExtraParameter(const char *key, const char *value) {
 }
 
 void NeftaPlugin_Init(const char *appId, OnInsights onInsights) {
-    _plugin = [NeftaPlugin InitWithAppId: [NSString stringWithUTF8String: appId]];
+    _plugin = [NeftaPlugin InitWithAppId: [NSString stringWithUTF8String: appId] integration: @"unity-applovin-max"];
     _plugin.OnInsightsAsString = ^void(NSInteger requestId, NSInteger adapterResponseType, NSString * _Nullable adapterResponse) {
         const char *aR = adapterResponse ? [adapterResponse UTF8String] : NULL;
         onInsights((int)requestId, (int)adapterResponseType, aR);
@@ -56,11 +56,11 @@ void NeftaPlugin_Record(int type, int category, int subCategory, const char *nam
     [_plugin RecordWithType: type category: category subCategory: subCategory name: n value: value customPayload: cp];
 }
 
-void NeftaPlugin_OnExternalMediationRequest(const char *provider, int adType, const char *id0, const char *requestedAdUnitId, double requestedFloorPrice, int adOpportunityId) {
+void NeftaPlugin_OnExternalMediationRequest(const char *provider, int adType, const char *id0, const char *requestedAdUnitId, double requestedFloorPrice, int requestId) {
     NSString *p = provider ? [NSString stringWithUTF8String: provider] : nil;
     NSString *i = id0 ? [NSString stringWithUTF8String: id0] : nil;
     NSString *rAI = requestedAdUnitId ? [NSString stringWithUTF8String: requestedAdUnitId] : nil;
-    [NeftaPlugin OnExternalMediationRequest: p adType: adType id: i requestedAdUnitId: rAI requestedFloorPrice: requestedFloorPrice adOpportunityId: adOpportunityId];
+    [NeftaPlugin OnExternalMediationRequest: p adType: adType id: i requestedAdUnitId: rAI requestedFloorPrice: requestedFloorPrice requestId: requestId];
 }
 
 void NeftaPlugin_OnExternalMediationResponse(const char *provider, const char *id0, const char *id2, double revenue, const char *precision, int status, const char *providerStatus, const char *networkStatus) {
@@ -92,8 +92,8 @@ const char * NeftaPlugin_GetNuid(void *instance, bool present) {
     return returnString;
 }
 
-void NeftaPlugin_GetInsights(int requestId, int insights, int previousAdOpportunityId, int timeoutInSeconds) {
-    [_plugin GetInsightsBridge: requestId insights: insights previousAdOpportunityId: previousAdOpportunityId timeout: timeoutInSeconds];
+void NeftaPlugin_GetInsights(int requestId, int insights, int previousRequestId, int timeoutInSeconds) {
+    [_plugin GetInsightsBridge: requestId insights: insights previousRequestId: previousRequestId timeout: timeoutInSeconds];
 }
 
 void NeftaPlugin_SetOverride(const char *root) {

@@ -10,11 +10,7 @@ namespace Editor
     {
         private static void Build(BuildTarget target, string outPath)
         {
-            var scenes = new List<string>();
-            foreach (var scene in EditorBuildSettings.scenes)
-            {
-                scenes.Add(scene.path);
-            }
+            var scenes = new List<string>() { "Assets/AdDemo/AdDemoSimulatorScene.unity" };
             var options = new BuildPlayerOptions
             {
                 scenes = scenes.ToArray(),

@@ -28,7 +28,7 @@ static NeftaPlugin *_plugin;
 }
 + (void)OnExternalMediationRequestWithBanner:(MAAdView * _Nonnull)banner customBidPrice:(double)customBidPrice {
     NSString *hash = [NSString stringWithFormat:@"%lu", (unsigned long)[banner hash]];
-    [NeftaPlugin OnExternalMediationRequest: _mediationProvider adType: AdTypeBanner id: hash requestedAdUnitId: banner.adUnitIdentifier requestedFloorPrice: customBidPrice adOpportunityId: -1];
+    [NeftaPlugin OnExternalMediationRequest: _mediationProvider adType: AdTypeBanner id: hash requestedAdUnitId: banner.adUnitIdentifier requestedFloorPrice: customBidPrice requestId: -1];
 }
 
 + (void)OnExternalMediationRequestWithInterstitial:(MAInterstitialAd * _Nonnull)interstitial insight:(AdInsight * _Nullable)insight {
@@ -40,7 +40,7 @@ static NeftaPlugin *_plugin;
 }
 + (void)OnExternalMediationRequestWithInterstitial:(MAInterstitialAd * _Nonnull)interstitial customBidPrice:(double)customBidPrice {
     NSString *hash = [NSString stringWithFormat:@"%lu", (unsigned long)[interstitial hash]];
-    [NeftaPlugin OnExternalMediationRequest: _mediationProvider adType: AdTypeInterstitial id: hash requestedAdUnitId: interstitial.adUnitIdentifier requestedFloorPrice: customBidPrice adOpportunityId: -1];
+    [NeftaPlugin OnExternalMediationRequest: _mediationProvider adType: AdTypeInterstitial id: hash requestedAdUnitId: interstitial.adUnitIdentifier requestedFloorPrice: customBidPrice requestId: -1];
 }
 
 + (void)OnExternalMediationRequestWithRewarded:(MARewardedAd * _Nonnull)rewarded insight:(AdInsight * _Nullable)insight {
@@ -52,17 +52,17 @@ static NeftaPlugin *_plugin;
 }
 + (void)OnExternalMediationRequestWithRewarded:(MARewardedAd * _Nonnull)rewarded customBidPrice:(double)customBidPrice {
     NSString *hash = [NSString stringWithFormat:@"%lu", (unsigned long)[rewarded hash]];
-    [NeftaPlugin OnExternalMediationRequest: _mediationProvider adType: AdTypeRewarded id: hash requestedAdUnitId: rewarded.adUnitIdentifier requestedFloorPrice: customBidPrice adOpportunityId: -1];
+    [NeftaPlugin OnExternalMediationRequest: _mediationProvider adType: AdTypeRewarded id: hash requestedAdUnitId: rewarded.adUnitIdentifier requestedFloorPrice: customBidPrice requestId: -1];
 }
 
 + (void)OnExternalMediationRequest:(AdType)adType id:(NSString * _Nonnull)id requestedAdUnitId:(NSString * _Nonnull)requestedAdUnitId insight:(AdInsight * _Nullable)insight {
-    int adOpportunityId = -1;
+    int requestId = -1;
     double requestedFloor = -1;
     if (insight != nil) {
-        adOpportunityId = (int)insight._adOpportunityId;
+        requestId = (int)insight._requestId;
         requestedFloor = insight._floorPrice;
     }
-    [NeftaPlugin OnExternalMediationRequest: _mediationProvider adType: (int)adType id: id requestedAdUnitId: requestedAdUnitId requestedFloorPrice: requestedFloor adOpportunityId: adOpportunityId];
+    [NeftaPlugin OnExternalMediationRequest: _mediationProvider adType: (int)adType id: id requestedAdUnitId: requestedAdUnitId requestedFloorPrice: requestedFloor requestId: requestId];
 }
 
 + (void)OnExternalMediationRequestLoadWithBanner:(MAAdView * _Nonnull)banner ad:(MAAd * _Nonnull)ad {
@@ -174,7 +174,7 @@ static NeftaPlugin *_plugin;
     } else {
         NSString *appId = parameters.serverParameters[@"app_id"];
         
-        _plugin = [NeftaPlugin InitWithAppId: appId];
+        _plugin = [NeftaPlugin InitWithAppId: appId integration: @"native-applovin-max"];
         NSNumber *hasConsent = [parameters hasUserConsent];
         NSNumber *isDoNotSell = [parameters isDoNotSell];
         [_plugin SetTrackingWithIsAuthorized: hasConsent != nil && hasConsent.longLongValue == 1 && (isDoNotSell == nil || isDoNotSell.longLongValue == 0)];
@@ -188,7 +188,7 @@ static NeftaPlugin *_plugin;
 }
 
 - (NSString *)adapterVersion {
-    return @"4.4.2";
+    return @"4.4.3";
 }
 
 - (void)destroy {
