@@ -246,6 +246,8 @@ namespace AdDemo
         private void OnAdDisplayFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo, MaxSdkBase.AdInfo adInfo)
         {
             SetStatus("OnAdDisplayFailedEvent");
+            
+            RetryLoading();
         }
         
         private void OnAdDisplayedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)

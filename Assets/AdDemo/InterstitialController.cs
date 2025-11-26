@@ -111,7 +111,7 @@ namespace AdDemo
             MaxSdk.LoadInterstitial(adRequest.AdUnitId);
         }
         
-        private void OnAdFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
+        private void OnAdLoadFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
         {
             NeftaAdapterEvents.OnExternalMediationRequestFailed(adUnitId, errorInfo);
             
@@ -171,7 +171,7 @@ namespace AdDemo
             _statusQueue = new Queue<string>();
             
             MaxSdkCallbacks.Interstitial.OnAdLoadedEvent += OnAdLoadedEvent;
-            MaxSdkCallbacks.Interstitial.OnAdLoadFailedEvent += OnAdFailedEvent;
+            MaxSdkCallbacks.Interstitial.OnAdLoadFailedEvent += OnAdLoadFailedEvent;
             MaxSdkCallbacks.Interstitial.OnAdDisplayFailedEvent += OnAdDisplayFailedEvent;
             MaxSdkCallbacks.Interstitial.OnAdDisplayedEvent += OnAdDisplayedEvent;
             MaxSdkCallbacks.Interstitial.OnAdHiddenEvent += OnAdHiddenEvent;
@@ -254,6 +254,8 @@ namespace AdDemo
         private void OnAdDisplayFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo, MaxSdkBase.AdInfo adInfo)
         {
             SetStatus("OnAdDisplayFailedEvent");
+            
+            RetryLoading();
         }
         
         private void OnAdDisplayedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
@@ -265,7 +267,7 @@ namespace AdDemo
         {
             SetStatus("OnAdHiddenEvent");
             
-            // start new load cycle
+            RetryLoading();
         }
         
         private void OnRevenuePaidEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
@@ -276,8 +278,6 @@ namespace AdDemo
         private void OnAdClickEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
             SetStatus($"On Ad clicked {adUnitId}");
-
-            RetryLoading();
         }
         
         private void SetStatus(string status)
