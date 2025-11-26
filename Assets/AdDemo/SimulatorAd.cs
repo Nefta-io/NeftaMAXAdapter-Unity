@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,7 +15,10 @@ namespace AdDemo
 
         private Action _onShow;
         private Action _onReward;
+        private Action _onClose;
         private float _time;
+
+        public static bool IsActive;
         
         public void Init(string title, Action onShow, Action onClick, Action onReward, Action onClose)
         {
@@ -22,6 +26,7 @@ namespace AdDemo
 
             _onShow = onShow;
             _onReward = onReward;
+            _onClose = onClose;
                 
             _ad.onClick.AddListener(() =>
             {
@@ -29,11 +34,19 @@ namespace AdDemo
             });
             _close.onClick.AddListener(() =>
             {
-                Destroy(gameObject);
-                onClose();
+                StartCoroutine(CloseWithDelay());
             });
 
             _time = 0f;
+            IsActive = true;
+        }
+
+        private IEnumerator CloseWithDelay()
+        {
+            IsActive = false;
+            yield return null;
+            Destroy(gameObject);
+            _onClose();
         }
 
         private void Start()

@@ -112,8 +112,7 @@ namespace AdDemo
                 }
                 else
                 {
-                    adRequest.ConsecutiveAdFails++;
-                    StartCoroutine(RetryLoad(adRequest));
+                    RestartAfterFailedLoad(adRequest);
                 }
             }, TimeoutInSeconds);
         }
@@ -135,15 +134,17 @@ namespace AdDemo
             
             var adRequest = adUnitId == _adRequestA.AdUnitId ? _adRequestA : _adRequestB;
             SetStatus($"Load Failed {adRequest.AdUnitId}: {errorInfo}");
-            
+
+            RestartAfterFailedLoad(adRequest);
+        }
+
+        private void RestartAfterFailedLoad(AdRequest adRequest)
+        {
             adRequest.ConsecutiveAdFails++;
             StartCoroutine(RetryLoad(adRequest));
             
             _isFirstResponseReceived = true;
-            if (_load.isOn)
-            {
-                StartLoading();
-            }
+            RetryLoading();
         }
         
         private void OnAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
@@ -161,16 +162,18 @@ namespace AdDemo
             UpdateShowButton();
 
             _isFirstResponseReceived = true;
-            if (_load.isOn)
-            {
-                StartLoading();
-            }
+            RetryLoading();
         }
         
         private IEnumerator RetryLoad(AdRequest adRequest)
         {
             yield return new WaitForSeconds(GetMinWaitTime(adRequest.ConsecutiveAdFails));
+            if (SimulatorAd.IsActive)
+            {
+                yield return null;
+            }
 
+            Debug.Log($"RetryLoad {adRequest.AdUnitId} to Idle and issue load");
             adRequest.State = State.Idle;
             if (_load.isOn)
             {
@@ -262,11 +265,16 @@ namespace AdDemo
                 SimShow(adRequest.AdUnitId);
                 return true;
             }
+            RetryLoading();
+            return false;
+        }
+        
+        private void RetryLoading()
+        {
             if (_load.isOn)
             {
                 StartLoading();   
             }
-            return false;
         }
 
         private void OnAdDisplayedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
@@ -278,11 +286,7 @@ namespace AdDemo
         {
             SetStatus("OnAdHiddenEvent");
             
-            // start new load cycle
-            if (_load.isOn)
-            {
-                StartLoading();   
-            }
+            RetryLoading();
         }
         
         private void OnRevenuePaidEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
@@ -362,9 +366,11 @@ namespace AdDemo
                 () => { OnAdClickEvent(adUnitId, adInfo); },
                 _isRewarded ? () =>
                 {
-                    var reward = new MaxSdkBase.Reward();
-                    reward.Amount = 1;
-                    reward.Label = "Sim Rewarded";
+                    var reward = new MaxSdkBase.Reward
+                    {
+                        Amount = 1,
+                        Label = "Sim Rewarded"
+                    };
                     OnAdReceivedRewardEvent(adUnitId, reward, adInfo);
                 } : null,
                 () => { OnAdHiddenEvent(adUnitId, adInfo); });

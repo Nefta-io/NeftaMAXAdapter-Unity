@@ -95,8 +95,7 @@ namespace AdDemo
                 }
                 else
                 {
-                    adRequest.ConsecutiveAdFails++;
-                    StartCoroutine(RetryLoad(adRequest));
+                    RestartAfterFailedLoad(adRequest);
                 }
             }, TimeoutInSeconds);
         }
@@ -119,14 +118,16 @@ namespace AdDemo
             var adRequest = adUnitId == _adRequestA.AdUnitId ? _adRequestA : _adRequestB;
             SetStatus($"Load Failed {adRequest.AdUnitId}: {errorInfo}");
             
+            RestartAfterFailedLoad(adRequest);
+        }
+        
+        private void RestartAfterFailedLoad(AdRequest adRequest)
+        {
             adRequest.ConsecutiveAdFails++;
             StartCoroutine(RetryLoad(adRequest));
             
             _isFirstResponseReceived = true;
-            if (_load.isOn)
-            {
-                StartLoading();
-            }
+            RetryLoading();
         }
         
         private void OnAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
@@ -144,10 +145,7 @@ namespace AdDemo
             UpdateShowButton();
 
             _isFirstResponseReceived = true;
-            if (_load.isOn)
-            {
-                StartLoading();
-            }
+            RetryLoading();
         }
         
         private IEnumerator RetryLoad(AdRequest adRequest)
@@ -233,11 +231,16 @@ namespace AdDemo
                 MaxSdk.ShowRewardedAd(adRequest.AdUnitId);
                 return true;
             }
+            RetryLoading();
+            return false;
+        }
+        
+        private void RetryLoading()
+        {
             if (_load.isOn)
             {
                 StartLoading();   
             }
-            return false;
         }
         
         private void OnAdDisplayFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo, MaxSdkBase.AdInfo adInfo)
@@ -254,11 +257,7 @@ namespace AdDemo
         {
             SetStatus("OnAdHideEvent");
             
-            // start new load cycle
-            if (_load.isOn)
-            {
-                StartLoading();   
-            }
+            RetryLoading();
         }
         
         private void OnAdReceivedRewardEvent(string adUnitId, MaxSdkBase.Reward reward, MaxSdkBase.AdInfo adInfo)
