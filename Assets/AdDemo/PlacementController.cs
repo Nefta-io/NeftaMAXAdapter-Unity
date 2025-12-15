@@ -194,14 +194,14 @@ namespace AdDemo
             _adRequestB = new AdRequest("Track B");
             
             ToggleTrackA(false);
-            _aFill2.onClick.AddListener(() => { SimOnAdLoadedEvent(_adRequestA, 2); });
-            _aFill1.onClick.AddListener(() => { SimOnAdLoadedEvent(_adRequestA, 1); });
+            _aFill2.onClick.AddListener(() => { SimOnAdLoadedEvent(_adRequestA, true); });
+            _aFill1.onClick.AddListener(() => { SimOnAdLoadedEvent(_adRequestA, false); });
             _aNoFill.onClick.AddListener(() => { SimOnAdFailedEvent(_adRequestA, 2); });
             _aOther.onClick.AddListener(() => { SimOnAdFailedEvent(_adRequestA, 0); });
             
             ToggleTrackB(false);
-            _bFill2.onClick.AddListener(() => { SimOnAdLoadedEvent(_adRequestB, 2); });
-            _bFill1.onClick.AddListener(() => { SimOnAdLoadedEvent(_adRequestB, 1); });
+            _bFill2.onClick.AddListener(() => { SimOnAdLoadedEvent(_adRequestB, true); });
+            _bFill1.onClick.AddListener(() => { SimOnAdLoadedEvent(_adRequestB, false); });
             _bNoFill.onClick.AddListener(() => { SimOnAdFailedEvent(_adRequestB, 2); });
             _bOther.onClick.AddListener(() => { SimOnAdFailedEvent(_adRequestB, 0); });
             
@@ -392,12 +392,13 @@ namespace AdDemo
         private MaxSdkBase.AdInfo _simAAdInfo;
         private double _simBFloor = -1;
         private MaxSdkBase.AdInfo _simBAdInfo; 
-        private void SimOnAdLoadedEvent(AdRequest request, double revenue)
+        private void SimOnAdLoadedEvent(AdRequest request, bool high)
         {
+            var revenue = high ? 0.002 : 0.001;
             if (request == _adRequestA && _simAAdInfo != null)
             {
                 _simAAdInfo = null;
-                if (revenue >= 2)
+                if (high)
                 {
                     _aFill2Renderer.color = DefaultColor;
                     _aFill2.interactable = false;
@@ -412,7 +413,7 @@ namespace AdDemo
             if (request == _adRequestB && _simBAdInfo != null)
             {
                 _simBAdInfo = null;
-                if (revenue >= 2)
+                if (high)
                 {
                     _bFill2Renderer.color = DefaultColor;
                     _bFill2.interactable = false;
@@ -429,15 +430,17 @@ namespace AdDemo
             {
                 { "adUnitId", request.AdUnitId },
                 { "adFormat", _isRewarded ? "REWARDED" : "INTER" },
-                { "networkName", "simulator" },
+                { "networkName", "simulator network" },
+                { "creativeId", "simulator creative"+ request.AdUnitId },
                 { "revenue", revenue },
-                { "revenuePrecision", "exact" }
+                { "revenuePrecision", "exact" },
+                { "waterfallInfo", GetWaterfallDictionary(new [] { MaxSdkBase.MaxAdLoadState.AdLoaded, MaxSdkBase.MaxAdLoadState.AdLoadNotAttempted })}
             });
             if (request == _adRequestA)
             {
                 _simAAdInfo = adInfo;
                 ToggleTrackA(false);
-                if (revenue >= 2)
+                if (high)
                 {
                     _aFill2Renderer.color = FillColor;
                     _aFill2.interactable = true;
@@ -454,7 +457,7 @@ namespace AdDemo
             {
                 _simBAdInfo = adInfo;
                 ToggleTrackB(false);
-                if (revenue >= 2)
+                if (high)
                 {
                     _bFill2Renderer.color = FillColor;
                     _bFill2.interactable = true;
@@ -536,9 +539,53 @@ namespace AdDemo
                 new MaxSdkBase.ErrorInfo(new Dictionary<string, object>()
                 {
                     { "errorCode", status == 2 ? 204 : -1 },
-                    { "errorMessage", status == 2 ? "no fill" : "other" }
+                    { "errorMessage", status == 2 ? "no fill" : "other" },
+                    { "waterfallInfo", GetWaterfallDictionary(new [] { MaxSdkBase.MaxAdLoadState.FailedToLoad , MaxSdkBase.MaxAdLoadState.FailedToLoad }) }
                 })
             ); 
+        }
+
+        private Dictionary<string, object> GetWaterfallDictionary(MaxSdkBase.MaxAdLoadState[] loadStates)
+        {
+            var responses = new List<object>();
+            for (var i = 0; i < loadStates.Length; i++)
+            {
+                Dictionary<string, object> error = null;
+                if (loadStates[i] == MaxSdkBase.MaxAdLoadState.FailedToLoad)
+                {
+                    error = new Dictionary<string, object>()
+                    {
+                        { "errorCode", "578" },
+                        { "errorMessage", "simulator error message" },
+                        { "latencyMillis", "45" }
+                    };
+                }
+                
+                responses.Add(new Dictionary<string, object>()
+                {
+                    { "adLoadState", ((int)loadStates[i]).ToString() },
+                    { "mediatedNetwork", new Dictionary<string, object>
+                        {
+                            { "name", $"simulator network {i}" },
+                            { "adapterClassName", "simulator adapter" },
+                            { "adapterVersion", "1.0.0" },
+                            { "sdkVersion", "13.0.0" }
+                        }
+                    },
+                    { "credentials", new Dictionary<string, object>()},
+                    { "isBidding", "true" },
+                    { "latencyMillis", UnityEngine.Random.Range(0, 200).ToString() },
+                    { "error", error }
+                });
+            }
+            
+            return new Dictionary<string, object>()
+            {
+                { "name", "simulator waterfall" },
+                { "testName", "waterfall test name" },
+                { "networkResponses", responses },
+                { "latencyMillis", UnityEngine.Random.Range(0, 200).ToString() }
+            };
         }
     }
 }

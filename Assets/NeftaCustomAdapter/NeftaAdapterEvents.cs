@@ -35,6 +35,26 @@ namespace NeftaCustomAdapter
             MatureAudience = 4
         }
         
+        [Serializable]
+        internal class InitConfigurationDto
+        {
+            public bool skipOptimization;
+            public string providerAdUnits;
+            public int disabledFeatures;
+        }
+        
+        [Flags]
+        private enum Feature {
+            Insights = 1,
+            Exchange = 1 << 1,
+            GameEvents = 1 << 2,
+            SessionEvents = 1 << 3,
+            ExternalMediationResponse = 1 << 4,
+            ExternalMediationRequest = 1 << 5,
+            ExternalMediationImpression = 1 << 6,
+            ExternalMediationClick = 1 << 7,
+        }
+        
         public struct ExtParams
         {
             public const string TestGroup = "test_group";
@@ -65,10 +85,16 @@ namespace NeftaCustomAdapter
 #if UNITY_EDITOR
         private static NeftaPlugin _plugin;
 #elif UNITY_IOS
+        private delegate void OnReadyDelegate(string initConfig);
         private delegate void OnInsightsDelegate(int requestId, int adapterResponseType, string adapterResponse);
 
+        [MonoPInvokeCallback(typeof(OnReadyDelegate))] 
+        private static void OnReadyBridge(string initConfig) {
+            IOnReady(initConfig);
+        }
+
         [MonoPInvokeCallback(typeof(OnInsightsDelegate))] 
-        private static void OnInsights(int requestId, int adapterResponseType, string adapterResponse) {
+        private static void OnInsightsBridge(int requestId, int adapterResponseType, string adapterResponse) {
             IOnInsights(requestId, adapterResponseType, adapterResponse);
         }
 
@@ -79,7 +105,7 @@ namespace NeftaCustomAdapter
         private static extern void NeftaPlugin_SetExtraParameter(string key, string value);
 
         [DllImport ("__Internal")]
-        private static extern void NeftaPlugin_Init(string appId, OnInsightsDelegate onInsights);
+        private static extern void NeftaPlugin_Init(string appId, OnReadyDelegate onReady, OnInsightsDelegate onInsights);
 
         [DllImport ("__Internal")]
         private static extern void NeftaPlugin_Record(int type, int category, int subCategory, string nameValue, long value, string customPayload);
@@ -88,13 +114,16 @@ namespace NeftaCustomAdapter
         private static extern void NeftaPlugin_OnExternalMediationRequest(string provider, int adType, string id, string requestedAdUnitId, double requestedFloorPrice, int requestId);
 
         [DllImport ("__Internal")]
-        private static extern void NeftaPlugin_OnExternalMediationResponse(string provider, string id, string id2, double revenue, string precision, int status, string providerStatus, string networkStatus);
+        private static extern void NeftaPlugin_OnExternalMediationResponseAsString(string provider, string id, string id2, double revenue, string precision, int status, string providerStatus, string networkStatus, string baseData);
 
         [DllImport ("__Internal")]
         private static extern void NeftaPlugin_OnExternalMediationImpressionAsString(bool isClick, string provider, string data, string id, string id2);
 
         [DllImport ("__Internal")]
         private static extern string NeftaPlugin_GetNuid(bool present);
+
+        [DllImport ("__Internal")]
+        private static extern void NeftaPlugin_SetTracking(bool isAuthorized);
 
         [DllImport ("__Internal")]
         private static extern void NeftaPlugin_SetContentRating(string rating);
@@ -122,6 +151,7 @@ namespace NeftaCustomAdapter
 
         private static List<InsightRequest> _insightRequests;
         private static int _insightId;
+        private static Feature _disabledFeatures;
 
         public static void EnableLogging(bool enable)
         {
@@ -134,7 +164,7 @@ namespace NeftaCustomAdapter
 #endif
         }
         
-        public static Action<string[]> OnReady;
+        public static Action<InitConfiguration> OnReady;
 
         public static void Init(string appId, bool sendAdEvents=true, bool simulateAdsInEditor=false)
         {
@@ -142,7 +172,7 @@ namespace NeftaCustomAdapter
             _plugin = NeftaPlugin.Init(appId, simulateAdsInEditor);
             _plugin._adapterListener = new NeftaAdapterListener();
 #elif UNITY_IOS
-            NeftaPlugin_Init(appId, OnInsights);
+            NeftaPlugin_Init(appId, OnReadyBridge, OnInsightsBridge);
 #elif UNITY_ANDROID
             AndroidJavaClass unityClass = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
             var unityActivity = unityClass.GetStatic<AndroidJavaObject>("currentActivity");
@@ -161,27 +191,27 @@ namespace NeftaCustomAdapter
 
         public static void Record(GameEvent gameEvent)
         {
+            if ((_disabledFeatures & Feature.GameEvents) != 0)
+            {
+                return;
+            }
+            
             var type = gameEvent._eventType;
             var category = gameEvent._category;
             var subCategory = gameEvent._subCategory;
             var name = gameEvent._name;
-            if (name != null)
-            {
-                name = JavaScriptStringEncode(gameEvent._name);
-            }
-
             var value = gameEvent._value;
             var customPayload = gameEvent._customString;
-            if (customPayload != null)
-            {
-                customPayload = JavaScriptStringEncode(gameEvent._customString);
-            }
-
             Record(type, category, subCategory, name, value, customPayload);
         }
 
         internal static void Record(int type, int category, int subCategory, string name, long value, string customPayload)
         {
+            if ((_disabledFeatures & Feature.GameEvents) != 0)
+            {
+                return;
+            }
+            
 #if UNITY_EDITOR
             _plugin.Record(type, category, subCategory, name, value, customPayload);
 #elif UNITY_IOS
@@ -217,7 +247,16 @@ namespace NeftaCustomAdapter
         /// <param name="adInfo">Loaded MAX Ad instance data</param>
         public static void OnExternalMediationRequestLoaded(MaxSdkBase.AdInfo adInfo)
         {
-            OnExternalMediationResponse(_mediationProvider, adInfo.AdUnitIdentifier, null, adInfo.Revenue, adInfo.RevenuePrecision, 1, null, null);
+            string baseString = null;
+            if (adInfo.WaterfallInfo != null)
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.Append('{');
+                SerializeWaterfall(sb, adInfo.WaterfallInfo);
+                sb.Append('}');
+                baseString = sb.ToString();
+            }
+            OnExternalMediationResponse(_mediationProvider, adInfo.AdUnitIdentifier, null, adInfo.Revenue, adInfo.RevenuePrecision, 1, null, null, baseString);
         }
 
         /// <summary>
@@ -228,9 +267,23 @@ namespace NeftaCustomAdapter
         /// <param name="errorInfo">Load fail reason</param>
         public static void OnExternalMediationRequestFailed(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
         {
+            if ((_disabledFeatures & Feature.ExternalMediationRequest) != 0)
+            {
+                return;
+            }
+            
             var providerStatus = ((int)errorInfo.Code).ToString(CultureInfo.InvariantCulture);
             var networkStatus = errorInfo.MediatedNetworkErrorCode.ToString(CultureInfo.InvariantCulture);
-            OnExternalMediationResponse(_mediationProvider, adUnitId, null, -1, null, errorInfo.Code == MaxSdkBase.ErrorCode.NoFill ? 2 : 0, providerStatus, networkStatus);
+            string baseString = null;
+            if (errorInfo.WaterfallInfo != null)
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.Append('{');
+                SerializeWaterfall(sb, errorInfo.WaterfallInfo);
+                sb.Append("}");
+                baseString = sb.ToString();
+            }
+            OnExternalMediationResponse(_mediationProvider, adUnitId, null, -1, null, errorInfo.Code == MaxSdkBase.ErrorCode.NoFill ? 2 : 0, providerStatus, networkStatus, baseString);
         }
         
         private static void OnExternalMediationRequest(string provider, AdType adType, string id, string requestedAdUnitId, double requestedFloorPrice, int requestId)
@@ -244,24 +297,34 @@ namespace NeftaCustomAdapter
 #endif
         }
 
-        private static void OnExternalMediationResponse(string provider, string id, string id2, double revenue, string precision, int status, string providerStatus, string networkStatus)
+        private static void OnExternalMediationResponse(string provider, string id, string id2, double revenue, string precision, int status, string providerStatus, string networkStatus, string baseString)
         {
 #if UNITY_EDITOR
-            _plugin.OnExternalMediationResponse(provider, id, id2, revenue, precision, status, providerStatus, networkStatus);
+            _plugin.OnExternalMediationResponseAsString(provider, id, id2, revenue, precision, status, providerStatus, networkStatus, baseString);
 #elif UNITY_IOS
-            NeftaPlugin_OnExternalMediationResponse(provider, id, id2, revenue, precision, status, providerStatus, networkStatus);
+            NeftaPlugin_OnExternalMediationResponseAsString(provider, id, id2, revenue, precision, status, providerStatus, networkStatus, baseString);
 #elif UNITY_ANDROID
-            _plugin.CallStatic("OnExternalMediationResponse", provider, id, id2, revenue, precision, status, providerStatus, networkStatus);
+            _plugin.CallStatic("OnExternalMediationResponseAsString", provider, id, id2, revenue, precision, status, providerStatus, networkStatus, baseString);
 #endif
         }
 
         public static void OnExternalMediationImpression(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
+            if ((_disabledFeatures & Feature.ExternalMediationImpression) != 0)
+            {
+                return;
+            }
+            
             OnMAXImpression(false, adUnitId, adInfo);
         }
 
         public static void OnExternalMediationClick(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
+            if ((_disabledFeatures & Feature.ExternalMediationClick) != 0)
+            {
+                return;
+            }
+            
             OnMAXImpression(true, adUnitId, adInfo);
         }
 
@@ -287,58 +350,107 @@ namespace NeftaCustomAdapter
             sb.Append(JavaScriptStringEncode(adInfo.CreativeIdentifier));
             sb.Append("\",\"format\":\"");
             sb.Append(JavaScriptStringEncode(adInfo.AdFormat));
+            sb.Append("\",\"revenue_precision\":\"");
+            sb.Append(adInfo.RevenuePrecision);
             sb.Append("\",\"revenue\":");
             sb.Append(adInfo.Revenue.ToString(CultureInfo.InvariantCulture));
-            sb.Append(",\"revenue_precision\":\"");
-            sb.Append(adInfo.RevenuePrecision);
             if (adInfo.WaterfallInfo != null)
             {
-                sb.Append("\",\"waterfall_name\":\"");
-                sb.Append(JavaScriptStringEncode(adInfo.WaterfallInfo.Name));
-                var responses = adInfo.WaterfallInfo.NetworkResponses;
-                if (responses != null && responses.Count > 0)
+                sb.Append(',');
+                SerializeWaterfall(sb, adInfo.WaterfallInfo);
+            }
+            sb.Append("}");
+
+            var data = sb.ToString();
+            OnExternalMediationImpression(isClick, _mediationProvider, data, adUnitId, null);
+        }
+
+        private static void SerializeWaterfall(StringBuilder sb, MaxSdkBase.WaterfallInfo waterfallInfo)
+        {
+            sb.Append("\"waterfall_name\":\"");
+            sb.Append(JavaScriptStringEncode(waterfallInfo.Name));
+            var responses = waterfallInfo.NetworkResponses;
+            StringBuilder sb2 = null;
+            if (responses != null && responses.Count > 0)
+            {
+                sb2 = new StringBuilder();
+                var isFirst = true;
+                sb.Append("\",\"waterfall\":[\"");
+                foreach (var response in responses)
                 {
-                    var isEmpty = true;
-                    sb.Append("\",\"waterfall\":[\"");
-                    foreach (var response in responses)
+                    if (isFirst)
                     {
-                        if (!isEmpty)
-                        {
-                            sb.Append("\",\"");
-                        }
+                        isFirst = false;
+                    }
+                    else
+                    {
+                        sb.Append("\",\"");
+                        sb2.Append(",");
+                    }
 
-                        var networkName = response.MediatedNetwork.Name;
-                        if (String.IsNullOrEmpty(networkName) && response.Credentials != null &&
-                            response.Credentials.TryGetValue("network_name", out var name))
+                    string networkName = null;
+                    if (response.MediatedNetwork != null)
+                    {
+                        networkName = response.MediatedNetwork.Name;   
+                    }
+                    if (String.IsNullOrEmpty(networkName) && response.Credentials != null &&
+                        response.Credentials.TryGetValue("network_name", out var name))
+                    {
+                        if (name is string nameString)
                         {
-                            if (name is string nameString)
-                            {
-                                networkName = nameString;
-                            }
-                        }
-
-                        if (!String.IsNullOrEmpty(networkName))
-                        {
-                            sb.Append(networkName);
-                            isEmpty = false;
+                            networkName = nameString;
                         }
                     }
 
-                    sb.Append("\"]");
+                    sb2.Append("{\"name\":\"");
+                    if (networkName != null)
+                    {
+                        networkName = JavaScriptStringEncode(networkName);
+                        sb.Append(networkName);
+                        sb2.Append(networkName);
+                    }
+                    sb2.Append("\",\"ad_load_state\":\"");
+                    var loadState = "FAILED_TO_LOAD";
+                    if (response.AdLoadState == MaxSdkBase.MaxAdLoadState.AdLoadNotAttempted) {
+                        loadState = "AD_LOAD_NOT_ATTEMPTED";
+                    } else if (response.AdLoadState == MaxSdkBase.MaxAdLoadState.AdLoaded) {
+                        loadState = "AD_LOADED";
+                    }
+                    sb2.Append(loadState);
+                    sb2.Append("\",\"is_bidding\":");
+                    sb2.Append(response.IsBidding ? "true" : "false");
+                    sb2.Append(",\"latency_millis\":");
+                    sb2.Append(response.LatencyMillis);
+                    var error = response.Error;
+                    if (error != null)
+                    {
+                        sb2.Append(",\"error\":{\"code\":");
+                        sb2.Append(error.Code);
+                        sb2.Append(",\"name\":\"");
+                        sb2.Append(JavaScriptStringEncode(error.Message));   
+                        sb2.Append("\"}");
+                    }
+                    sb2.Append("}");
                 }
-                else
-                {
-                    sb.Append("\"");
-                }
-
-                sb.Append(",\"waterfall_test_name\":\"");
-                sb.Append(JavaScriptStringEncode(adInfo.WaterfallInfo.TestName));
+                sb.Append("\"]");
+            }
+            else
+            {
+                sb.Append("\"");
             }
 
-            sb.Append("\"");
-            
-            var data = sb.ToString();
-            OnExternalMediationImpression(isClick, _mediationProvider, data, adUnitId, null);
+            sb.Append(",\"waterfall_test_name\":\"");
+            sb.Append(JavaScriptStringEncode(waterfallInfo.TestName));   
+            if (sb2 != null)
+            {
+                sb.Append("\",\"waterfall_responses\":[");
+                sb.Append(sb2.ToString());
+                sb.Append("]");
+            }
+            else
+            {
+                sb.Append('"');
+            }
         }
 
         private static void OnExternalMediationImpression(bool isClick, string provider, string data, string id, string id2)
@@ -354,6 +466,12 @@ namespace NeftaCustomAdapter
         
         public static void GetInsights(int insights, AdInsight previousInsight, OnInsightsCallback callback, int timeoutInSeconds=0)
         {
+            if ((_disabledFeatures & Feature.Insights) != 0)
+            {
+                callback(new Insights());
+                return;
+            }
+            
             var id = 0;
             var previousRequestId = -1;
             if (previousInsight != null)
@@ -388,6 +506,17 @@ namespace NeftaCustomAdapter
             nuid = _plugin.Call<string>("GetNuid", present);
 #endif
             return nuid;
+        }
+
+        public static void SetTracking(bool isAuthorized)
+        {
+#if UNITY_EDITOR
+            _plugin.SetTracking(isAuthorized);
+#elif UNITY_IOS
+            NeftaPlugin_SetTracking(isAuthorized);
+#elif UNITY_ANDROID
+            _plugin.Call("SetTracking", isAuthorized);
+#endif
         }
         
         public static void SetExtraParameter(string key, string value)
@@ -441,14 +570,12 @@ namespace NeftaCustomAdapter
         
         internal static void IOnReady(string initConfig)
         {
+            var initDto = JsonUtility.FromJson<InitConfigurationDto>(initConfig);
+            _disabledFeatures = (Feature)initDto.disabledFeatures;
             if (OnReady != null)
             {
-                string[] adUnits = null;
-                if (initConfig != null)
-                {
-                    adUnits = initConfig.Split(',');
-                }
-                OnReady.Invoke(adUnits);
+                var initConfiguration = new InitConfiguration(initDto.skipOptimization, initDto.providerAdUnits);
+                OnReady.Invoke(initConfiguration);
             }
         }
         
@@ -496,6 +623,10 @@ namespace NeftaCustomAdapter
         
         internal static string JavaScriptStringEncode(string value)
         {
+            if (value == null)
+            {
+                return null;
+            }
             var len = value.Length;
             var needEncode = false;
             char c;

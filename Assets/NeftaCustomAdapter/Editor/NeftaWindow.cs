@@ -87,6 +87,14 @@ namespace NeftaCustomAdapter.Editor
                 }
             }
         }
+
+        [MenuItem("Window/Nefta/Delete nuid", false, 300)]
+        private static void DeleteNuid()
+        {
+            PlayerPrefs.DeleteKey("nefta.core.user_id");
+            PlayerPrefs.Save();
+            Debug.Log("Deleted nuid");
+        }
         
         [MenuItem("Window/Nefta/Export Nefta Custom Adapter SDK", false, int.MaxValue)]
         private static void ExportAdSdkPackage()

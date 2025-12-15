@@ -123,6 +123,17 @@
       "dependencyXmlFileName": "ISUnityAdsAdapterDependencies.xml",
       "SKAdNetworkIdXmlURL": "https://s3.amazonaws.com/ssa.public/Unity/SKAdNetwork-IDs/All/skadnetworks.unityads.plist.xml",
       "versions": {
+        "4.3.68.0": {
+          "ironSourceSdkVersion": "[8.9.0, 9.0[",
+          "android": {
+            "adapterVersion": "4.3.63",
+            "adNetworkVersion": "4.16.5"
+          },
+          "ios": {
+            "adapterVersion": "4.3.59.0",
+            "adNetworkVersion": "4.16.5"
+          }
+        },
         "4.3.67.0": {
           "ironSourceSdkVersion": "[8.9.0, 9.0[",
           "android": {

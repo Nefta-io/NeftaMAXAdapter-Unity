@@ -17,17 +17,7 @@ namespace Nefta.Core.Events
         
         public void Record()
         {
-            string name = null;
-            if (_name != null)
-            {
-                name = NeftaAdapterEvents.JavaScriptStringEncode(_name);
-            }
-            string customPayload = null;
-            if (_customString != null)
-            {
-                customPayload = NeftaAdapterEvents.JavaScriptStringEncode(_customString);
-            }
-            NeftaAdapterEvents.Record(_eventType, _category, _subCategory, name, _value, customPayload);
+            NeftaAdapterEvents.Record(_eventType, _category, _subCategory, _name, _value, _customString);
         }
     }
 }

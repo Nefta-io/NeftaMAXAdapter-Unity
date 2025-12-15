@@ -79,7 +79,13 @@ static NeftaPlugin *_plugin;
 }
 + (void)OnExternalMediationResponseLoad:(NSString * _Nonnull)id ad:(MAAd * _Nonnull)ad {
     NSString *hash = [NSString stringWithFormat:@"%lu", (unsigned long)[ad hash]];
-    [NeftaPlugin OnExternalMediationResponse: _mediationProvider id: id id2: hash revenue: ad.revenue precision: ad.revenuePrecision status: 1 providerStatus: nil networkStatus: nil];
+    NSMutableDictionary *baseObject = nil;
+    MAAdWaterfallInfo *waterfall = ad.waterfall;
+    if (waterfall != nil) {
+        baseObject = [NSMutableDictionary dictionary];
+        [ALNeftaMediationAdapter SerializeWaterfall: baseObject waterfall:waterfall];
+    }
+    [NeftaPlugin OnExternalMediationResponse: _mediationProvider id: id id2: hash revenue: ad.revenue precision: ad.revenuePrecision status: 1 providerStatus: nil networkStatus: nil baseObject: baseObject];
 }
 
 + (void)OnExternalMediationRequestFailWithBanner:(MAAdView * _Nonnull)banner error:(MAError * _Nonnull)error {
@@ -99,9 +105,15 @@ static NeftaPlugin *_plugin;
     if (error.code == MAErrorCodeNoFill) {
         status = 2;
     }
+    NSMutableDictionary *baseObject = nil;
+    MAAdWaterfallInfo *waterfall = error.waterfall;
+    if (waterfall != nil) {
+        baseObject = [NSMutableDictionary dictionary];
+        [ALNeftaMediationAdapter SerializeWaterfall: baseObject waterfall:waterfall];
+    }
     NSString *providerStatus = [NSString stringWithFormat:@"%ld", error.code];
     NSString *networkStatus = [NSString stringWithFormat:@"%ld", error.mediatedNetworkErrorCode];
-    [NeftaPlugin OnExternalMediationResponse: _mediationProvider id: id id2: nil revenue: -1 precision: nil status: status providerStatus: providerStatus networkStatus: networkStatus];
+    [NeftaPlugin OnExternalMediationResponse: _mediationProvider id: id id2: nil revenue: -1 precision: nil status: status providerStatus: providerStatus networkStatus: networkStatus baseObject: baseObject];
 }
 
 + (void) OnExternalMediationImpression:(MAAd*)ad {
@@ -133,28 +145,9 @@ static NeftaPlugin *_plugin;
     if (ad.creativeIdentifier != nil) {
         [data setObject: ad.creativeIdentifier forKey: @"creative_id"];
     }
-    MAAdWaterfallInfo* waterfall = ad.waterfall;
+    MAAdWaterfallInfo *waterfall = ad.waterfall;
     if (waterfall != nil) {
-        if (waterfall.name != nil) {
-            [data setObject: waterfall.name forKey: @"waterfall_name"];
-        }
-        if (waterfall.testName != nil) {
-            [data setObject: waterfall.testName forKey: @"waterfall_test_name"];
-        }
-        NSMutableArray *waterfalls = [NSMutableArray array];
-        for (MANetworkResponseInfo *other in waterfall.networkResponses) {
-            NSString *name = other.mediatedNetwork.name;
-            if (name == nil || [name length] == 0) {
-                id n = other.credentials[@"network_name"];
-                if ([n isKindOfClass:[NSString class]]) {
-                    name = (NSString *)n;
-                }
-            }
-            if (name != nil && [name length] > 0) {
-                [waterfalls addObject: name];
-            }
-        }
-        [data setObject: waterfalls forKey: @"waterfall"];
+        [ALNeftaMediationAdapter SerializeWaterfall: data waterfall: waterfall];
     }
     int type = 0;
     if (ad.format == MAAdFormat.banner || ad.format == MAAdFormat.leader || ad.format == MAAdFormat.mrec) {
@@ -166,6 +159,52 @@ static NeftaPlugin *_plugin;
     }
     NSString *hash = [NSString stringWithFormat:@"%lu", (unsigned long)[ad hash]];
     [NeftaPlugin OnExternalMediationImpression: isClick provider: _mediationProvider data: data id: nil id2: hash];
+}
+
++ (void)SerializeWaterfall:(NSMutableDictionary * _Nonnull)data waterfall:(MAAdWaterfallInfo * _Nonnull)waterfall {
+    if (waterfall.name != nil) {
+        [data setObject: waterfall.name forKey: @"waterfall_name"];
+    }
+    if (waterfall.testName != nil) {
+        [data setObject: waterfall.testName forKey: @"waterfall_test_name"];
+    }
+    NSMutableArray *waterfalls = [NSMutableArray array];
+    NSMutableArray *waterfallResponses = [NSMutableArray array];
+    for (MANetworkResponseInfo *other in waterfall.networkResponses) {
+        NSString *name = other.mediatedNetwork.name;
+        if (name == nil || [name length] == 0) {
+            id n = other.credentials[@"network_name"];
+            if ([n isKindOfClass:[NSString class]]) {
+                name = (NSString *)n;
+            }
+        }
+        NSMutableDictionary *waterfallResponse = [NSMutableDictionary dictionary];
+        if (name != nil && [name length] > 0) {
+            [waterfalls addObject: name];
+            [waterfallResponse setObject: name forKey: @"name"];
+        }
+        NSString *loadState = @"FAILED_TO_LOAD";
+        if (other.adLoadState == MAAdLoadStateAdLoadNotAttempted) {
+            loadState = @"AD_LOAD_NOT_ATTEMPTED";
+        } else if (other.adLoadState == MAAdLoadStateAdLoaded) {
+            loadState = @"AD_LOADED";
+        }
+        [waterfallResponse setObject: loadState forKey: @"ad_load_state"];
+        [waterfallResponse setObject: @(other.isBidding) forKey: @"is_bidding"];
+        [waterfallResponse setObject: @(other.latency) forKey: @"latency_millis"];
+        MAError *error = other.error;
+        if (error != nil) {
+            NSMutableDictionary *jError = [NSMutableDictionary dictionary];
+            [jError setObject: @(error.code) forKey: @"code"];
+            if (error.message != nil) {
+                [jError setObject: error.message forKey: @"name"];
+            }
+            [waterfallResponse setObject: jError forKey: @"error"];
+        }
+        [waterfallResponses addObject: waterfallResponse];
+    }
+    [data setObject: waterfalls forKey: @"waterfall"];
+    [data setObject: waterfallResponses forKey: @"waterfall_responses"];
 }
 
 - (void)initializeWithParameters:(id<MAAdapterInitializationParameters>)parameters completionHandler:(void (^)(MAAdapterInitializationStatus, NSString *_Nullable))completionHandler {
@@ -188,7 +227,7 @@ static NeftaPlugin *_plugin;
 }
 
 - (NSString *)adapterVersion {
-    return @"4.4.3";
+    return @"4.4.4";
 }
 
 - (void)destroy {

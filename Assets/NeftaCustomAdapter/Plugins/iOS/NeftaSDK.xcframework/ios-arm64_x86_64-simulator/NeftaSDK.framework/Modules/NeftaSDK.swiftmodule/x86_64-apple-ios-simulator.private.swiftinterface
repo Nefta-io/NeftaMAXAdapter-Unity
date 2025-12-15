@@ -145,6 +145,7 @@ import os
     @objc deinit
   }
   public typealias OnReadyBlock = (NeftaSDK.InitConfiguration) -> Swift.Void
+  public typealias OnReadyAsStringBlock = (Swift.String) -> Swift.Void
   public typealias OnInsightsBlock = (NeftaSDK.Insights) -> Swift.Void
   public typealias OnInsightsAsStringBlock = (Swift.Int, Swift.Int, Swift.String?) -> Swift.Void
   public typealias OnLogBlock = (Swift.String) -> Swift.Void
@@ -168,6 +169,7 @@ import os
   public var _placements: [Swift.String : NeftaSDK.Placement]!
   public var _ads: [NeftaSDK.NAd]
   @objc public var OnReady: NeftaSDK.NeftaPlugin.OnReadyBlock?
+  @objc public var OnReadyAsString: NeftaSDK.NeftaPlugin.OnReadyAsStringBlock?
   @objc public var OnInsightsAsString: NeftaSDK.NeftaPlugin.OnInsightsAsStringBlock?
   @objc public static var OnLog: NeftaSDK.NeftaPlugin.OnLogBlock?
   @objc public static var _instance: NeftaSDK.NeftaPlugin!
@@ -183,7 +185,8 @@ import os
   @objc(GetInsights:previousInsight:callback:timeout:) public func GetInsights(_ insights: Swift.Int, previousInsight: NeftaSDK.AdInsight?, callback: @escaping NeftaSDK.NeftaPlugin.OnInsightsBlock, timeout: Swift.Int = 0)
   @objc public func GetNuid(present: Swift.Bool) -> Swift.String
   @objc public static func OnExternalMediationRequest(_ provider: Swift.String, adType: Swift.Int, id: Swift.String, requestedAdUnitId: Swift.String, requestedFloorPrice: Swift.Float64, requestId: Swift.Int)
-  @objc public static func OnExternalMediationResponse(_ provider: Swift.String, id: Swift.String, id2: Swift.String?, revenue: Swift.Float64, precision: Swift.String?, status: Swift.Int, providerStatus: Swift.String?, networkStatus: Swift.String?)
+  @objc public static func OnExternalMediationResponse(_ provider: Swift.String, id: Swift.String, id2: Swift.String?, revenue: Swift.Float64, precision: Swift.String?, status: Swift.Int, providerStatus: Swift.String?, networkStatus: Swift.String?, baseObject: [Swift.String : Any]?)
+  @objc public static func OnExternalMediationResponseAsString(_ provider: Swift.String, id: Swift.String, id2: Swift.String?, revenue: Swift.Float64, precision: Swift.String?, status: Swift.Int, providerStatus: Swift.String?, networkStatus: Swift.String?, baseString: Swift.String?)
   @objc public static func OnExternalMediationImpression(_ isClick: Swift.Bool, provider: Swift.String, data: Foundation.NSMutableDictionary?, id: Swift.String?, id2: Swift.String?)
   @objc public static func OnExternalMediationImpressionAsString(_ isClick: Swift.Bool, provider: Swift.String, data: Swift.String, id: Swift.String?, id2: Swift.String?)
   @objc public static func SetOverride(url: Swift.String?)
@@ -341,35 +344,6 @@ import os
   @objc override dynamic public init()
   @objc deinit
 }
-@objc public protocol NBannerListener : NeftaSDK.NAdListener {
-}
-@_inheritsConvenienceInitializers @objc public class NRewarded : NeftaSDK.NAd {
-  @objc override public init(id: Swift.String)
-  @objc deinit
-}
-@objc public class NBanner : NeftaSDK.NAd {
-  @objc public enum Position : Swift.Int {
-    case None = 0
-    case Top = 1
-    case Bottom = 2
-    public init?(rawValue: Swift.Int)
-    public typealias RawValue = Swift.Int
-    public var rawValue: Swift.Int {
-      get
-    }
-  }
-  @objc public var _position: NeftaSDK.NBanner.Position
-  @objc public var _onRemove: ((NeftaSDK.NBanner) -> Swift.Void)?
-  @objc public init(id: Swift.String, parent: UIKit.UIView)
-  @objc public init(id: Swift.String, position: NeftaSDK.NBanner.Position)
-  @objc(SetAutoRefresh:) public func SetAutoRefresh(autoRefresh: Swift.Bool)
-  @objc(GracefulShow:) public func GracefulShow(viewController: UIKit.UIViewController?) -> UIKit.UIView?
-  @objc public func GetView() -> UIKit.UIView?
-  @objc override public func Show(viewController: UIKit.UIViewController?)
-  @objc override public func Close()
-  @objc public func Hide()
-  @objc deinit
-}
 @objc public class UnityWrapper : ObjectiveC.NSObject {
   public typealias IOnReadyBlock = (Swift.String) -> Swift.Void
   public typealias IOnBidBlock = (Swift.String, Swift.Float, Swift.Int) -> Swift.Void
@@ -402,6 +376,35 @@ import os
   @objc public func Close(id: Swift.String)
   @objc deinit
 }
+@objc public protocol NBannerListener : NeftaSDK.NAdListener {
+}
+@_inheritsConvenienceInitializers @objc public class NRewarded : NeftaSDK.NAd {
+  @objc override public init(id: Swift.String)
+  @objc deinit
+}
+@objc public class NBanner : NeftaSDK.NAd {
+  @objc public enum Position : Swift.Int {
+    case None = 0
+    case Top = 1
+    case Bottom = 2
+    public init?(rawValue: Swift.Int)
+    public typealias RawValue = Swift.Int
+    public var rawValue: Swift.Int {
+      get
+    }
+  }
+  @objc public var _position: NeftaSDK.NBanner.Position
+  @objc public var _onRemove: ((NeftaSDK.NBanner) -> Swift.Void)?
+  @objc public init(id: Swift.String, parent: UIKit.UIView)
+  @objc public init(id: Swift.String, position: NeftaSDK.NBanner.Position)
+  @objc(SetAutoRefresh:) public func SetAutoRefresh(autoRefresh: Swift.Bool)
+  @objc(GracefulShow:) public func GracefulShow(viewController: UIKit.UIViewController?) -> UIKit.UIView?
+  @objc public func GetView() -> UIKit.UIView?
+  @objc override public func Show(viewController: UIKit.UIViewController?)
+  @objc override public func Close()
+  @objc public func Hide()
+  @objc deinit
+}
 @objc public class Churn : ObjectiveC.NSObject {
   @objc public var _d1_probability: Swift.Double
   @objc public var _d3_probability: Swift.Double
@@ -412,11 +415,11 @@ import os
   public init(config: [Swift.String : Any])
   @objc deinit
 }
-@_inheritsConvenienceInitializers @objc public class InitConfiguration : ObjectiveC.NSObject {
-  @objc public var _placements: [Swift.String : NeftaSDK.Placement]?
+@_hasMissingDesignatedInitializers @objc public class InitConfiguration : ObjectiveC.NSObject {
+  @objc public var _skipOptimization: Swift.Bool
+  @objc public var _providerAdUnits: [Swift.String : [Swift.String]]
   @objc public func GetMediationProviderAdUnits() -> [Swift.String]?
   @objc public func GetMediationProviderAdUnits(provider: Swift.String) -> [Swift.String]?
-  @objc override dynamic public init()
   @objc deinit
 }
 extension NeftaSDK.NError.Code : Swift.Equatable {}

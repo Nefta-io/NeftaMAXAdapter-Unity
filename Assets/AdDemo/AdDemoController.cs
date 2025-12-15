@@ -1,8 +1,10 @@
 #if UNITY_IOS
 using System.Runtime.InteropServices;
 #endif
+using JetBrains.Annotations;
 using NeftaCustomAdapter;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace AdDemo
 {
@@ -34,21 +36,25 @@ namespace AdDemo
             "3082ee9199cf59f0"
         };
 #endif
-        
-        [SerializeField] private InterstitialController _interstitial;
-        [SerializeField] private RewardedController _rewarded;
 
         private float _stateTime;
-        private bool _permissionChecked;
         
         private void Awake()
         {
             NeftaAdapterEvents.EnableLogging(true);
             NeftaAdapterEvents.SetExtraParameter(NeftaAdapterEvents.ExtParams.TestGroup, "split-unity-max");
+                
+            NeftaAdapterEvents.OnReady = (InitConfiguration config) =>
+            {
+                Debug.Log($"[NeftaPluginMAX] Dynamic ad units: {string.Join(", ", config.GetProviderAdUnits())}");
+                Debug.Log($"[NeftaPluginMAX] Should bypass Nefta optimization? {config._skipOptimization}");
+            };
             NeftaAdapterEvents.Init(NeftaId);
             
-#if UNITY_EDITOR || !UNITY_IOS
-            _stateTime = 1f; // skip IDFA check
+#if !UNITY_EDITOR && UNITY_IOS
+            CheckIdfaAndInitAds();
+#else
+            InitAds();
 #endif
         }
 
@@ -63,15 +69,20 @@ namespace AdDemo
             MaxSdk.SetExtraParameter("disable_b2b_ad_unit_ids", string.Join(",", _adUnits));
             MaxSdk.InitializeSdk();
         }
+
+        [UsedImplicitly]
+        private void CheckIdfaAndInitAds()
+        {
+            _stateTime = 1f;
+        }
         
         private void Update()
         {
-            if (!_permissionChecked)
+            if (_stateTime > 0f)
             {
-                _stateTime += Time.deltaTime;
-                if (_stateTime > 1f)
+                _stateTime -= Time.deltaTime;
+                if (_stateTime <= 0f)
                 {
-                    _permissionChecked = true;
 #if !UNITY_EDITOR && UNITY_IOS
                     CheckTrackingPermission();
 #endif
