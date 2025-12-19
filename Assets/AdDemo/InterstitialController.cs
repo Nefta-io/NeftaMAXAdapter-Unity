@@ -104,10 +104,12 @@ namespace AdDemo
         {
             adRequest.State = State.Loading;
             
-            SetStatus($"Loading {adRequest.AdUnitId} as Default");
+            MaxSdk.SetInterstitialExtraParameter(adRequest.AdUnitId, "disable_auto_retries", "false");
+            MaxSdk.SetInterstitialExtraParameter(adRequest.AdUnitId, "jC7Fp", "");
             
             NeftaAdapterEvents.OnExternalMediationRequest(NeftaAdapterEvents.AdType.Interstitial, adRequest.AdUnitId);
             
+            SetStatus($"Loading {adRequest.AdUnitId} as Default");
             MaxSdk.LoadInterstitial(adRequest.AdUnitId);
         }
         

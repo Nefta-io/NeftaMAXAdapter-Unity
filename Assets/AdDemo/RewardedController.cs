@@ -103,11 +103,13 @@ namespace AdDemo
         private void LoadDefault(AdRequest adRequest)
         {
             adRequest.State = State.Loading;
-                        
-            SetStatus($"Loading {adRequest.AdUnitId} as Default");
+            
+            MaxSdk.SetRewardedAdExtraParameter(adRequest.AdUnitId, "disable_auto_retries", "false");
+            MaxSdk.SetRewardedAdExtraParameter(adRequest.AdUnitId, "jC7Fp", "");
             
             NeftaAdapterEvents.OnExternalMediationRequest(NeftaAdapterEvents.AdType.Rewarded, adRequest.AdUnitId);
             
+            SetStatus($"Loading {adRequest.AdUnitId} as Default");
             MaxSdk.LoadRewardedAd(adRequest.AdUnitId);
         }
         
