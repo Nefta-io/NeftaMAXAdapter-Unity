@@ -191,7 +191,7 @@ static NeftaPlugin *_plugin;
         }
         [waterfallResponse setObject: loadState forKey: @"ad_load_state"];
         [waterfallResponse setObject: @(other.isBidding) forKey: @"is_bidding"];
-        [waterfallResponse setObject: @(other.latency) forKey: @"latency_millis"];
+        [waterfallResponse setObject: @((NSInteger)(other.latency * 1000)) forKey: @"latency_millis"];
         MAError *error = other.error;
         if (error != nil) {
             NSMutableDictionary *jError = [NSMutableDictionary dictionary];
@@ -227,7 +227,7 @@ static NeftaPlugin *_plugin;
 }
 
 - (NSString *)adapterVersion {
-    return @"4.4.4";
+    return @"4.4.5";
 }
 
 - (void)destroy {

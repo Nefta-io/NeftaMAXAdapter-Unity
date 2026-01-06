@@ -33,7 +33,6 @@ namespace AdDemo
             ToggleUI(!_isSimulator);
         }
         
-        
         private void ToggleUI(bool isSimulator)
         {
             _isSimulator = isSimulator;

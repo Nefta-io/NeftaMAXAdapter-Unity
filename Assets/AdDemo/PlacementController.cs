@@ -394,7 +394,7 @@ namespace AdDemo
         private MaxSdkBase.AdInfo _simBAdInfo; 
         private void SimOnAdLoadedEvent(AdRequest request, bool high)
         {
-            var revenue = high ? 0.002 : 0.001;
+            var revenue = high ? 0.002 : 0;
             if (request == _adRequestA && _simAAdInfo != null)
             {
                 _simAAdInfo = null;
@@ -555,7 +555,7 @@ namespace AdDemo
                 {
                     error = new Dictionary<string, object>()
                     {
-                        { "errorCode", "578" },
+                        { "errorCode", "-1" },
                         { "errorMessage", "simulator error message" },
                         { "latencyMillis", "45" }
                     };

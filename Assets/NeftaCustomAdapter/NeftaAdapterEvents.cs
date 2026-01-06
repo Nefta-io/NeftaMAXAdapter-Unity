@@ -425,7 +425,7 @@ namespace NeftaCustomAdapter
                     if (error != null)
                     {
                         sb2.Append(",\"error\":{\"code\":");
-                        sb2.Append(error.Code);
+                        sb2.Append((int)error.Code);
                         sb2.Append(",\"name\":\"");
                         sb2.Append(JavaScriptStringEncode(error.Message));   
                         sb2.Append("\"}");
