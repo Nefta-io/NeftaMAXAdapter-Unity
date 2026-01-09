@@ -26,7 +26,8 @@ namespace AdDemo
             Idle,
             LoadingWithInsights,
             Loading,
-            Ready
+            Ready,
+            Shown
         }
         
         private class AdRequest
@@ -232,7 +233,7 @@ namespace AdDemo
         
         private bool TryShow(AdRequest adRequest)
         {
-            adRequest.State = State.Idle;
+            adRequest.State = State.Shown;
             adRequest.Revenue = 0;
             
             if (MaxSdk.IsInterstitialReady(adRequest.AdUnitId))
@@ -255,6 +256,9 @@ namespace AdDemo
         
         private void OnAdDisplayFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo, MaxSdkBase.AdInfo adInfo)
         {
+            var adRequest = adUnitId == _adRequestA.AdUnitId ? _adRequestA : _adRequestB;
+            adRequest.State = State.Idle;
+            
             SetStatus("OnAdDisplayFailedEvent");
             
             RetryLoading();
@@ -267,6 +271,9 @@ namespace AdDemo
         
         private void OnAdHiddenEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
+            var adRequest = adUnitId == _adRequestA.AdUnitId ? _adRequestA : _adRequestB;
+            adRequest.State = State.Idle;
+
             SetStatus("OnAdHiddenEvent");
             
             RetryLoading();
