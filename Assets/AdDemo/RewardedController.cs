@@ -225,15 +225,15 @@ namespace AdDemo
 
         private bool TryShow(AdRequest adRequest)
         {
-            adRequest.State = State.Shown;
             adRequest.Revenue = 0;
-            
             if (MaxSdk.IsRewardedAdReady(adRequest.AdUnitId))
             {
+                adRequest.State = State.Shown;
                 SetStatus($"Showing {adRequest.AdUnitId}");
                 MaxSdk.ShowRewardedAd(adRequest.AdUnitId);
                 return true;
             }
+            adRequest.State = State.Idle;
             RetryLoading();
             return false;
         }
