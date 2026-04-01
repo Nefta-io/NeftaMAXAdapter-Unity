@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: cd5259d3a52eb46f79e701d0f2e227d5
+guid: cd29d7835ec5497f98838991262186c7
 PluginImporter:
   externalObjects: {}
   serializedVersion: 2
@@ -72,10 +72,10 @@ PluginImporter:
     second:
       enabled: 1
       settings:
-        AddToEmbeddedBinaries: false
+        AddToEmbeddedBinaries: true
         CPU: AnyCPU
         CompileFlags: 
-        FrameworkDependencies: AdSupport;
+        FrameworkDependencies: 
   userData: 
   assetBundleName: 
   assetBundleVariant: 

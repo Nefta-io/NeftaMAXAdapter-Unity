@@ -7,13 +7,15 @@ namespace NeftaCustomAdapter
     public class InitConfiguration
     {
         public bool _skipOptimization;
+        public string _nuid;
         public Dictionary<string, string[]> _providerAdUnits;
 
-        public InitConfiguration(bool skipOptimization, string providerAdUnits)
+        public InitConfiguration(bool skipOptimization, string nuid, string providerAdUnits)
         {
             _skipOptimization = skipOptimization;
+            _nuid = nuid;
             _providerAdUnits = new Dictionary<string, string[]>();
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             String provider = null;
             List<String> adUnits = null;
             for (var i = 0; i < providerAdUnits.Length; i++)
@@ -47,7 +49,11 @@ namespace NeftaCustomAdapter
 
         public string[] GetProviderAdUnits()
         {
-            return _providerAdUnits["applovin-max"];
+            if (_providerAdUnits.TryGetValue("applovin-max", out var adUnits))
+            {
+                return adUnits;
+            }
+            return null;
         }
     }
 }

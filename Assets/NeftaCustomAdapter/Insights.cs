@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace NeftaCustomAdapter
 {
     public class Insights
@@ -12,6 +14,60 @@ namespace NeftaCustomAdapter
         public AdInsight _banner;
         public AdInsight _interstitial;
         public AdInsight _rewarded;
+
+        public readonly AdInsight Insight;
+
+        public Insights()
+        {
+        }
+        
+        public Insights(int adapterResponseType, string adapterResponse)
+        {
+            if (adapterResponseType == Churn)
+            {
+                var churn = JsonUtility.FromJson<ChurnDto>(adapterResponse);
+                if (churn != null)
+                {
+                    _churn = new Churn(churn);   
+                }
+            }
+            else if (adapterResponseType == Banner)
+            {
+                var banner = JsonUtility.FromJson<AdConfigurationDto>(adapterResponse);
+                if (banner != null)
+                {
+                    _banner = new AdInsight(NeftaAdapterEvents.AdType.Banner, banner);
+                    Insight = _banner;
+                }
+            }
+            else if (adapterResponseType == Interstitial)
+            {
+                var interstitial = JsonUtility.FromJson<AdConfigurationDto>(adapterResponse);
+                if (interstitial != null)
+                {
+                    _interstitial = new AdInsight(NeftaAdapterEvents.AdType.Interstitial, interstitial);
+                    Insight = _interstitial;
+                }
+            }
+            else if (adapterResponseType == Rewarded)
+            {
+                var rewarded = JsonUtility.FromJson<AdConfigurationDto>(adapterResponse);
+                if (rewarded != null)
+                {
+                    _rewarded = new AdInsight(NeftaAdapterEvents.AdType.Rewarded, rewarded);
+                    Insight = _rewarded;
+                }
+            }
+        }
+
+        public override string ToString()
+        {
+            if (Insight == null)
+            {
+                return "No Insight";
+            }
+            return Insight.ToString();
+        }
     }
     
     public class Churn
@@ -45,20 +101,30 @@ namespace NeftaCustomAdapter
         public NeftaAdapterEvents.AdType _type;
         public double _floorPrice;
         public string _adUnit;
+        public float _delay;
         
         public AdInsight(NeftaAdapterEvents.AdType type, AdConfigurationDto dto)
         {
             _type = type;
-            _requestId = dto.request_id;
-            _adOpportunityId = dto.ad_opportunity_id;
-            _auctionId = dto.auction_id;
-            _floorPrice = dto.floor_price;
-            _adUnit = dto.ad_unit;
+            if (dto != null)
+            {
+                _requestId = dto.request_id;
+                _adOpportunityId = dto.ad_opportunity_id;
+                _auctionId = dto.auction_id;
+                _floorPrice = dto.floor_price;
+                _adUnit = dto.ad_unit;
+                _delay = dto.delay;
+            }
+            else
+            {
+                _floorPrice = 0;
+                _delay = 0;
+            }
         }
 
         public override string ToString()
         {
-            return $"AdInsight[type: {_type}, recommendedAdUnit: {_adUnit}, floorPrice: {_floorPrice} adOpportunityId: {_adOpportunityId} auctionId: {_auctionId}]";
+            return $"AdInsight[type: {_type}, recommendedAdUnit: {_adUnit}, floorPrice: {_floorPrice}, delay: {_delay}, adOpportunityId: {_adOpportunityId} auctionId: {_auctionId}]";
         }
     }
 }

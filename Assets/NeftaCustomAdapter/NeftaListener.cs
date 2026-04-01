@@ -3,12 +3,11 @@ using UnityEngine;
 using Nefta.Editor;
 #endif
 
-
 namespace NeftaCustomAdapter
 {
-    public class NeftaAdapterListener : AndroidJavaProxy, IAdapterListener
+    public class NeftaListener : AndroidJavaProxy, IPluginListener
     {
-        public NeftaAdapterListener() : base("com.nefta.sdk.AdapterCallback")
+        public NeftaListener() : base("com.nefta.sdk.AdapterCallback")
         {
         }
         
@@ -20,6 +19,11 @@ namespace NeftaCustomAdapter
         public void IOnInsights(int id, int adapterResponseType, string adapterResponse)
         {
             NeftaAdapterEvents.IOnInsights(id, adapterResponseType, adapterResponse);
+        }
+
+        public void IOnNewSessionCallback()
+        {
+            NeftaAdapterEvents.IOnNewSessionCallback();
         }
     }
 }

@@ -281,11 +281,8 @@ typedef unsigned int swift_uint4  __attribute__((__ext_vector_type__(4)));
 #if __has_warning("-Watimport-in-framework-header")
 #pragma clang diagnostic ignored "-Watimport-in-framework-header"
 #endif
-@import CoreFoundation;
 @import Foundation;
 @import ObjectiveC;
-@import UIKit;
-@import WebKit;
 #endif
 
 #endif
@@ -318,21 +315,18 @@ SWIFT_CLASS("_TtC8NeftaSDK9AdInsight")
 @property (nonatomic, readonly) enum Types _type;
 @property (nonatomic) double _floorPrice;
 @property (nonatomic, copy) NSString * _Nullable _adUnit;
+@property (nonatomic) float _delay;
 @property (nonatomic, readonly, copy) NSString * _Nonnull description;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
 
-SWIFT_CLASS("_TtC8NeftaSDK11BidResponse")
-@interface BidResponse : NSObject
-@property (nonatomic, copy) NSString * _Nullable _auctionId;
-@property (nonatomic, copy) NSString * _Null_unspecified _id;
-@property (nonatomic) float _price;
-@property (nonatomic, copy) NSString * _Nullable _campaignId;
-@property (nonatomic, copy) NSString * _Nullable _creativeId;
-- (BOOL)IsExpired SWIFT_WARN_UNUSED_RESULT;
-- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
-@end
+typedef SWIFT_ENUM(NSInteger, Types, open) {
+  TypesUninitialized = 0,
+  TypesBanner = 1,
+  TypesInterstitial = 2,
+  TypesRewarded = 3,
+};
 
 SWIFT_CLASS("_TtC8NeftaSDK5Churn")
 @interface Churn : NSObject
@@ -349,6 +343,7 @@ SWIFT_CLASS("_TtC8NeftaSDK5Churn")
 SWIFT_CLASS("_TtC8NeftaSDK17InitConfiguration")
 @interface InitConfiguration : NSObject
 @property (nonatomic) BOOL _skipOptimization;
+@property (nonatomic, copy) NSString * _Nonnull _nuid;
 @property (nonatomic, copy) NSDictionary<NSString *, NSArray<NSString *> *> * _Nonnull _providerAdUnits;
 - (NSArray<NSString *> * _Nullable)GetMediationProviderAdUnits SWIFT_WARN_UNUSED_RESULT;
 - (NSArray<NSString *> * _Nullable)GetMediationProviderAdUnitsWithProvider:(NSString * _Nonnull)provider SWIFT_WARN_UNUSED_RESULT;
@@ -373,138 +368,6 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger Rewarded;)
 @property (nonatomic, strong) AdInsight * _Nullable _interstitial;
 @property (nonatomic, strong) AdInsight * _Nullable _rewarded;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
-@end
-
-@class Placement;
-@protocol NAdListener;
-@class NSData;
-@class UIViewController;
-SWIFT_CLASS("_TtC8NeftaSDK3NAd")
-@interface NAd : NSObject
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger Request;)
-+ (NSInteger)Request SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger Initialized;)
-+ (NSInteger)Initialized SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger Bidding;)
-+ (NSInteger)Bidding SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger ReadyToLoad;)
-+ (NSInteger)ReadyToLoad SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger Loading;)
-+ (NSInteger)Loading SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger Ready;)
-+ (NSInteger)Ready SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger Showing;)
-+ (NSInteger)Showing SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger Hidden;)
-+ (NSInteger)Hidden SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger Expired;)
-+ (NSInteger)Expired SWIFT_WARN_UNUSED_RESULT;
-@property (nonatomic, copy) NSString * _Nonnull _id;
-@property (nonatomic) enum Types _type;
-@property (nonatomic, strong) Placement * _Nullable _placement;
-@property (nonatomic, strong) BidResponse * _Nullable _bid;
-@property (nonatomic) NSInteger _state;
-@property (nonatomic) int64_t _stateStart;
-@property (nonatomic, strong) id <NAdListener> _Nullable _listener;
-- (nonnull instancetype)initWithId:(NSString * _Nonnull)id OBJC_DESIGNATED_INITIALIZER;
-- (NSInteger)CanShow SWIFT_WARN_UNUSED_RESULT;
-- (NSDictionary<NSString *, id> * _Nonnull)GetPartialBidRequest SWIFT_WARN_UNUSED_RESULT;
-- (NSString * _Nonnull)GetPartialBidRequestAsString SWIFT_WARN_UNUSED_RESULT;
-- (void)Bid;
-- (void)LoadWithBidResponseWithBidResponse:(NSData * _Nonnull)bidResponse;
-- (void)Load;
-- (void)ShowThreaded:(UIViewController * _Nonnull)viewController;
-- (void)Show:(UIViewController * _Nullable)viewController;
-- (void)CloseThreaded;
-- (void)Close;
-- (void)SetFloorPriceWithFloorPrice:(float)floorPrice;
-- (void)SetCustomParameterWithProvider:(NSString * _Nonnull)provider value:(NSString * _Nonnull)value;
-- (void)Mute:(BOOL)mute;
-- (nonnull instancetype)init SWIFT_UNAVAILABLE;
-+ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
-@end
-
-@class NError;
-SWIFT_PROTOCOL("_TtP8NeftaSDK11NAdListener_")
-@protocol NAdListener <NSObject>
-@optional
-- (void)OnBidWithAd:(NAd * _Nonnull)ad bidResponse:(BidResponse * _Nullable)bidResponse error:(NError * _Nullable)error;
-- (void)OnLoadStartWithAd:(NAd * _Nonnull)ad;
-@required
-- (void)OnLoadFailWithAd:(NAd * _Nonnull)ad error:(NError * _Nonnull)error;
-- (void)OnLoadWithAd:(NAd * _Nonnull)ad width:(NSInteger)width height:(NSInteger)height;
-- (void)OnShowFailWithAd:(NAd * _Nonnull)ad error:(NError * _Nonnull)error;
-- (void)OnShowWithAd:(NAd * _Nonnull)ad;
-@optional
-- (void)OnClickWithAd:(NAd * _Nonnull)ad;
-@required
-- (void)OnCloseWithAd:(NAd * _Nonnull)ad;
-@end
-
-enum Position : NSInteger;
-@class UIView;
-SWIFT_CLASS("_TtC8NeftaSDK7NBanner")
-@interface NBanner : NAd
-@property (nonatomic) enum Position _position;
-@property (nonatomic, copy) void (^ _Nullable _onRemove)(NBanner * _Nonnull);
-- (nonnull instancetype)initWithId:(NSString * _Nonnull)id parent:(UIView * _Nonnull)parent OBJC_DESIGNATED_INITIALIZER;
-- (nonnull instancetype)initWithId:(NSString * _Nonnull)id position:(enum Position)position OBJC_DESIGNATED_INITIALIZER;
-- (void)SetAutoRefresh:(BOOL)autoRefresh;
-- (UIView * _Nullable)GracefulShow:(UIViewController * _Nullable)viewController SWIFT_WARN_UNUSED_RESULT;
-- (UIView * _Nullable)GetView SWIFT_WARN_UNUSED_RESULT;
-- (void)Show:(UIViewController * _Nullable)viewController;
-- (void)Close;
-- (void)Hide;
-- (nonnull instancetype)initWithId:(NSString * _Nonnull)id SWIFT_UNAVAILABLE;
-@end
-
-typedef SWIFT_ENUM(NSInteger, Position, open) {
-  PositionNone = 0,
-  PositionTop = 1,
-  PositionBottom = 2,
-};
-
-SWIFT_PROTOCOL("_TtP8NeftaSDK15NBannerListener_")
-@protocol NBannerListener <NAdListener>
-@end
-
-SWIFT_CLASS("_TtC8NeftaSDK6NError")
-@interface NError : NSObject
-@property (nonatomic, readonly) NSInteger _code;
-@property (nonatomic, readonly, copy) NSString * _Nonnull _message;
-- (nonnull instancetype)init SWIFT_UNAVAILABLE;
-+ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
-@end
-
-typedef SWIFT_ENUM(NSInteger, Code, open) {
-  CodeUnknown = 0,
-  CodeRequest = 100,
-  CodeInvalidState = 101,
-  CodeExpired = 102,
-  CodeNetwork = 200,
-  CodeTimeout = 201,
-  CodeResponse = 300,
-  CodeNoFill = 301,
-  CodeParse = 302,
-};
-
-SWIFT_CLASS("_TtC8NeftaSDK13NInterstitial")
-@interface NInterstitial : NAd
-- (nonnull instancetype)initWithId:(NSString * _Nonnull)id OBJC_DESIGNATED_INITIALIZER;
-@end
-
-SWIFT_PROTOCOL("_TtP8NeftaSDK21NInterstitialListener_")
-@protocol NInterstitialListener <NAdListener>
-@end
-
-SWIFT_CLASS("_TtC8NeftaSDK9NRewarded")
-@interface NRewarded : NAd
-- (nonnull instancetype)initWithId:(NSString * _Nonnull)id OBJC_DESIGNATED_INITIALIZER;
-@end
-
-SWIFT_PROTOCOL("_TtP8NeftaSDK17NRewardedListener_")
-@protocol NRewardedListener <NAdListener>
-- (void)OnRewardWithAd:(NAd * _Nonnull)ad;
 @end
 
 enum ProgressionStatus : NSInteger;
@@ -732,16 +595,6 @@ SWIFT_CLASS("_TtC8NeftaSDK11NeftaPlugin")
 @interface NeftaPlugin : NSObject
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull Version;)
 + (NSString * _Nonnull)Version SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ContentRating_Unspecified;)
-+ (NSString * _Nonnull)ContentRating_Unspecified SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ContentRating_General;)
-+ (NSString * _Nonnull)ContentRating_General SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ContentRating_ParentalGuidance;)
-+ (NSString * _Nonnull)ContentRating_ParentalGuidance SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ContentRating_Teen;)
-+ (NSString * _Nonnull)ContentRating_Teen SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ContentRating_MatureAudience;)
-+ (NSString * _Nonnull)ContentRating_MatureAudience SWIFT_WARN_UNUSED_RESULT;
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ExtParam_TestGroup;)
 + (NSString * _Nonnull)ExtParam_TestGroup SWIFT_WARN_UNUSED_RESULT;
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ExtParam_AttributionSource;)
@@ -755,104 +608,28 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _No
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ExtParam_AttributionIncentivized;)
 + (NSString * _Nonnull)ExtParam_AttributionIncentivized SWIFT_WARN_UNUSED_RESULT;
 @property (nonatomic, strong) NeftaEvents * _Nonnull Events;
-@property (nonatomic, copy) void (^ _Nullable OnReady)(InitConfiguration * _Nonnull);
-@property (nonatomic, copy) void (^ _Nullable OnReadyAsString)(NSString * _Nonnull);
 @property (nonatomic, copy) void (^ _Nullable OnInsightsAsString)(NSInteger, NSInteger, NSString * _Nullable);
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable OnLog)(NSString * _Nonnull);)
-+ (void (^ _Nullable)(NSString * _Nonnull))OnLog SWIFT_WARN_UNUSED_RESULT;
-+ (void)setOnLog:(void (^ _Nullable)(NSString * _Nonnull))value;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NeftaPlugin * _Null_unspecified _instance;)
-+ (NeftaPlugin * _Null_unspecified)_instance SWIFT_WARN_UNUSED_RESULT;
-+ (void)set_instance:(NeftaPlugin * _Null_unspecified)value;
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NeftaPlugin * _Nullable _instance;)
++ (NeftaPlugin * _Nullable)_instance SWIFT_WARN_UNUSED_RESULT;
++ (void)set_instance:(NeftaPlugin * _Nullable)value;
 + (void)EnableLogging:(BOOL)enable;
-+ (NeftaPlugin * _Nonnull)InitWithAppId:(NSString * _Nonnull)appId SWIFT_WARN_UNUSED_RESULT;
-+ (NeftaPlugin * _Nonnull)InitWithAppId:(NSString * _Nonnull)appId integration:(NSString * _Nonnull)integration SWIFT_WARN_UNUSED_RESULT;
++ (NeftaPlugin * _Nonnull)NativeInitWithAppId:(NSString * _Nullable)appId clientId:(NSString * _Nullable)clientId onReady:(void (^ _Nullable)(InitConfiguration * _Nonnull))onReady integration:(NSString * _Nonnull)integration mediationVersion:(NSString * _Nonnull)mediationVersion SWIFT_WARN_UNUSED_RESULT;
++ (NeftaPlugin * _Nonnull)UnityInitWithAppId:(NSString * _Nullable)appId clientId:(NSString * _Nullable)clientId onReadyAsString:(void (^ _Nullable)(NSString * _Nonnull))onReadyAsString integration:(NSString * _Nonnull)integration mediationVersion:(NSString * _Nonnull)mediationVersion SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
-- (void)SetContentRatingWithRating:(NSString * _Nonnull)rating;
-- (void)SetTrackingWithIsAuthorized:(BOOL)isAuthorized;
 + (void)SetExtraParameterWithKey:(NSString * _Nonnull)key value:(NSString * _Nonnull)value;
 - (void)RecordWithType:(NSInteger)type category:(NSInteger)category subCategory:(NSInteger)subCategory name:(NSString * _Nullable)name value:(int64_t)value customPayload:(NSString * _Nullable)customPayload;
-- (void)GetInsightsBridge:(NSInteger)requestId insights:(NSInteger)insights previousRequestId:(NSInteger)previousRequestId timeout:(NSInteger)timeout;
-- (void)GetInsights:(NSInteger)insights previousInsight:(AdInsight * _Nullable)previousInsight callback:(void (^ _Nonnull)(Insights * _Nonnull))callback timeout:(NSInteger)timeout;
++ (void)AddNewSessionCallback:(void (^ _Nonnull)(void))callback;
+- (void)GetInsightsBridge:(NSInteger)requestId insights:(NSInteger)insights previousRequestId:(NSInteger)previousRequestId;
+- (void)GetInsights:(NSInteger)insights previousInsight:(AdInsight * _Nullable)previousInsight callback:(void (^ _Nonnull)(Insights * _Nonnull))callback;
 - (NSString * _Nonnull)GetNuidWithPresent:(BOOL)present SWIFT_WARN_UNUSED_RESULT;
 + (void)OnExternalMediationRequest:(NSString * _Nonnull)provider adType:(NSInteger)adType id:(NSString * _Nonnull)id requestedAdUnitId:(NSString * _Nonnull)requestedAdUnitId requestedFloorPrice:(double)requestedFloorPrice requestId:(NSInteger)requestId;
 + (void)OnExternalMediationResponse:(NSString * _Nonnull)provider id:(NSString * _Nonnull)id id2:(NSString * _Nullable)id2 revenue:(double)revenue precision:(NSString * _Nullable)precision status:(NSInteger)status providerStatus:(NSString * _Nullable)providerStatus networkStatus:(NSString * _Nullable)networkStatus baseObject:(NSDictionary<NSString *, id> * _Nullable)baseObject;
 + (void)OnExternalMediationResponseAsString:(NSString * _Nonnull)provider id:(NSString * _Nonnull)id id2:(NSString * _Nullable)id2 revenue:(double)revenue precision:(NSString * _Nullable)precision status:(NSInteger)status providerStatus:(NSString * _Nullable)providerStatus networkStatus:(NSString * _Nullable)networkStatus baseString:(NSString * _Nullable)baseString;
 + (void)OnExternalMediationImpression:(BOOL)isClick provider:(NSString * _Nonnull)provider data:(NSMutableDictionary * _Nullable)data id:(NSString * _Nullable)id id2:(NSString * _Nullable)id2;
 + (void)OnExternalMediationImpressionAsString:(BOOL)isClick provider:(NSString * _Nonnull)provider data:(NSString * _Nonnull)data id:(NSString * _Nullable)id id2:(NSString * _Nullable)id2;
++ (float)GetRetryDelayInSeconds:(AdInsight * _Nullable)insight SWIFT_WARN_UNUSED_RESULT;
 + (void)SetOverrideWithUrl:(NSString * _Nullable)url;
-@end
-
-SWIFT_CLASS("_TtC8NeftaSDK9Placement")
-@interface Placement : NSObject
-@property (nonatomic, copy) NSString * _Nonnull _id;
-@property (nonatomic) NSInteger _width;
-@property (nonatomic) NSInteger _height;
-@property (nonatomic) enum Types _type;
-- (nonnull instancetype)init SWIFT_UNAVAILABLE;
-+ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
-@end
-
-typedef SWIFT_ENUM(NSInteger, Types, open) {
-  TypesUninitialized = 0,
-  TypesBanner = 1,
-  TypesInterstitial = 2,
-  TypesRewarded = 3,
-};
-
-SWIFT_CLASS("_TtC8NeftaSDK12UnityWrapper")
-@interface UnityWrapper : NSObject
-@property (nonatomic, copy) void (^ _Nullable IOnReady)(NSString * _Nonnull);
-@property (nonatomic, copy) void (^ _Nullable IOnBid)(NSString * _Nonnull, float, NSInteger);
-@property (nonatomic, copy) void (^ _Nullable IOnLoadStart)(NSString * _Nonnull);
-@property (nonatomic, copy) void (^ _Nullable IOnLoadFail)(NSString * _Nonnull, NSInteger, NSString * _Nullable);
-@property (nonatomic, copy) void (^ _Nullable IOnLoad)(NSString * _Nonnull, NSInteger, NSInteger);
-@property (nonatomic, copy) void (^ _Nullable IOnShowFail)(NSString * _Nonnull, NSInteger, NSString * _Nullable);
-@property (nonatomic, copy) void (^ _Nullable IOnShow)(NSString * _Nonnull);
-@property (nonatomic, copy) void (^ _Nullable IOnClick)(NSString * _Nonnull);
-@property (nonatomic, copy) void (^ _Nullable IOnClose)(NSString * _Nonnull);
-@property (nonatomic, copy) void (^ _Nullable IOnReward)(NSString * _Nonnull);
-@property (nonatomic, readonly, strong) NeftaPlugin * _Nonnull _plugin;
-- (nonnull instancetype)initWithViewController:(UIViewController * _Nonnull)viewController appId:(NSString * _Nonnull)appId OBJC_DESIGNATED_INITIALIZER;
-- (void)SetFloorPriceWithId:(NSString * _Nonnull)id floorPrice:(float)floorPrice;
-- (void)SetCustomParameterWithId:(NSString * _Nonnull)id provider:(NSString * _Nonnull)provider value:(NSString * _Nonnull)value;
-- (void)MuteWithId:(NSString * _Nonnull)id mute:(BOOL)mute;
-- (void)CreateBannerWithId:(NSString * _Nonnull)id position:(NSInteger)position autoRefresh:(BOOL)autoRefresh;
-- (void)BidWithId:(NSString * _Nonnull)id;
-- (NSString * _Nullable)GetPartialBidRequestAsString:(NSString * _Nonnull)id SWIFT_WARN_UNUSED_RESULT;
-- (void)LoadWithId:(NSString * _Nonnull)id;
-- (void)LoadWithBidResponseWithId:(NSString * _Nonnull)id bidResponse:(NSData * _Nonnull)bidResponse;
-- (NSInteger)CanShowWithId:(NSString * _Nonnull)id SWIFT_WARN_UNUSED_RESULT;
-- (void)ShowWithId:(NSString * _Nonnull)id;
-- (void)HideWithId:(NSString * _Nonnull)id;
-- (void)CloseWithId:(NSString * _Nonnull)id;
-- (nonnull instancetype)init SWIFT_UNAVAILABLE;
-+ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
-@end
-
-@class NSCoder;
-@class WKWebView;
-@class WKNavigation;
-@class WKNavigationAction;
-@class WKWebViewConfiguration;
-@class WKWindowFeatures;
-@class WKUserContentController;
-@class WKScriptMessage;
-@class UIGestureRecognizer;
-SWIFT_CLASS("_TtC8NeftaSDK13WebController")
-@interface WebController : UIView <UIGestureRecognizerDelegate, WKNavigationDelegate, WKScriptMessageHandler, WKUIDelegate>
-- (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)aDecoder SWIFT_UNAVAILABLE;
-- (void)layoutSubviews;
-- (void)didMoveToSuperview;
-- (void)webView:(WKWebView * _Nonnull)webView didFailNavigation:(WKNavigation * _Null_unspecified)navigation withError:(NSError * _Nonnull)error;
-- (void)webView:(WKWebView * _Nonnull)webView didFailProvisionalNavigation:(WKNavigation * _Null_unspecified)navigation withError:(NSError * _Nonnull)error;
-- (void)webView:(WKWebView * _Nonnull)webView didFinishNavigation:(WKNavigation * _Null_unspecified)navigation;
-- (void)webView:(WKWebView * _Nonnull)webView decidePolicyForNavigationAction:(WKNavigationAction * _Nonnull)navigationAction decisionHandler:(void (^ _Nonnull)(WKNavigationActionPolicy))decisionHandler;
-- (WKWebView * _Nullable)webView:(WKWebView * _Nonnull)webView createWebViewWithConfiguration:(WKWebViewConfiguration * _Nonnull)configuration forNavigationAction:(WKNavigationAction * _Nonnull)navigationAction windowFeatures:(WKWindowFeatures * _Nonnull)windowFeatures SWIFT_WARN_UNUSED_RESULT;
-- (void)userContentController:(WKUserContentController * _Nonnull)userContentController didReceiveScriptMessage:(WKScriptMessage * _Nonnull)message;
-- (BOOL)gestureRecognizer:(UIGestureRecognizer * _Nonnull)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer * _Nonnull)otherGestureRecognizer SWIFT_WARN_UNUSED_RESULT;
-- (nonnull instancetype)initWithFrame:(CGRect)frame SWIFT_UNAVAILABLE;
 @end
 
 #endif
@@ -1146,11 +923,8 @@ typedef unsigned int swift_uint4  __attribute__((__ext_vector_type__(4)));
 #if __has_warning("-Watimport-in-framework-header")
 #pragma clang diagnostic ignored "-Watimport-in-framework-header"
 #endif
-@import CoreFoundation;
 @import Foundation;
 @import ObjectiveC;
-@import UIKit;
-@import WebKit;
 #endif
 
 #endif
@@ -1183,21 +957,18 @@ SWIFT_CLASS("_TtC8NeftaSDK9AdInsight")
 @property (nonatomic, readonly) enum Types _type;
 @property (nonatomic) double _floorPrice;
 @property (nonatomic, copy) NSString * _Nullable _adUnit;
+@property (nonatomic) float _delay;
 @property (nonatomic, readonly, copy) NSString * _Nonnull description;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
 
-SWIFT_CLASS("_TtC8NeftaSDK11BidResponse")
-@interface BidResponse : NSObject
-@property (nonatomic, copy) NSString * _Nullable _auctionId;
-@property (nonatomic, copy) NSString * _Null_unspecified _id;
-@property (nonatomic) float _price;
-@property (nonatomic, copy) NSString * _Nullable _campaignId;
-@property (nonatomic, copy) NSString * _Nullable _creativeId;
-- (BOOL)IsExpired SWIFT_WARN_UNUSED_RESULT;
-- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
-@end
+typedef SWIFT_ENUM(NSInteger, Types, open) {
+  TypesUninitialized = 0,
+  TypesBanner = 1,
+  TypesInterstitial = 2,
+  TypesRewarded = 3,
+};
 
 SWIFT_CLASS("_TtC8NeftaSDK5Churn")
 @interface Churn : NSObject
@@ -1214,6 +985,7 @@ SWIFT_CLASS("_TtC8NeftaSDK5Churn")
 SWIFT_CLASS("_TtC8NeftaSDK17InitConfiguration")
 @interface InitConfiguration : NSObject
 @property (nonatomic) BOOL _skipOptimization;
+@property (nonatomic, copy) NSString * _Nonnull _nuid;
 @property (nonatomic, copy) NSDictionary<NSString *, NSArray<NSString *> *> * _Nonnull _providerAdUnits;
 - (NSArray<NSString *> * _Nullable)GetMediationProviderAdUnits SWIFT_WARN_UNUSED_RESULT;
 - (NSArray<NSString *> * _Nullable)GetMediationProviderAdUnitsWithProvider:(NSString * _Nonnull)provider SWIFT_WARN_UNUSED_RESULT;
@@ -1238,138 +1010,6 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger Rewarded;)
 @property (nonatomic, strong) AdInsight * _Nullable _interstitial;
 @property (nonatomic, strong) AdInsight * _Nullable _rewarded;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
-@end
-
-@class Placement;
-@protocol NAdListener;
-@class NSData;
-@class UIViewController;
-SWIFT_CLASS("_TtC8NeftaSDK3NAd")
-@interface NAd : NSObject
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger Request;)
-+ (NSInteger)Request SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger Initialized;)
-+ (NSInteger)Initialized SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger Bidding;)
-+ (NSInteger)Bidding SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger ReadyToLoad;)
-+ (NSInteger)ReadyToLoad SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger Loading;)
-+ (NSInteger)Loading SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger Ready;)
-+ (NSInteger)Ready SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger Showing;)
-+ (NSInteger)Showing SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger Hidden;)
-+ (NSInteger)Hidden SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger Expired;)
-+ (NSInteger)Expired SWIFT_WARN_UNUSED_RESULT;
-@property (nonatomic, copy) NSString * _Nonnull _id;
-@property (nonatomic) enum Types _type;
-@property (nonatomic, strong) Placement * _Nullable _placement;
-@property (nonatomic, strong) BidResponse * _Nullable _bid;
-@property (nonatomic) NSInteger _state;
-@property (nonatomic) int64_t _stateStart;
-@property (nonatomic, strong) id <NAdListener> _Nullable _listener;
-- (nonnull instancetype)initWithId:(NSString * _Nonnull)id OBJC_DESIGNATED_INITIALIZER;
-- (NSInteger)CanShow SWIFT_WARN_UNUSED_RESULT;
-- (NSDictionary<NSString *, id> * _Nonnull)GetPartialBidRequest SWIFT_WARN_UNUSED_RESULT;
-- (NSString * _Nonnull)GetPartialBidRequestAsString SWIFT_WARN_UNUSED_RESULT;
-- (void)Bid;
-- (void)LoadWithBidResponseWithBidResponse:(NSData * _Nonnull)bidResponse;
-- (void)Load;
-- (void)ShowThreaded:(UIViewController * _Nonnull)viewController;
-- (void)Show:(UIViewController * _Nullable)viewController;
-- (void)CloseThreaded;
-- (void)Close;
-- (void)SetFloorPriceWithFloorPrice:(float)floorPrice;
-- (void)SetCustomParameterWithProvider:(NSString * _Nonnull)provider value:(NSString * _Nonnull)value;
-- (void)Mute:(BOOL)mute;
-- (nonnull instancetype)init SWIFT_UNAVAILABLE;
-+ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
-@end
-
-@class NError;
-SWIFT_PROTOCOL("_TtP8NeftaSDK11NAdListener_")
-@protocol NAdListener <NSObject>
-@optional
-- (void)OnBidWithAd:(NAd * _Nonnull)ad bidResponse:(BidResponse * _Nullable)bidResponse error:(NError * _Nullable)error;
-- (void)OnLoadStartWithAd:(NAd * _Nonnull)ad;
-@required
-- (void)OnLoadFailWithAd:(NAd * _Nonnull)ad error:(NError * _Nonnull)error;
-- (void)OnLoadWithAd:(NAd * _Nonnull)ad width:(NSInteger)width height:(NSInteger)height;
-- (void)OnShowFailWithAd:(NAd * _Nonnull)ad error:(NError * _Nonnull)error;
-- (void)OnShowWithAd:(NAd * _Nonnull)ad;
-@optional
-- (void)OnClickWithAd:(NAd * _Nonnull)ad;
-@required
-- (void)OnCloseWithAd:(NAd * _Nonnull)ad;
-@end
-
-enum Position : NSInteger;
-@class UIView;
-SWIFT_CLASS("_TtC8NeftaSDK7NBanner")
-@interface NBanner : NAd
-@property (nonatomic) enum Position _position;
-@property (nonatomic, copy) void (^ _Nullable _onRemove)(NBanner * _Nonnull);
-- (nonnull instancetype)initWithId:(NSString * _Nonnull)id parent:(UIView * _Nonnull)parent OBJC_DESIGNATED_INITIALIZER;
-- (nonnull instancetype)initWithId:(NSString * _Nonnull)id position:(enum Position)position OBJC_DESIGNATED_INITIALIZER;
-- (void)SetAutoRefresh:(BOOL)autoRefresh;
-- (UIView * _Nullable)GracefulShow:(UIViewController * _Nullable)viewController SWIFT_WARN_UNUSED_RESULT;
-- (UIView * _Nullable)GetView SWIFT_WARN_UNUSED_RESULT;
-- (void)Show:(UIViewController * _Nullable)viewController;
-- (void)Close;
-- (void)Hide;
-- (nonnull instancetype)initWithId:(NSString * _Nonnull)id SWIFT_UNAVAILABLE;
-@end
-
-typedef SWIFT_ENUM(NSInteger, Position, open) {
-  PositionNone = 0,
-  PositionTop = 1,
-  PositionBottom = 2,
-};
-
-SWIFT_PROTOCOL("_TtP8NeftaSDK15NBannerListener_")
-@protocol NBannerListener <NAdListener>
-@end
-
-SWIFT_CLASS("_TtC8NeftaSDK6NError")
-@interface NError : NSObject
-@property (nonatomic, readonly) NSInteger _code;
-@property (nonatomic, readonly, copy) NSString * _Nonnull _message;
-- (nonnull instancetype)init SWIFT_UNAVAILABLE;
-+ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
-@end
-
-typedef SWIFT_ENUM(NSInteger, Code, open) {
-  CodeUnknown = 0,
-  CodeRequest = 100,
-  CodeInvalidState = 101,
-  CodeExpired = 102,
-  CodeNetwork = 200,
-  CodeTimeout = 201,
-  CodeResponse = 300,
-  CodeNoFill = 301,
-  CodeParse = 302,
-};
-
-SWIFT_CLASS("_TtC8NeftaSDK13NInterstitial")
-@interface NInterstitial : NAd
-- (nonnull instancetype)initWithId:(NSString * _Nonnull)id OBJC_DESIGNATED_INITIALIZER;
-@end
-
-SWIFT_PROTOCOL("_TtP8NeftaSDK21NInterstitialListener_")
-@protocol NInterstitialListener <NAdListener>
-@end
-
-SWIFT_CLASS("_TtC8NeftaSDK9NRewarded")
-@interface NRewarded : NAd
-- (nonnull instancetype)initWithId:(NSString * _Nonnull)id OBJC_DESIGNATED_INITIALIZER;
-@end
-
-SWIFT_PROTOCOL("_TtP8NeftaSDK17NRewardedListener_")
-@protocol NRewardedListener <NAdListener>
-- (void)OnRewardWithAd:(NAd * _Nonnull)ad;
 @end
 
 enum ProgressionStatus : NSInteger;
@@ -1597,16 +1237,6 @@ SWIFT_CLASS("_TtC8NeftaSDK11NeftaPlugin")
 @interface NeftaPlugin : NSObject
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull Version;)
 + (NSString * _Nonnull)Version SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ContentRating_Unspecified;)
-+ (NSString * _Nonnull)ContentRating_Unspecified SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ContentRating_General;)
-+ (NSString * _Nonnull)ContentRating_General SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ContentRating_ParentalGuidance;)
-+ (NSString * _Nonnull)ContentRating_ParentalGuidance SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ContentRating_Teen;)
-+ (NSString * _Nonnull)ContentRating_Teen SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ContentRating_MatureAudience;)
-+ (NSString * _Nonnull)ContentRating_MatureAudience SWIFT_WARN_UNUSED_RESULT;
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ExtParam_TestGroup;)
 + (NSString * _Nonnull)ExtParam_TestGroup SWIFT_WARN_UNUSED_RESULT;
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ExtParam_AttributionSource;)
@@ -1620,104 +1250,28 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _No
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ExtParam_AttributionIncentivized;)
 + (NSString * _Nonnull)ExtParam_AttributionIncentivized SWIFT_WARN_UNUSED_RESULT;
 @property (nonatomic, strong) NeftaEvents * _Nonnull Events;
-@property (nonatomic, copy) void (^ _Nullable OnReady)(InitConfiguration * _Nonnull);
-@property (nonatomic, copy) void (^ _Nullable OnReadyAsString)(NSString * _Nonnull);
 @property (nonatomic, copy) void (^ _Nullable OnInsightsAsString)(NSInteger, NSInteger, NSString * _Nullable);
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) void (^ _Nullable OnLog)(NSString * _Nonnull);)
-+ (void (^ _Nullable)(NSString * _Nonnull))OnLog SWIFT_WARN_UNUSED_RESULT;
-+ (void)setOnLog:(void (^ _Nullable)(NSString * _Nonnull))value;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NeftaPlugin * _Null_unspecified _instance;)
-+ (NeftaPlugin * _Null_unspecified)_instance SWIFT_WARN_UNUSED_RESULT;
-+ (void)set_instance:(NeftaPlugin * _Null_unspecified)value;
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NeftaPlugin * _Nullable _instance;)
++ (NeftaPlugin * _Nullable)_instance SWIFT_WARN_UNUSED_RESULT;
++ (void)set_instance:(NeftaPlugin * _Nullable)value;
 + (void)EnableLogging:(BOOL)enable;
-+ (NeftaPlugin * _Nonnull)InitWithAppId:(NSString * _Nonnull)appId SWIFT_WARN_UNUSED_RESULT;
-+ (NeftaPlugin * _Nonnull)InitWithAppId:(NSString * _Nonnull)appId integration:(NSString * _Nonnull)integration SWIFT_WARN_UNUSED_RESULT;
++ (NeftaPlugin * _Nonnull)NativeInitWithAppId:(NSString * _Nullable)appId clientId:(NSString * _Nullable)clientId onReady:(void (^ _Nullable)(InitConfiguration * _Nonnull))onReady integration:(NSString * _Nonnull)integration mediationVersion:(NSString * _Nonnull)mediationVersion SWIFT_WARN_UNUSED_RESULT;
++ (NeftaPlugin * _Nonnull)UnityInitWithAppId:(NSString * _Nullable)appId clientId:(NSString * _Nullable)clientId onReadyAsString:(void (^ _Nullable)(NSString * _Nonnull))onReadyAsString integration:(NSString * _Nonnull)integration mediationVersion:(NSString * _Nonnull)mediationVersion SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
-- (void)SetContentRatingWithRating:(NSString * _Nonnull)rating;
-- (void)SetTrackingWithIsAuthorized:(BOOL)isAuthorized;
 + (void)SetExtraParameterWithKey:(NSString * _Nonnull)key value:(NSString * _Nonnull)value;
 - (void)RecordWithType:(NSInteger)type category:(NSInteger)category subCategory:(NSInteger)subCategory name:(NSString * _Nullable)name value:(int64_t)value customPayload:(NSString * _Nullable)customPayload;
-- (void)GetInsightsBridge:(NSInteger)requestId insights:(NSInteger)insights previousRequestId:(NSInteger)previousRequestId timeout:(NSInteger)timeout;
-- (void)GetInsights:(NSInteger)insights previousInsight:(AdInsight * _Nullable)previousInsight callback:(void (^ _Nonnull)(Insights * _Nonnull))callback timeout:(NSInteger)timeout;
++ (void)AddNewSessionCallback:(void (^ _Nonnull)(void))callback;
+- (void)GetInsightsBridge:(NSInteger)requestId insights:(NSInteger)insights previousRequestId:(NSInteger)previousRequestId;
+- (void)GetInsights:(NSInteger)insights previousInsight:(AdInsight * _Nullable)previousInsight callback:(void (^ _Nonnull)(Insights * _Nonnull))callback;
 - (NSString * _Nonnull)GetNuidWithPresent:(BOOL)present SWIFT_WARN_UNUSED_RESULT;
 + (void)OnExternalMediationRequest:(NSString * _Nonnull)provider adType:(NSInteger)adType id:(NSString * _Nonnull)id requestedAdUnitId:(NSString * _Nonnull)requestedAdUnitId requestedFloorPrice:(double)requestedFloorPrice requestId:(NSInteger)requestId;
 + (void)OnExternalMediationResponse:(NSString * _Nonnull)provider id:(NSString * _Nonnull)id id2:(NSString * _Nullable)id2 revenue:(double)revenue precision:(NSString * _Nullable)precision status:(NSInteger)status providerStatus:(NSString * _Nullable)providerStatus networkStatus:(NSString * _Nullable)networkStatus baseObject:(NSDictionary<NSString *, id> * _Nullable)baseObject;
 + (void)OnExternalMediationResponseAsString:(NSString * _Nonnull)provider id:(NSString * _Nonnull)id id2:(NSString * _Nullable)id2 revenue:(double)revenue precision:(NSString * _Nullable)precision status:(NSInteger)status providerStatus:(NSString * _Nullable)providerStatus networkStatus:(NSString * _Nullable)networkStatus baseString:(NSString * _Nullable)baseString;
 + (void)OnExternalMediationImpression:(BOOL)isClick provider:(NSString * _Nonnull)provider data:(NSMutableDictionary * _Nullable)data id:(NSString * _Nullable)id id2:(NSString * _Nullable)id2;
 + (void)OnExternalMediationImpressionAsString:(BOOL)isClick provider:(NSString * _Nonnull)provider data:(NSString * _Nonnull)data id:(NSString * _Nullable)id id2:(NSString * _Nullable)id2;
++ (float)GetRetryDelayInSeconds:(AdInsight * _Nullable)insight SWIFT_WARN_UNUSED_RESULT;
 + (void)SetOverrideWithUrl:(NSString * _Nullable)url;
-@end
-
-SWIFT_CLASS("_TtC8NeftaSDK9Placement")
-@interface Placement : NSObject
-@property (nonatomic, copy) NSString * _Nonnull _id;
-@property (nonatomic) NSInteger _width;
-@property (nonatomic) NSInteger _height;
-@property (nonatomic) enum Types _type;
-- (nonnull instancetype)init SWIFT_UNAVAILABLE;
-+ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
-@end
-
-typedef SWIFT_ENUM(NSInteger, Types, open) {
-  TypesUninitialized = 0,
-  TypesBanner = 1,
-  TypesInterstitial = 2,
-  TypesRewarded = 3,
-};
-
-SWIFT_CLASS("_TtC8NeftaSDK12UnityWrapper")
-@interface UnityWrapper : NSObject
-@property (nonatomic, copy) void (^ _Nullable IOnReady)(NSString * _Nonnull);
-@property (nonatomic, copy) void (^ _Nullable IOnBid)(NSString * _Nonnull, float, NSInteger);
-@property (nonatomic, copy) void (^ _Nullable IOnLoadStart)(NSString * _Nonnull);
-@property (nonatomic, copy) void (^ _Nullable IOnLoadFail)(NSString * _Nonnull, NSInteger, NSString * _Nullable);
-@property (nonatomic, copy) void (^ _Nullable IOnLoad)(NSString * _Nonnull, NSInteger, NSInteger);
-@property (nonatomic, copy) void (^ _Nullable IOnShowFail)(NSString * _Nonnull, NSInteger, NSString * _Nullable);
-@property (nonatomic, copy) void (^ _Nullable IOnShow)(NSString * _Nonnull);
-@property (nonatomic, copy) void (^ _Nullable IOnClick)(NSString * _Nonnull);
-@property (nonatomic, copy) void (^ _Nullable IOnClose)(NSString * _Nonnull);
-@property (nonatomic, copy) void (^ _Nullable IOnReward)(NSString * _Nonnull);
-@property (nonatomic, readonly, strong) NeftaPlugin * _Nonnull _plugin;
-- (nonnull instancetype)initWithViewController:(UIViewController * _Nonnull)viewController appId:(NSString * _Nonnull)appId OBJC_DESIGNATED_INITIALIZER;
-- (void)SetFloorPriceWithId:(NSString * _Nonnull)id floorPrice:(float)floorPrice;
-- (void)SetCustomParameterWithId:(NSString * _Nonnull)id provider:(NSString * _Nonnull)provider value:(NSString * _Nonnull)value;
-- (void)MuteWithId:(NSString * _Nonnull)id mute:(BOOL)mute;
-- (void)CreateBannerWithId:(NSString * _Nonnull)id position:(NSInteger)position autoRefresh:(BOOL)autoRefresh;
-- (void)BidWithId:(NSString * _Nonnull)id;
-- (NSString * _Nullable)GetPartialBidRequestAsString:(NSString * _Nonnull)id SWIFT_WARN_UNUSED_RESULT;
-- (void)LoadWithId:(NSString * _Nonnull)id;
-- (void)LoadWithBidResponseWithId:(NSString * _Nonnull)id bidResponse:(NSData * _Nonnull)bidResponse;
-- (NSInteger)CanShowWithId:(NSString * _Nonnull)id SWIFT_WARN_UNUSED_RESULT;
-- (void)ShowWithId:(NSString * _Nonnull)id;
-- (void)HideWithId:(NSString * _Nonnull)id;
-- (void)CloseWithId:(NSString * _Nonnull)id;
-- (nonnull instancetype)init SWIFT_UNAVAILABLE;
-+ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
-@end
-
-@class NSCoder;
-@class WKWebView;
-@class WKNavigation;
-@class WKNavigationAction;
-@class WKWebViewConfiguration;
-@class WKWindowFeatures;
-@class WKUserContentController;
-@class WKScriptMessage;
-@class UIGestureRecognizer;
-SWIFT_CLASS("_TtC8NeftaSDK13WebController")
-@interface WebController : UIView <UIGestureRecognizerDelegate, WKNavigationDelegate, WKScriptMessageHandler, WKUIDelegate>
-- (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)aDecoder SWIFT_UNAVAILABLE;
-- (void)layoutSubviews;
-- (void)didMoveToSuperview;
-- (void)webView:(WKWebView * _Nonnull)webView didFailNavigation:(WKNavigation * _Null_unspecified)navigation withError:(NSError * _Nonnull)error;
-- (void)webView:(WKWebView * _Nonnull)webView didFailProvisionalNavigation:(WKNavigation * _Null_unspecified)navigation withError:(NSError * _Nonnull)error;
-- (void)webView:(WKWebView * _Nonnull)webView didFinishNavigation:(WKNavigation * _Null_unspecified)navigation;
-- (void)webView:(WKWebView * _Nonnull)webView decidePolicyForNavigationAction:(WKNavigationAction * _Nonnull)navigationAction decisionHandler:(void (^ _Nonnull)(WKNavigationActionPolicy))decisionHandler;
-- (WKWebView * _Nullable)webView:(WKWebView * _Nonnull)webView createWebViewWithConfiguration:(WKWebViewConfiguration * _Nonnull)configuration forNavigationAction:(WKNavigationAction * _Nonnull)navigationAction windowFeatures:(WKWindowFeatures * _Nonnull)windowFeatures SWIFT_WARN_UNUSED_RESULT;
-- (void)userContentController:(WKUserContentController * _Nonnull)userContentController didReceiveScriptMessage:(WKScriptMessage * _Nonnull)message;
-- (BOOL)gestureRecognizer:(UIGestureRecognizer * _Nonnull)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer * _Nonnull)otherGestureRecognizer SWIFT_WARN_UNUSED_RESULT;
-- (nonnull instancetype)initWithFrame:(CGRect)frame SWIFT_UNAVAILABLE;
 @end
 
 #endif

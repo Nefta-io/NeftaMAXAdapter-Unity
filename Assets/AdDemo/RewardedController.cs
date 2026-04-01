@@ -1,12 +1,8 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Globalization;
-using Nefta.Core.Events;
+using System.Threading.Tasks;
 using NeftaCustomAdapter;
 using UnityEngine;
 using UnityEngine.UI;
-using Random = UnityEngine.Random;
 
 namespace AdDemo
 {
@@ -19,256 +15,90 @@ namespace AdDemo
         private const string AdUnitIdA = "c164298ebdd0c008";
         private const string AdUnitIdB = "3082ee9199cf59f0";
 #endif
-        private const int TimeoutInSeconds = 5;
-
-        private enum State
-        {
-            Idle,
-            LoadingWithInsights,
-            Loading,
-            Ready,
-            Shown
-        }
-                
-        private class AdRequest
-        {
-            public readonly string AdUnitId;
-            public State State;
-            public AdInsight Insight;
-            public double Revenue;
-            public int ConsecutiveAdFails;
-
-            public AdRequest(string adUnitId)
-            {
-                AdUnitId = adUnitId;
-            }
-        }
-
-        private AdRequest _adRequestA;
-        private AdRequest _adRequestB;
-        private bool _isFirstResponseReceived;
-
-        private Queue<string> _statusQueue;
+        private int _consecutiveAdFails;
+        private bool _isAutoLoad;
         
         [SerializeField] private Toggle _load;
         [SerializeField] private Button _show;
         [SerializeField] private Text _status;
         
-        private void StartLoading()
+        private void Start()
         {
-            Load(_adRequestA, _adRequestB.State);
-            Load(_adRequestB, _adRequestA.State);
-        }
-        
-        private void Load(AdRequest request, State otherState)
-        {
-            if (request.State == State.Idle)
-            {
-                if (otherState != State.LoadingWithInsights)
-                {
-                    GetInsightsAndLoad(request); 
-                }
-                else if (_isFirstResponseReceived)
-                {
-                    LoadDefault(request);
-                }
-            }
-        }
-
-        private void GetInsightsAndLoad(AdRequest adRequest)
-        {
-            adRequest.State = State.LoadingWithInsights;
-               
-            NeftaAdapterEvents.GetInsights(Insights.Rewarded, adRequest.Insight, (Insights insights) => {
-                var insight = insights._rewarded;
-                SetStatus($"Load with Insights: {insight}");
-                if (insight != null)
-                {
-                    adRequest.Insight = insight;
-                    var bidFloor = insight._floorPrice.ToString(CultureInfo.InvariantCulture);
-                    MaxSdk.SetRewardedAdExtraParameter(adRequest.AdUnitId, "disable_auto_retries", "true");
-                    MaxSdk.SetRewardedAdExtraParameter(adRequest.AdUnitId, "jC7Fp", bidFloor);
-                    
-                    NeftaAdapterEvents.OnExternalMediationRequest(NeftaAdapterEvents.AdType.Rewarded, adRequest.AdUnitId, insight);
-                    
-                    SetStatus($"Loading {adRequest.AdUnitId} as Optimized with floor: {bidFloor}");
-                    MaxSdk.LoadRewardedAd(adRequest.AdUnitId);
-                }
-                else
-                {
-                    RestartAfterFailedLoad(adRequest);
-                }
-            }, TimeoutInSeconds);
-        }
-
-        private void LoadDefault(AdRequest adRequest)
-        {
-            adRequest.State = State.Loading;
-            
-            MaxSdk.SetRewardedAdExtraParameter(adRequest.AdUnitId, "disable_auto_retries", "false");
-            MaxSdk.SetRewardedAdExtraParameter(adRequest.AdUnitId, "jC7Fp", "");
-            
-            NeftaAdapterEvents.OnExternalMediationRequest(NeftaAdapterEvents.AdType.Rewarded, adRequest.AdUnitId);
-            
-            SetStatus($"Loading {adRequest.AdUnitId} as Default");
-            MaxSdk.LoadRewardedAd(adRequest.AdUnitId);
-        }
-        
-        private void OnAdFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
-        {
-            NeftaAdapterEvents.OnExternalMediationRequestFailed(adUnitId, errorInfo);
-            
-            var adRequest = adUnitId == _adRequestA.AdUnitId ? _adRequestA : _adRequestB;
-            SetStatus($"Load Failed {adRequest.AdUnitId}: {errorInfo}");
-            
-            RestartAfterFailedLoad(adRequest);
-        }
-        
-        private void RestartAfterFailedLoad(AdRequest adRequest)
-        {
-            adRequest.ConsecutiveAdFails++;
-            StartCoroutine(RetryLoad(adRequest));
-            
-            _isFirstResponseReceived = true;
-            RetryLoading();
-        }
-        
-        private void OnAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
-        {
-            NeftaAdapterEvents.OnExternalMediationRequestLoaded(adInfo);
-            
-            var adRequest = adUnitId == _adRequestA.AdUnitId ? _adRequestA : _adRequestB;
-            SetStatus($"Loaded {adRequest.AdUnitId} at: {adInfo.Revenue}");
-
-            adRequest.Insight = null;
-            adRequest.ConsecutiveAdFails = 0;
-            adRequest.Revenue = adInfo.Revenue;
-            adRequest.State = State.Ready;
-
-            UpdateShowButton();
-
-            _isFirstResponseReceived = true;
-            RetryLoading();
-        }
-        
-        private IEnumerator RetryLoad(AdRequest adRequest)
-        {
-            yield return new WaitForSeconds(GetMinWaitTime(adRequest.ConsecutiveAdFails));
-
-            adRequest.State = State.Idle;
-            if (_load.isOn)
-            {
-                StartLoading();
-            }
-        }
-
-        private float GetMinWaitTime(int numberOfConsecutiveFails)
-        {
-            // As per MAX recommendations, retry with exponentially higher delays up to 64s
-            // In case you would like to customize fill rate / revenue please contact our customer support
-            return new [] { 0, 2, 4, 8, 16, 32, 64 }[Math.Min(numberOfConsecutiveFails, 6)];
-        }
-        
-        private void Awake()
-        {
-            _adRequestA = new AdRequest(AdUnitIdA);
-            _adRequestB = new AdRequest(AdUnitIdB);
-                        
-            _statusQueue = new Queue<string>();
-            
-            MaxSdkCallbacks.Rewarded.OnAdLoadedEvent += OnAdLoadedEvent;
-            MaxSdkCallbacks.Rewarded.OnAdLoadFailedEvent += OnAdFailedEvent;
-            MaxSdkCallbacks.Rewarded.OnAdDisplayFailedEvent += OnAdDisplayFailedEvent;
-            MaxSdkCallbacks.Rewarded.OnAdDisplayedEvent += OnAdDisplayedEvent;
-            MaxSdkCallbacks.Rewarded.OnAdClickedEvent += OnAdClickedEvent;
-            MaxSdkCallbacks.Rewarded.OnAdHiddenEvent += OnAdHideEvent;
-            MaxSdkCallbacks.Rewarded.OnAdReceivedRewardEvent += OnAdReceivedRewardEvent;
-            MaxSdkCallbacks.Rewarded.OnAdRevenuePaidEvent += OnAdRevenuePaidEvent;
-            
             _load.onValueChanged.AddListener(OnLoadChanged);
-            _show.onClick.AddListener(OnShowClick);
-
-            _show.interactable = false;
-        }
-        
-        private void OnLoadChanged(bool isOn)
-        {
-            if (isOn)
-            {
-                StartLoading();   
-            }
             
-            AddDemoGameEventExample();
+            _show.interactable = false;
+            _show.onClick.AddListener(OnShowClick);
+            
+            //MaxSdkCallbacks.Rewarded.OnAdLoadedEvent += OnAdLoadedEvent;
+            //MaxSdkCallbacks.Rewarded.OnAdLoadFailedEvent += OnAdLoadFailedEvent;
+            //MaxSdkCallbacks.Rewarded.OnAdDisplayFailedEvent += OnAdDisplayFailedEvent;
+            //MaxSdkCallbacks.Rewarded.OnAdHiddenEvent += OnAdHiddenEvent;
+            //MaxSdkCallbacks.Rewarded.OnAdReceivedRewardEvent += OnAdReceivedRewardEvent;
+            
+            NeftaSdk.Rewarded.InitializeDualTrack(AdUnitIdA, AdUnitIdB);
+            NeftaSdk.Rewarded.OnAdLoadedEvent += OnAdLoadedEvent;
+            NeftaSdk.Rewarded.OnAdLoadFailedEvent += OnAdLoadFailedEvent;
+            NeftaSdk.Rewarded.OnAdDisplayFailedEvent += OnAdDisplayFailedEvent;
+            NeftaSdk.Rewarded.OnAdReceivedRewardEvent += OnAdReceivedRewardEvent;
+            NeftaSdk.Rewarded.OnAdHiddenEvent += OnAdHiddenEvent;
+        }
+
+        private void Load()
+        {
+            //MaxSdk.LoadRewardedAd(AdUnitIdA);
+            NeftaSdk.LoadRewardedAd(AdUnitIdA);
         }
         
         private void OnShowClick()
         {
-            var isShown = false;
-            if (_adRequestA.State == State.Ready)
+            _show.interactable = false;
+            //if (MaxSdk.IsRewardedAdReady(AdUnitIdA))
+            if (NeftaSdk.IsRewardedAdReady(AdUnitIdA))
             {
-                if (_adRequestB.State == State.Ready && _adRequestB.Revenue > _adRequestA.Revenue)
-                {
-                    isShown = TryShow(_adRequestB);
-                }
-                if (!isShown)
-                {
-                    isShown = TryShow(_adRequestA);
-                }
+                //MaxSdk.ShowRewardedAd(AdUnitIdA);
+                NeftaSdk.ShowRewardedAd(AdUnitIdA);
             }
-            if (!isShown && _adRequestB.State == State.Ready)
-            {
-                TryShow(_adRequestB);
-            }
-            
-            UpdateShowButton();
-        }
-
-        private bool TryShow(AdRequest adRequest)
-        {
-            adRequest.Revenue = 0;
-            if (MaxSdk.IsRewardedAdReady(adRequest.AdUnitId))
-            {
-                adRequest.State = State.Shown;
-                SetStatus($"Showing {adRequest.AdUnitId}");
-                MaxSdk.ShowRewardedAd(adRequest.AdUnitId);
-                return true;
-            }
-            adRequest.State = State.Idle;
-            RetryLoading();
-            return false;
         }
         
-        private void RetryLoading()
+        private void OnAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
-            if (_load.isOn)
-            {
-                StartLoading();   
-            }
+            SetStatus($"Loaded {adUnitId} at: {adInfo.Revenue}");
+
+            _consecutiveAdFails = 0;
+            
+            _show.interactable = true;
+        }
+        
+        private void OnAdLoadFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
+        {
+            SetStatus($"Load failed {adUnitId} with: {errorInfo}");
+            
+            _consecutiveAdFails++;
+            _ = LoadWithDelay();
         }
         
         private void OnAdDisplayFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo, MaxSdkBase.AdInfo adInfo)
         {
-            var adRequest = adUnitId == _adRequestA.AdUnitId ? _adRequestA : _adRequestB;
-            adRequest.State = State.Idle;
-
+            _load.interactable = true;
+            
             SetStatus("OnAdDisplayFailedEvent");
             
-            RetryLoading();
+            if (_isAutoLoad)
+            {
+                Load();
+            }
         }
         
-        private void OnAdDisplayedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
+        private void OnAdHiddenEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
-            SetStatus("OnAdDisplayedEvent");
-        }
-        
-        private void OnAdHideEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
-        {
-            var adRequest = adUnitId == _adRequestA.AdUnitId ? _adRequestA : _adRequestB;
-            adRequest.State = State.Idle;
-
-            SetStatus("OnAdHideEvent");
+            _load.interactable = true;
             
-            RetryLoading();
+            SetStatus("OnAdHideEvent");
+
+            if (_isAutoLoad)
+            {
+                Load();
+            }
         }
         
         private void OnAdReceivedRewardEvent(string adUnitId, MaxSdkBase.Reward reward, MaxSdkBase.AdInfo adInfo)
@@ -276,54 +106,32 @@ namespace AdDemo
             SetStatus("OnAdReceivedRewardEvent");
         }
         
-        private void OnAdRevenuePaidEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
+        private void OnLoadChanged(bool isOn)
         {
-            SetStatus($"OnAdRevenuePaidEvent {adInfo.Revenue}");
-        }
-        
-        private void OnAdClickedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
-        {
-            SetStatus("OnAdClickedEvent");
+            _isAutoLoad = isOn;
+            if (_isAutoLoad)
+            {
+                Load();   
+            }
         }
         
         private void SetStatus(string status)
         {
-            lock (_statusQueue)
-            {
-                _statusQueue.Enqueue(status);
-            }
+            _status.text = status;
+            Debug.Log($"NeftaPluginMAX Rewarded: {status}");
         }
         
-        private void Update()
+        private async Task LoadWithDelay()
         {
-            if (_statusQueue == null)
+            var delay = new[] { 0, 2, 4, 8, 16, 32, 64 }[Math.Min(_consecutiveAdFails, 6)];
+            await Task.Delay(delay * 1000);
+#if UNITY_EDITOR
+            if (!Application.isPlaying)
             {
                 return;
             }
-            
-            lock (_statusQueue)
-            {
-                while (_statusQueue.Count > 0)
-                {
-                    var status = _statusQueue.Dequeue();
-                    
-                    _status.text = status;
-                    Debug.Log($"NeftaPluginMAX Rewarded: {status}");
-                }
-            }
-        }
-
-        private void UpdateShowButton()
-        {
-            _show.interactable = _adRequestA.State == State.Ready || _adRequestB.State == State.Ready;
-        }
-
-        private void AddDemoGameEventExample()
-        {
-            var category = (ResourceCategory) Random.Range(0, 9);
-            var method = (SpendMethod)Random.Range(0, 8);
-            var value = Random.Range(0, 101);
-            new SpendEvent(category) { _method = method, _name = $"spend_{category} {method} {value}", _value = value }.Record();
+#endif
+            Load();
         }
     }
 }
