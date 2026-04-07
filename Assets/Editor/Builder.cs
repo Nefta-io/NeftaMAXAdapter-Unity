@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using NeftaCustomAdapter.Editor;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
@@ -7,6 +9,25 @@ namespace Editor
 {
     public class Builder
     {
+        [MenuItem("Window/Nefta/Export Nefta Custom Adapter SDK", false, int.MaxValue)]
+        private static void ExportAdSdkPackage()
+        {
+            NeftaWindow.ShowWindow();
+            
+            var packageName = $"NeftaMAX_SDK_{Application.version}.unitypackage";
+            var assetPaths = new string[] { "Assets/NeftaCustomAdapter" };
+            
+            try
+            {
+                AssetDatabase.ExportPackage(assetPaths, packageName, ExportPackageOptions.Recurse);
+                Debug.Log($"Finished exporting {packageName}");   
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Error exporting {packageName}: {e.Message}");   
+            }
+        }
+        
         private static void Build(BuildTarget target, string outPath)
         {
             var scenes = new List<string>();

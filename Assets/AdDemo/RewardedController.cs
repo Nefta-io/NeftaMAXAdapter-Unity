@@ -34,6 +34,8 @@ namespace AdDemo
             //MaxSdkCallbacks.Rewarded.OnAdDisplayFailedEvent += OnAdDisplayFailedEvent;
             //MaxSdkCallbacks.Rewarded.OnAdHiddenEvent += OnAdHiddenEvent;
             //MaxSdkCallbacks.Rewarded.OnAdReceivedRewardEvent += OnAdReceivedRewardEvent;
+            //MaxSdkCallbacks.Rewarded.OnAdRevenuePaidEvent += OnAdRevenuePaidEvent;
+            //MaxSdkCallbacks.Rewarded.OnAdClickedEvent += OnAdClickedEvent;
             
             NeftaSdk.Rewarded.InitializeDualTrack(AdUnitIdA, AdUnitIdB);
             NeftaSdk.Rewarded.OnAdLoadedEvent += OnAdLoadedEvent;
@@ -132,6 +134,24 @@ namespace AdDemo
             }
 #endif
             Load();
+        }
+        
+        // when implementing dual track manually (not using NeftaSDK wrapper)
+        // you should forward ILRD event to the SDK manually
+        private void OnAdRevenuePaidEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
+        {
+            NeftaAdapterEvents.OnExternalMediationImpression(adUnitId, adInfo);
+            
+            Debug.Log($"NeftaPluginMAX Rewarded OnAdRevenuePaidEvent: {adInfo.Revenue}");
+        }
+
+        // when implementing dual track manually (not using NeftaSDK wrapper)
+        // you should forward ILRD event to the SDK manually
+        private void OnAdClickedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
+        {
+            NeftaAdapterEvents.OnExternalMediationClick(adUnitId, adInfo);
+            
+            Debug.Log("NeftaPluginMAX Rewarded OnAdClickedEvent");
         }
     }
 }
