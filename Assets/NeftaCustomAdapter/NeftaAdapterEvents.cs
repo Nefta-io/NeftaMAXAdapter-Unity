@@ -580,14 +580,17 @@ namespace NeftaCustomAdapter
                     // ignored
                 }
                 
-                _disabledFeatures = (Feature)initDto.disabledFeatures;
                 _delays.Clear();
-                if (initDto.delays != null)
+                if (initDto != null)
                 {
-                    foreach (var delay in initDto.delays)
+                    _disabledFeatures = (Feature)initDto.disabledFeatures;
+                    if (initDto.delays != null)
                     {
-                        _delays.Add(delay);
-                    }
+                        foreach (var delay in initDto.delays)
+                        {
+                            _delays.Add(delay);
+                        }
+                    }   
                 }
                 if (_delays.Count == 0)
                 {
