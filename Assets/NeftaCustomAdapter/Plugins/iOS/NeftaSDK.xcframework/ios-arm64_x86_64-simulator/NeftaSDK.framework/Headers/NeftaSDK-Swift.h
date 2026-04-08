@@ -344,7 +344,6 @@ SWIFT_CLASS("_TtC8NeftaSDK17InitConfiguration")
 @interface InitConfiguration : NSObject
 @property (nonatomic) BOOL _skipOptimization;
 @property (nonatomic, copy) NSString * _Nonnull _nuid;
-@property (nonatomic, copy) NSDictionary<NSString *, NSArray<NSString *> *> * _Nonnull _providerAdUnits;
 - (NSArray<NSString *> * _Nullable)GetMediationProviderAdUnits SWIFT_WARN_UNUSED_RESULT;
 - (NSArray<NSString *> * _Nullable)GetMediationProviderAdUnitsWithProvider:(NSString * _Nonnull)provider SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
@@ -986,7 +985,6 @@ SWIFT_CLASS("_TtC8NeftaSDK17InitConfiguration")
 @interface InitConfiguration : NSObject
 @property (nonatomic) BOOL _skipOptimization;
 @property (nonatomic, copy) NSString * _Nonnull _nuid;
-@property (nonatomic, copy) NSDictionary<NSString *, NSArray<NSString *> *> * _Nonnull _providerAdUnits;
 - (NSArray<NSString *> * _Nullable)GetMediationProviderAdUnits SWIFT_WARN_UNUSED_RESULT;
 - (NSArray<NSString *> * _Nullable)GetMediationProviderAdUnitsWithProvider:(NSString * _Nonnull)provider SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;

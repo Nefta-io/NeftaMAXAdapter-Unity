@@ -27,11 +27,10 @@ namespace NeftaCustomAdapter
         }
         
         [Serializable]
-        internal class InitConfigurationDto
+        public class InitConfigurationDto
         {
             public bool skipOptimization;
             public string nuid;
-            public string providerAdUnits;
             public int disabledFeatures;
             public float[] delays;
         }
@@ -571,11 +570,16 @@ namespace NeftaCustomAdapter
         {
             _mainContext.Post(_ =>
             {
-                var initDto = JsonUtility.FromJson<InitConfigurationDto>(initConfig);
-                if (initDto == null)
+                InitConfigurationDto initDto = null;
+                try
                 {
-                    initDto = new InitConfigurationDto();
+                    initDto = JsonUtility.FromJson<InitConfigurationDto>(initConfig);
                 }
+                catch (Exception e)
+                {
+                    // ignored
+                }
+                
                 _disabledFeatures = (Feature)initDto.disabledFeatures;
                 _delays.Clear();
                 if (initDto.delays != null)
@@ -592,7 +596,7 @@ namespace NeftaCustomAdapter
                 
                 if (_onReady != null)
                 {
-                    InitConfiguration = new InitConfiguration(initDto.skipOptimization, initDto.nuid, initDto.providerAdUnits);
+                    InitConfiguration = new InitConfiguration(initDto);
                     _onReady.Invoke(InitConfiguration);
                 }
             }, null);

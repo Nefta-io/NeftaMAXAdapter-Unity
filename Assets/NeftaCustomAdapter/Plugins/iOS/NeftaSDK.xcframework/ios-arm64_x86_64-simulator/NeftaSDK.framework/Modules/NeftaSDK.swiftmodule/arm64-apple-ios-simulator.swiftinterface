@@ -241,7 +241,6 @@ import os
 @_hasMissingDesignatedInitializers @objc public class InitConfiguration : ObjectiveC.NSObject {
   @objc public var _skipOptimization: Swift.Bool
   @objc public var _nuid: Swift.String
-  @objc public var _providerAdUnits: [Swift.String : [Swift.String]]
   @objc public func GetMediationProviderAdUnits() -> [Swift.String]?
   @objc public func GetMediationProviderAdUnits(provider: Swift.String) -> [Swift.String]?
   public func GetAdapterResponse() -> Swift.String
