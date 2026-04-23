@@ -8,7 +8,7 @@ import Foundation
 @_exported import NeftaSDK
 import Swift
 import SystemConfiguration
-import WebKit
+import UIKit
 import _Concurrency
 import _StringProcessing
 import _SwiftConcurrencyShims
@@ -52,8 +52,9 @@ import os
     public var _model: Swift.String?
     @objc deinit
   }
-  @_hasMissingDesignatedInitializers public class State {
+  public class State {
     public var _nuid: Swift.String
+    public init()
     @objc deinit
   }
   public typealias OnReadyBlock = (NeftaSDK.InitConfiguration) -> Swift.Void
@@ -90,6 +91,7 @@ import os
   @objc public static func OnExternalMediationImpression(_ isClick: Swift.Bool, provider: Swift.String, data: Foundation.NSMutableDictionary?, id: Swift.String?, id2: Swift.String?)
   @objc public static func OnExternalMediationImpressionAsString(_ isClick: Swift.Bool, provider: Swift.String, data: Swift.String, id: Swift.String?, id2: Swift.String?)
   @objc(GetRetryDelayInSeconds:) public static func GetRetryDelayInSeconds(insight: NeftaSDK.AdInsight?) -> Swift.Float
+  public func GetDebugState() -> [Swift.String : Any?]
   @objc public static func SetOverride(url: Swift.String?)
   @objc deinit
 }
@@ -225,6 +227,10 @@ import os
   @objc public var _banner: NeftaSDK.AdInsight?
   @objc public var _interstitial: NeftaSDK.AdInsight?
   @objc public var _rewarded: NeftaSDK.AdInsight?
+  @objc public var _insight: NeftaSDK.AdInsight?
+  @objc override dynamic public var description: Swift.String {
+    @objc get
+  }
   @objc override dynamic public init()
   @objc deinit
 }
@@ -238,11 +244,12 @@ import os
   public init(config: [Swift.String : Any])
   @objc deinit
 }
-@_hasMissingDesignatedInitializers @objc public class InitConfiguration : ObjectiveC.NSObject {
+@objc public class InitConfiguration : ObjectiveC.NSObject {
   @objc public var _skipOptimization: Swift.Bool
   @objc public var _nuid: Swift.String
-  @objc public func GetMediationProviderAdUnits() -> [Swift.String]?
-  @objc public func GetMediationProviderAdUnits(provider: Swift.String) -> [Swift.String]?
+  @objc public var _noDynamicResponseRetryInMs: Swift.Int
+  @objc public var _noDefaultResponseRetryInMs: Swift.Int
+  public init(skipOptimization: Swift.Bool, state: NeftaSDK.NeftaPlugin.State)
   public func GetAdapterResponse() -> Swift.String
   @objc deinit
 }

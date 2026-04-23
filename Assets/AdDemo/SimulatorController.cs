@@ -112,11 +112,11 @@ namespace AdDemo
         {
             if (_isRewarded)
             {
-                NeftaSdk.LoadRewardedAd("");
+                NeftaSdk.LoadRewardedAd("rewarded1");
             }
             else
             {
-                NeftaSdk.LoadInterstitial("");
+                NeftaSdk.LoadInterstitial("inter1");
             }
         }
         
@@ -133,9 +133,9 @@ namespace AdDemo
         {
             if (_isRewarded)
             {
-                if (NeftaSdk.IsRewardedAdReady(""))
+                if (NeftaSdk.IsRewardedAdReady("rewarded1"))
                 {
-                    NeftaSdk.ShowRewardedAd("");   
+                    NeftaSdk.ShowRewardedAd("rewarded1");   
                 }
                 else
                 {
@@ -144,9 +144,9 @@ namespace AdDemo
             }
             else
             {
-                if (NeftaSdk.IsInterstitialReady(""))
+                if (NeftaSdk.IsInterstitialReady("interstitial1"))
                 {
-                    NeftaSdk.ShowInterstitial("");
+                    NeftaSdk.ShowInterstitial("interstitial1");
                 }
                 else
                 {

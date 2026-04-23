@@ -344,8 +344,8 @@ SWIFT_CLASS("_TtC8NeftaSDK17InitConfiguration")
 @interface InitConfiguration : NSObject
 @property (nonatomic) BOOL _skipOptimization;
 @property (nonatomic, copy) NSString * _Nonnull _nuid;
-- (NSArray<NSString *> * _Nullable)GetMediationProviderAdUnits SWIFT_WARN_UNUSED_RESULT;
-- (NSArray<NSString *> * _Nullable)GetMediationProviderAdUnitsWithProvider:(NSString * _Nonnull)provider SWIFT_WARN_UNUSED_RESULT;
+@property (nonatomic) NSInteger _noDynamicResponseRetryInMs;
+@property (nonatomic) NSInteger _noDefaultResponseRetryInMs;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
@@ -366,6 +366,8 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger Rewarded;)
 @property (nonatomic, strong) AdInsight * _Nullable _banner;
 @property (nonatomic, strong) AdInsight * _Nullable _interstitial;
 @property (nonatomic, strong) AdInsight * _Nullable _rewarded;
+@property (nonatomic, strong) AdInsight * _Nullable _insight;
+@property (nonatomic, readonly, copy) NSString * _Nonnull description;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 

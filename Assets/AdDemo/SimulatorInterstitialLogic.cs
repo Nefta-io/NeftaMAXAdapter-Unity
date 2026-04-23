@@ -14,6 +14,28 @@ namespace AdDemo
         
         protected override string LogTag => "SimInterstitial";
 
+        public class TrackStatus
+        {
+            public enum State
+            {
+                Idle,
+                LoadingWithInsights,
+                Loading,
+                Ready,
+                Shown
+            }
+
+            private Track _track;
+
+            public TrackStatus(object track)
+            {
+                _track = (Track) track;
+            }
+
+            public State GetState => (State)(int) _track.State;
+            public AdInsight GetInsight => _track.Insight;
+        }
+
         private readonly Image _rendererFill2A;
         private readonly Button _fill2A;
         private readonly Image _rendererFill1A;
@@ -162,6 +184,11 @@ namespace AdDemo
                 () => { OnAdHiddenCallback(track.AdUnitId, adInfo); });
             
             return true;
+        }
+
+        public TrackStatus GetTrack(bool a)
+        {
+            return a ? new TrackStatus(_trackA) : new TrackStatus(_trackB);
         }
         
         private void SimLoad(string adUnitId)

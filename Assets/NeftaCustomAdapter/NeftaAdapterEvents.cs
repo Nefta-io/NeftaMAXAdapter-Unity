@@ -31,18 +31,9 @@ namespace NeftaCustomAdapter
         {
             public bool skipOptimization;
             public string nuid;
-            public int disabledFeatures;
             public float[] delays;
-        }
-        
-        [Flags]
-        private enum Feature {
-            Insights = 1,
-            GameEvents = 1 << 1,
-            ExternalMediationRequest = 1 << 2,
-            ExternalMediationResponse = 1 << 3,
-            ExternalMediationImpression = 1 << 4,
-            ExternalMediationClick = 1 << 5
+            public int noDynamicResponseRetryInMs;
+            public int noDefaultResponseRetryInMs;
         }
         
         public struct ExtParams
@@ -74,6 +65,16 @@ namespace NeftaCustomAdapter
 
 #if UNITY_EDITOR
         private static NeftaPlugin _plugin;
+
+        public static void UnitTestOverrideOnReady(string initConfig)
+        {
+            NeftaPlugin.OverrideOnReady(initConfig);
+        }
+        
+        public static void UnitTestOverrideOnInsight(int requestId, int responseType, string insightResponse)
+        {
+            NeftaPlugin.OverrideOnInsight(requestId, responseType, insightResponse);
+        }
 #elif UNITY_IOS
         private delegate void OnReadyDelegate(string initConfig);
         private delegate void OnInsightsDelegate(int requestId, int adapterResponseType, string adapterResponse);
@@ -141,8 +142,9 @@ namespace NeftaCustomAdapter
 
         private static List<InsightRequest> _insightRequests;
         private static int _insightId;
-        private static Feature _disabledFeatures;
         private static List<float> _delays;
+        internal static int NoDynamicResponseRetryInMs;
+        internal static int NoDefaultResponseRetryInMs;
 
         private static SynchronizationContext _mainContext;
         private static Action<InitConfiguration> _onReady;
@@ -194,11 +196,6 @@ namespace NeftaCustomAdapter
 
         public static void Record(GameEvent gameEvent)
         {
-            if ((_disabledFeatures & Feature.GameEvents) != 0)
-            {
-                return;
-            }
-            
             var type = gameEvent._eventType;
             var category = gameEvent._category;
             var subCategory = gameEvent._subCategory;
@@ -210,11 +207,6 @@ namespace NeftaCustomAdapter
 
         internal static void Record(int type, int category, int subCategory, string name, long value, string customPayload)
         {
-            if ((_disabledFeatures & Feature.GameEvents) != 0)
-            {
-                return;
-            }
-            
 #if UNITY_EDITOR
             _plugin.Record(type, category, subCategory, name, value, customPayload);
 #elif UNITY_IOS
@@ -271,11 +263,6 @@ namespace NeftaCustomAdapter
         /// <param name="errorInfo">Load fail reason</param>
         public static void OnExternalMediationRequestFailed(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
         {
-            if ((_disabledFeatures & Feature.ExternalMediationResponse) != 0)
-            {
-                return;
-            }
-            
             var providerStatus = ((int)errorInfo.Code).ToString(CultureInfo.InvariantCulture);
             var networkStatus = errorInfo.MediatedNetworkErrorCode.ToString(CultureInfo.InvariantCulture);
             string baseString = null;
@@ -314,21 +301,11 @@ namespace NeftaCustomAdapter
 
         public static void OnExternalMediationImpression(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
-            if ((_disabledFeatures & Feature.ExternalMediationImpression) != 0)
-            {
-                return;
-            }
-            
             OnMAXImpression(false, adUnitId, adInfo);
         }
 
         public static void OnExternalMediationClick(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
-            if ((_disabledFeatures & Feature.ExternalMediationClick) != 0)
-            {
-                return;
-            }
-            
             OnMAXImpression(true, adUnitId, adInfo);
         }
 
@@ -484,12 +461,6 @@ namespace NeftaCustomAdapter
         
         public static void GetInsights(int insights, AdInsight previousInsight, OnInsightsCallback callback)
         {
-            if ((_disabledFeatures & Feature.Insights) != 0)
-            {
-                callback(new Insights());
-                return;
-            }
-            
             var id = 0;
             var previousRequestId = -1;
             if (previousInsight != null)
@@ -577,20 +548,21 @@ namespace NeftaCustomAdapter
                 }
                 catch (Exception e)
                 {
-                    // ignored
+                    Debug.Log("IOnReady error: " + e.Message);
                 }
                 
                 _delays.Clear();
                 if (initDto != null)
                 {
-                    _disabledFeatures = (Feature)initDto.disabledFeatures;
                     if (initDto.delays != null)
                     {
                         foreach (var delay in initDto.delays)
                         {
                             _delays.Add(delay);
                         }
-                    }   
+                    }
+                    NoDynamicResponseRetryInMs = initDto.noDynamicResponseRetryInMs;
+                    NoDefaultResponseRetryInMs = initDto.noDefaultResponseRetryInMs;
                 }
                 if (_delays.Count == 0)
                 {

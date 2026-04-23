@@ -6,7 +6,7 @@
 	<dict>
 		<key>Headers/NeftaSDK-Swift.h</key>
 		<data>
-		DNmaEt6+SXygDVlAciyVFgwd3Yc=
+		KPfqipiDhCPJTFb4PPW7HjBRzB8=
 		</data>
 		<key>Headers/NeftaSDK.h</key>
 		<data>
@@ -14,15 +14,15 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		+X3eUpxwqxF76i2AKycWN1SAhEc=
+		+yYLyi++vqTWcmpSBjR9qzmTihg=
 		</data>
 		<key>Modules/NeftaSDK.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
 		<data>
-		hXwbTz6FYb5NKcBTbvrRqV/ZizQ=
+		3N+jHPS/YHMMa80xX/4MsdLNKaU=
 		</data>
 		<key>Modules/NeftaSDK.swiftmodule/arm64-apple-ios-simulator.private.swiftinterface</key>
 		<data>
-		ib2HFyVFqjyrSHQnORUh1DgsfqE=
+		eEXOo/P8z3ho5kJKKXZkMfYZ6dw=
 		</data>
 		<key>Modules/NeftaSDK.swiftmodule/arm64-apple-ios-simulator.swiftdoc</key>
 		<data>
@@ -30,19 +30,19 @@
 		</data>
 		<key>Modules/NeftaSDK.swiftmodule/arm64-apple-ios-simulator.swiftinterface</key>
 		<data>
-		ib2HFyVFqjyrSHQnORUh1DgsfqE=
+		eEXOo/P8z3ho5kJKKXZkMfYZ6dw=
 		</data>
 		<key>Modules/NeftaSDK.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		GnFplDcNqojl/bp5dzBTYIc5G2o=
+		MrcgNWdclUe4IBLazUrWq5FsvMY=
 		</data>
 		<key>Modules/NeftaSDK.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<data>
-		hXwbTz6FYb5NKcBTbvrRqV/ZizQ=
+		3N+jHPS/YHMMa80xX/4MsdLNKaU=
 		</data>
 		<key>Modules/NeftaSDK.swiftmodule/x86_64-apple-ios-simulator.private.swiftinterface</key>
 		<data>
-		dFVFkQ1GnOLVSy3Qp4q5VKrpqKs=
+		PJAFlT+yvF0dznC6dTjRZX9Y+PA=
 		</data>
 		<key>Modules/NeftaSDK.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
 		<data>
@@ -50,11 +50,11 @@
 		</data>
 		<key>Modules/NeftaSDK.swiftmodule/x86_64-apple-ios-simulator.swiftinterface</key>
 		<data>
-		dFVFkQ1GnOLVSy3Qp4q5VKrpqKs=
+		PJAFlT+yvF0dznC6dTjRZX9Y+PA=
 		</data>
 		<key>Modules/NeftaSDK.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		Zgv/B58H3ME1RSrzHjaWuQqQZIo=
+		hIFvJNr0cIyCQf2U7nUb7wQlOtc=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -71,7 +71,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			ew1jmvdG0yr2OyaIhFOyGLvY9eCNobc4sxsifT/pKVo=
+			TUe+f28PUwAR5VtpZH3YdURNctJYjxysIuVUZaBAV2c=
 			</data>
 		</dict>
 		<key>Headers/NeftaSDK.h</key>
@@ -85,14 +85,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			qkdglRmLrjy7jQyjTNXvwnvEQqNVWbzaAiQSYkhWXME=
+			36DNQYgd7Y3Cs3TJN38XfeyxAopCGhv7LD7CUgFWQpg=
 			</data>
 		</dict>
 		<key>Modules/NeftaSDK.swiftmodule/arm64-apple-ios-simulator.private.swiftinterface</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			2bf5+ZL6uVqc5Jt38+alZ/cdckaJrDqR+fwoOyfHucI=
+			ZTt/tHyH8U/ExNFyAalJr9DzNnHupfl8jnvZ5z4Mtws=
 			</data>
 		</dict>
 		<key>Modules/NeftaSDK.swiftmodule/arm64-apple-ios-simulator.swiftdoc</key>
@@ -106,28 +106,28 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			2bf5+ZL6uVqc5Jt38+alZ/cdckaJrDqR+fwoOyfHucI=
+			ZTt/tHyH8U/ExNFyAalJr9DzNnHupfl8jnvZ5z4Mtws=
 			</data>
 		</dict>
 		<key>Modules/NeftaSDK.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			h1b6HKIcqZWLLmF2qAUy/khOxxD4gYDxkuxKYWnKjb0=
+			mGGIYqESCkaBy7i2XewYXRKMKNTeJctwxalUFMfUs5w=
 			</data>
 		</dict>
 		<key>Modules/NeftaSDK.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			qkdglRmLrjy7jQyjTNXvwnvEQqNVWbzaAiQSYkhWXME=
+			36DNQYgd7Y3Cs3TJN38XfeyxAopCGhv7LD7CUgFWQpg=
 			</data>
 		</dict>
 		<key>Modules/NeftaSDK.swiftmodule/x86_64-apple-ios-simulator.private.swiftinterface</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			6IQjsLt0wrRfvGLWC3cGc/MK0U/VlM720c+FPEdBHFI=
+			HFMScSIhJUH93A/tx1hi0H608XqAfZrcwcdxSSGe6iY=
 			</data>
 		</dict>
 		<key>Modules/NeftaSDK.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
@@ -141,14 +141,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			6IQjsLt0wrRfvGLWC3cGc/MK0U/VlM720c+FPEdBHFI=
+			HFMScSIhJUH93A/tx1hi0H608XqAfZrcwcdxSSGe6iY=
 			</data>
 		</dict>
 		<key>Modules/NeftaSDK.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			wKE78egF2kNZ2+Mr90Mt6RzYlN3hNU4wyBLrK4FQe3U=
+			veV8mmdrs3/GjkNErK/n9j4/3MRdXWf3Wu55hSPQw28=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>

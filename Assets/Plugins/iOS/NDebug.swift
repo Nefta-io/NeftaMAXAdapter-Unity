@@ -278,7 +278,10 @@ public class AdViewController : UIViewController {
                             self.Send()
                         }
                     }
+            
                     self.Send()
+                
+                    self.ReceiveBroadcast(on: self._broadcastConnection!)
                 case .failed(let error):
                     print("DS:Broadcast failed on: \(error)")
                 default:
@@ -518,21 +521,16 @@ public class AdViewController : UIViewController {
     }
     
     private func SendState(connection: NWConnection, to: String) {
-        var payload: [String: Any] = [:]
-            //"rest_url": NeftaPlugin._rtbUrl,
-        //]
-        
-        if let NeftaInstance = NeftaPlugin._instance {
-            payload["app_id"] = NeftaInstance._info._appId ?? ""
-            payload["nuid"] = NeftaInstance._state._nuid
+        var state = ""
+        if let neftaInstance = NeftaPlugin._instance {
+            do {
+                let jsonData = try JSONSerialization.data(withJSONObject: neftaInstance.GetDebugState(), options: [])
+                state = String(data:jsonData, encoding: .utf8)!
+            } catch _ as NSError {
+                
+            }
         }
-        
-        do {
-            let jsonData = try JSONSerialization.data(withJSONObject: payload, options: [])
-            SendUdp(connection: connection, to: to, message: "state|ios|\(_localPort)|\(_bundleId!)|\(self._version!)|\(_lastLogTime)|\(String(data:jsonData, encoding: .utf8)!)")
-        } catch _ as NSError {
-            
-        }
+        SendUdp(connection: connection, to: to, message: "state|ios|\(_localPort)|\(_bundleId!)|\(self._version!)|\(_lastLogTime)|\(state)")
     }
     
     private func ToProgressionStatus(_ name: String) -> NeftaEvents.ProgressionStatus {
