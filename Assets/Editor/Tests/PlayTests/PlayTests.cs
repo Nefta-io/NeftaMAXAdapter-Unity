@@ -15,30 +15,35 @@ namespace Editor.Tests.PlayTests
         [UnityTest]
         public IEnumerator BasicFlow()
         {
-            UnityEngine.SceneManagement.SceneManager.LoadScene("AdDemo/AdDemoScene");
+            UnityEngine.SceneManagement.SceneManager.LoadScene("Editor/Tests/PlayTests/PlayTestScene");
             yield return null;
             
             yield return null;
-            var infoController = Object.FindFirstObjectByType<InfoController>();
-            var toggleUIMethod = typeof(InfoController).GetMethod("ToggleUI", BindingFlags.NonPublic | BindingFlags.Instance);
-            toggleUIMethod.Invoke(infoController, new object[] { true });
             
-            var simControllers = Object.FindObjectsByType<SimulatorController>(FindObjectsSortMode.None);
-            SimulatorController interstitialController = null;
-            SimulatorController rewardedController = null;
+            NeftaAdapterEvents.EnableLogging(true);
+            NeftaAdapterEvents.InitWithAppId("5693275310653440", (InitConfiguration config) =>
+            {
+                Debug.Log($"[PlayTest] Initialized, nuid: {config._nuid}");
+            });
+            
+            var simControllers = Object.FindObjectsByType<SimulatorUi>(FindObjectsSortMode.None);
+            SimulatorUi interstitialUi = null;
+            SimulatorUi rewardedUi = null;
             foreach (var simController in simControllers)
             {
-                if (simController.name == "InterstitialSimulatorController")
+                if (simController.name == "SimulatorInterstitial")
                 {
-                    interstitialController = simController;
+                    interstitialUi = simController;
+                    interstitialUi.Init();
                 }
                 else
                 {
-                    rewardedController = simController;
+                    rewardedUi = simController;
+                    rewardedUi.Init();
                 }
             }
             
-            Assert.IsNotNull(interstitialController);
+            Assert.IsNotNull(interstitialUi);
 
             var startTime = Time.time;
             while (NeftaAdapterEvents.InitConfiguration == null)
@@ -51,19 +56,18 @@ namespace Editor.Tests.PlayTests
             }
             
             // get tracks
-            var trackA = ((SimulatorInterstitialLogic)interstitialController.AdLogic).GetTrack(true);
-            var trackB = ((SimulatorInterstitialLogic)interstitialController.AdLogic).GetTrack(false);
+            var trackA = ((InterstitialSimulator)interstitialUi.AdLogic).GetTrack(true);
+            var trackB = ((InterstitialSimulator)interstitialUi.AdLogic).GetTrack(false);
             
             // initiate load
-            var loadFiled = typeof(SimulatorController).GetField("_load", BindingFlags.NonPublic | BindingFlags.Instance);
-            var loadToggle = (Toggle)loadFiled.GetValue(interstitialController);
+            var loadFiled = typeof(SimulatorUi).GetField("_load", BindingFlags.NonPublic | BindingFlags.Instance);
+            var loadToggle = (Toggle)loadFiled.GetValue(interstitialUi);
             loadToggle.isOn = true;
             
             // verify trackA is loaded, trackB is still idle
             yield return new WaitForSeconds(2f);
-            Assert.IsTrue(trackA.GetState == SimulatorInterstitialLogic.TrackStatus.State.LoadingWithInsights);
-            Debug.Log($".. {trackA.GetInsight} .. {trackB.GetState}");
-            Assert.IsTrue(trackB.GetState == SimulatorInterstitialLogic.TrackStatus.State.Idle);
+            Assert.IsTrue(trackA.GetState == InterstitialSimulator.TrackStatus.State.LoadingWithInsights);
+            Assert.IsTrue(trackB.GetState == InterstitialSimulator.TrackStatus.State.Idle);
         }
     }
 }

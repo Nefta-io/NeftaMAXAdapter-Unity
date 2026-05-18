@@ -161,7 +161,89 @@ public class AdViewController : UIViewController {
     
     @objc public static func Init(viewController: UIViewController) {
         if _instance == nil {
-            _instance = DebugServer(viewController: viewController)
+            //_instance = DebugServer(viewController: viewController)
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+            
+            DispatchQueue.global(qos: .background).async {
+                NeftaPlugin._instance!.GetInsightsBridge(requestId: 1, insights: Insights.Interstitial, previousRequestId: -1)
+            }
+                
+            DispatchQueue.global(qos: .background).asyncAfter(deadline: .now() + 2.0) {
+                NeftaPlugin.OnExternalMediationRequest("test", adType: 2, id: "dfd", requestedAdUnitId: "adUnitT", requestedFloorPrice: 3.1, requestId: 1)
+                NeftaPlugin.OnExternalMediationResponse("test", id: "dfd", id2: "dfd2", revenue: 3.3, precision: "dfd", status: 3, providerStatus: "ok", networkStatus: nil, baseObject: nil)
+                NeftaPlugin.OnExternalMediationImpression(false, provider: "test", data: nil, id: "dfd", id2: "dfd2")
+                
+                NeftaPlugin._instance!.GetInsightsBridge(requestId: 7, insights: AdInsight.Types.Interstitial.rawValue, previousRequestId: 1)
+        
+                
+                for  i in 0..<10 {
+                    let id = "dfd"
+                    NeftaPlugin._instance!.GetInsightsBridge(requestId: 1, insights: AdInsight.Types.Interstitial.rawValue, previousRequestId: 1)
+                    NeftaPlugin._instance!.GetInsightsBridge(requestId: i, insights: AdInsight.Types.Interstitial.rawValue, previousRequestId: i - 1)
+                    NeftaPlugin.OnExternalMediationRequest("test", adType: 2, id: "dfd", requestedAdUnitId: "adUnitT", requestedFloorPrice: 3.1, requestId: 1)
+                    NeftaPlugin.OnExternalMediationRequest("test", adType: 2, id: id, requestedAdUnitId: "adUnitT", requestedFloorPrice: 3.1, requestId: i)
+                    NeftaPlugin.OnExternalMediationResponse("test", id: "dfd", id2: "dfd", revenue: 3.3, precision: "dfd", status: 3, providerStatus: "ok", networkStatus: nil, baseObject: nil)
+                    NeftaPlugin.OnExternalMediationResponse("test", id: id, id2: id, revenue: 3.3, precision: "dfd", status: 3, providerStatus: "ok", networkStatus: nil, baseObject: nil)
+                    
+                    NeftaPlugin.OnExternalMediationImpression(false, provider: "test", data: nil, id: "dfd", id2: "dfd")
+                    NeftaPlugin.OnExternalMediationImpression(true, provider: "test", data: nil, id: id, id2: id)
+                    NeftaPlugin.OnExternalMediationImpression(true, provider: "test", data: nil, id: "dfd", id2: "dfd")
+                    NeftaPlugin.OnExternalMediationImpression(true, provider: "test", data: nil, id: id, id2: id)
+                    NeftaPlugin.OnExternalMediationImpression(true, provider: "test", data: nil, id: id, id2: id)
+                }
+            }
+            
+            DispatchQueue.global(qos: .background).asyncAfter(deadline: .now() + 2.0) {
+                NeftaPlugin.OnExternalMediationRequest("test", adType: 2, id: "dfd", requestedAdUnitId: "adUnitT", requestedFloorPrice: 3.1, requestId: 1)
+                NeftaPlugin.OnExternalMediationResponse("test", id: "dfd", id2: "dfd2", revenue: 3.3, precision: "dfd", status: 3, providerStatus: "ok", networkStatus: nil, baseObject: nil)
+                NeftaPlugin.OnExternalMediationImpression(false, provider: "test", data: nil, id: "dfd", id2: "dfd2")
+                
+                NeftaPlugin._instance!.GetInsightsBridge(requestId: 7, insights: AdInsight.Types.Interstitial.rawValue, previousRequestId: 1)
+        
+                
+                for  i in 0..<10 {
+                    let id = "dfd"
+                    NeftaPlugin._instance!.GetInsightsBridge(requestId: 1, insights: AdInsight.Types.Interstitial.rawValue, previousRequestId: 1)
+                    NeftaPlugin._instance!.GetInsightsBridge(requestId: i, insights: AdInsight.Types.Interstitial.rawValue, previousRequestId: i - 1)
+                    NeftaPlugin.OnExternalMediationRequest("test", adType: 2, id: "dfd", requestedAdUnitId: "adUnitT", requestedFloorPrice: 3.1, requestId: 1)
+                    NeftaPlugin.OnExternalMediationRequest("test", adType: 2, id: id, requestedAdUnitId: "adUnitT", requestedFloorPrice: 3.1, requestId: i)
+                    NeftaPlugin.OnExternalMediationResponse("test", id: "dfd", id2: "dfd", revenue: 3.3, precision: "dfd", status: 3, providerStatus: "ok", networkStatus: nil, baseObject: nil)
+                    NeftaPlugin.OnExternalMediationResponse("test", id: id, id2: id, revenue: 3.3, precision: "dfd", status: 3, providerStatus: "ok", networkStatus: nil, baseObject: nil)
+                    
+                    NeftaPlugin.OnExternalMediationImpression(false, provider: "test", data: nil, id: "dfd", id2: "dfd")
+                    NeftaPlugin.OnExternalMediationImpression(true, provider: "test", data: nil, id: id, id2: id)
+                    NeftaPlugin.OnExternalMediationImpression(true, provider: "test", data: nil, id: "dfd", id2: "dfd")
+                    NeftaPlugin.OnExternalMediationImpression(true, provider: "test", data: nil, id: id, id2: id)
+                    NeftaPlugin.OnExternalMediationImpression(true, provider: "test", data: nil, id: id, id2: id)
+                }
+            }
+            
+            DispatchQueue.global(qos: .background).asyncAfter(deadline: .now() + 2.0) {
+                NeftaPlugin.OnExternalMediationRequest("test", adType: 2, id: "dfd", requestedAdUnitId: "adUnitT", requestedFloorPrice: 3.1, requestId: 1)
+                NeftaPlugin.OnExternalMediationResponse("test", id: "dfd", id2: "dfd2", revenue: 3.3, precision: "dfd", status: 3, providerStatus: "ok", networkStatus: nil, baseObject: nil)
+                NeftaPlugin.OnExternalMediationImpression(false, provider: "test", data: nil, id: "dfd", id2: "dfd2")
+                
+                NeftaPlugin._instance!.GetInsightsBridge(requestId: 7, insights: AdInsight.Types.Interstitial.rawValue, previousRequestId: 1)
+        
+                
+                for  i in 0..<10 {
+                    let id = "dfd"
+                    NeftaPlugin._instance!.GetInsightsBridge(requestId: 1, insights: AdInsight.Types.Interstitial.rawValue, previousRequestId: 1)
+                    NeftaPlugin._instance!.GetInsightsBridge(requestId: i, insights: AdInsight.Types.Interstitial.rawValue, previousRequestId: i - 1)
+                    NeftaPlugin.OnExternalMediationRequest("test", adType: 2, id: "dfd", requestedAdUnitId: "adUnitT", requestedFloorPrice: 3.1, requestId: 1)
+                    NeftaPlugin.OnExternalMediationRequest("test", adType: 2, id: id, requestedAdUnitId: "adUnitT", requestedFloorPrice: 3.1, requestId: i)
+                    NeftaPlugin.OnExternalMediationResponse("test", id: "dfd", id2: "dfd", revenue: 3.3, precision: "dfd", status: 3, providerStatus: "ok", networkStatus: nil, baseObject: nil)
+                    NeftaPlugin.OnExternalMediationResponse("test", id: id, id2: id, revenue: 3.3, precision: "dfd", status: 3, providerStatus: "ok", networkStatus: nil, baseObject: nil)
+                    
+                    NeftaPlugin.OnExternalMediationImpression(false, provider: "test", data: nil, id: "dfd", id2: "dfd")
+                    NeftaPlugin.OnExternalMediationImpression(true, provider: "test", data: nil, id: id, id2: id)
+                    NeftaPlugin.OnExternalMediationImpression(true, provider: "test", data: nil, id: "dfd", id2: "dfd")
+                    NeftaPlugin.OnExternalMediationImpression(true, provider: "test", data: nil, id: id, id2: id)
+                    NeftaPlugin.OnExternalMediationImpression(true, provider: "test", data: nil, id: id, id2: id)
+                }
+            }
         }
     }
     

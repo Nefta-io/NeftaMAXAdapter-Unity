@@ -1,6 +1,6 @@
 using NeftaCustomAdapter;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
+using UnityEngine.UI;
 
 namespace AdDemo
 {
@@ -29,33 +29,128 @@ namespace AdDemo
             "3082ee9199cf59f0"
         };
 #endif
+        private enum IntegrationType
+        {
+            Manual,
+            Wrapper
+        }
+
+        [SerializeField] private Text _title;
+        [SerializeField] private GameObject _integrationSelection;
+        [SerializeField] private Button _integrationManualButton;
+        [SerializeField] private Button _integrationWrapperButton;
+        [SerializeField] private Button _groupDefaultButton;
+        [SerializeField] private Button _groupOptimizedButton;
+        [SerializeField] private Button _simulatorButton;
+        
+        [SerializeField] private InterstitialUi _interstitialUi;
+        [SerializeField] private RewardedUi _rewardedUi;
+        
+        [SerializeField] private SimulatorUi _interstitialSimulator;
+        [SerializeField] private SimulatorUi _rewardedSimulator;
+        
+        // When integrating Nefta chose either Manual or Wrapper
+        private IntegrationType _integrationType;
         
         private void Awake()
         {
+            _title.text = $"MAX Integration {MaxSdk.Version}";
+            
+            _integrationManualButton.onClick.AddListener(OnManualClick);
+            _integrationWrapperButton.onClick.AddListener(OnWrapperClick);
+            _groupDefaultButton.onClick.AddListener(OnDefaultClick);
+            _groupOptimizedButton.onClick.AddListener(OnOptimizedClick);
+            _simulatorButton.onClick.AddListener(OnSimulatorClick);
+            
             NeftaAdapterEvents.EnableLogging(true);
             NeftaAdapterEvents.InitWithAppId(_neftaAppId, (InitConfiguration config) =>
             {
-                Debug.Log($"[NeftaPluginMAX] Should skip Nefta optimization: {config._skipOptimization} for: {config._nuid}");
-                
-                MaxSdk.SetVerboseLogging(true);
-                MaxSdk.SetTestDeviceAdvertisingIdentifiers(new string[]
-                {
-                    "6AE31431-72EA-44BD-9732-8159D827E21C",
-                    "B656BE16-9A12-4A0E-B160-DBEDFEC7F4C6",
-                    "97ec28e2-e65a-4fac-b11e-3975391f7cb7",
-                    "dca773a6-3445-4776-b361-4d950a0e212f"
-                });
-                if (!config._skipOptimization)
-                {
-                    MaxSdk.SetExtraParameter("disable_b2b_ad_unit_ids", string.Join(",", _adUnits));   
-                }
-                    
-                MaxSdkCallbacks.OnSdkInitializedEvent += sdkConfiguration =>
-                {
-                    Debug.Log("MAX SDK Initialized");
-                };
-                MaxSdk.InitializeSdk();
+                Debug.Log($"[NeftaPluginMAX] Nefta Initialized, nuid: {config._nuid}");
             });
+        }
+        
+        private void OnManualClick()
+        {
+            if (_integrationType == IntegrationType.Wrapper)
+            {
+                _integrationManualButton.interactable = false;
+                _integrationWrapperButton.interactable = true;
+                _integrationType = IntegrationType.Manual;   
+            }
+        }
+        
+        private void OnWrapperClick()
+        {
+            if (_integrationType == IntegrationType.Manual)
+            {
+                _integrationManualButton.interactable = true;
+                _integrationWrapperButton.interactable = false;
+                _integrationType = IntegrationType.Wrapper;
+            }
+        }
+        
+        private void OnDefaultClick()
+        {
+            _integrationSelection.SetActive(false);
+            
+            InitializeMAX(false);
+        }
+        
+        private void OnOptimizedClick()
+        {
+            _integrationSelection.SetActive(false);
+            
+            InitializeMAX(true);
+        }
+        
+        private void InitializeMAX(bool isOptimized)
+        {
+            MaxSdk.SetVerboseLogging(true);
+            MaxSdk.SetTestDeviceAdvertisingIdentifiers(new string[]
+            {
+                "6AE31431-72EA-44BD-9732-8159D827E21C",
+                "B656BE16-9A12-4A0E-B160-DBEDFEC7F4C6",
+                "97ec28e2-e65a-4fac-b11e-3975391f7cb7",
+                "dca773a6-3445-4776-b361-4d950a0e212f"
+            });
+            
+            if (isOptimized)
+            {
+                MaxSdk.SetExtraParameter("disable_b2b_ad_unit_ids", string.Join(",", _adUnits));   
+            }
+                    
+            MaxSdkCallbacks.OnSdkInitializedEvent += sdkConfiguration =>
+            {
+                Debug.Log("MAX SDK Initialized");
+            };
+            MaxSdk.InitializeSdk();
+
+            if (_integrationType == IntegrationType.Manual)
+            {
+                if (isOptimized)
+                {
+                    _interstitialUi.Init(new InterstitialNeftaManual());
+                    _rewardedUi.Init(new RewardedNeftaManual());
+                }
+                else
+                {
+                    _interstitialUi.Init(new InterstitialDefault());
+                    _rewardedUi.Init(new RewardedDefault());
+                }
+            }
+            else if (_integrationType == IntegrationType.Wrapper)
+            {
+                _interstitialUi.Init(new InterstitialNeftaWrapper(isOptimized));
+                _rewardedUi.Init(new RewardedNeftaWrapper(isOptimized));
+            }
+        }
+
+        private void OnSimulatorClick()
+        {
+            _integrationSelection.SetActive(false);
+            
+            _interstitialSimulator.Init();
+            _rewardedSimulator.Init();
         }
     }
 }

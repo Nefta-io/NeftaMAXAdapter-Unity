@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace AdDemo
 {
-    public class SimulatorInterstitialLogic : InterstitialLogic
+    public class InterstitialSimulator : InterstitialLogic
     {
         private readonly Color DefaultColor = new Color(0.6509804f, 0.1490196f, 0.7490196f, 1f);
         private readonly Color FillColor = Color.green;
@@ -60,7 +60,7 @@ namespace AdDemo
         private double _simBFloor = -1;
         private MaxSdkBase.AdInfo _simBAdInfo; 
 
-        public SimulatorInterstitialLogic(Image rendererFill2A, Button fill2A,
+        public InterstitialSimulator(Image rendererFill2A, Button fill2A,
             Image rendererFill1A, Button fill1A,
             Image rendererNoFillA, Button noFillA,
             Image rendererOtherA, Button otherA, Text statusA,
@@ -124,7 +124,7 @@ namespace AdDemo
             base.OnNewSession();
         }
 
-        protected override void LoadInternal(string adUnitId, string bidFloor)
+        protected override void LoadInternal(string adUnitId, bool disableAutoRetries, string bidFloor)
         {
             if (adUnitId == _trackA.AdUnitId)
             {
@@ -172,7 +172,7 @@ namespace AdDemo
             }
             
             track.State = State.Shown;
-            SimulatorController.ShowAd(
+            SimulatorUi.ShowAd(
                 "Interstitial",
                 () =>
                 {

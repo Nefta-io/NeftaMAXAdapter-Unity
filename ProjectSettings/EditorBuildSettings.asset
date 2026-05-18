@@ -8,4 +8,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/AdDemo/AdDemoScene.unity
     guid: d751acd2c41b34bce9b0959a1633577a
+  - enabled: 1
+    path: Assets/Editor/Tests/PlayTests/PlayTestScene.unity
+    guid: f58f5f1dd77c34fbcbeabda0056ed2d9
   m_configObjects: {}

@@ -29,10 +29,10 @@ namespace NeftaCustomAdapter
             LoadOrTriggerAlreadyLoaded();
         }
 
-        protected override void LoadInternal(string adUnitId, string bidFloor)
+        protected override void LoadInternal(string adUnitId, bool disableAutoRetries, string bidFloor)
         {
-            MaxSdk.SetRewardedAdExtraParameter(adUnitId, "disable_auto_retries", bidFloor != null ? "true" : "false");
-            MaxSdk.SetRewardedAdExtraParameter(adUnitId, "jC7Fp", bidFloor ?? "");
+            MaxSdk.SetRewardedAdExtraParameter(adUnitId, "disable_auto_retries", disableAutoRetries ? "true" : "false");
+            MaxSdk.SetRewardedAdExtraParameter(adUnitId, "jC7Fp", bidFloor);
             MaxSdk.LoadRewardedAd(adUnitId);
         }
 

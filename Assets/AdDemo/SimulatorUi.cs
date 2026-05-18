@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 
 namespace AdDemo
 {
-    public class SimulatorController : MonoBehaviour
+    public class SimulatorUi : MonoBehaviour
     {
 #if UNITY_IOS
         private delegate void OnCallback();
@@ -84,19 +84,21 @@ namespace AdDemo
         {
             if (_isRewarded)
             {
-                AdLogic = new SimulatorRewardedLogic(
+                AdLogic = new RewardedSimulator(
                     _aFill2Renderer, _aFill2, _aFill1Renderer, _aFill1, _aNoFillRenderer, _aNoFill,
                     _aOtherRenderer, _aOther, _aStatus,
                     _bFill2Renderer, _bFill2, _bFill1Renderer, _bFill1, _bNoFillRenderer, _bNoFill,
                     _bOtherRenderer, _bOther, _bStatus);
+                NeftaSdk.Rewarded = (RewardedLogic)AdLogic;
             }
             else
             {
-                AdLogic = new SimulatorInterstitialLogic(
+                AdLogic = new InterstitialSimulator(
                     _aFill2Renderer, _aFill2, _aFill1Renderer, _aFill1, _aNoFillRenderer, _aNoFill,
                     _aOtherRenderer, _aOther, _aStatus,
                     _bFill2Renderer, _bFill2, _bFill1Renderer, _bFill1, _bNoFillRenderer, _bNoFill,
                     _bOtherRenderer, _bOther, _bStatus);
+                NeftaSdk.Interstitial = (InterstitialLogic)AdLogic;
             }
             AdLogic.OnAdLoadedEvent += OnAdLoadedEvent;
             AdLogic.OnAdLoadFailedEvent += OnAdLoadFailedEvent;
@@ -105,6 +107,7 @@ namespace AdDemo
             
             _load.onValueChanged.AddListener(OnLoadChanged);
             _show.onClick.AddListener(OnShowClick);
+            gameObject.SetActive(true);
             UpdateShowButton();
         }
         

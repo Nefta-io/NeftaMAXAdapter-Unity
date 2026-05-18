@@ -62,12 +62,8 @@ namespace Editor.Tests
             Assert.AreEqual(321, delays[1]);
             Assert.AreEqual(456.7, delays[2], 0.0001);
             
-            var noDynamicResponseRetryInMsField = typeof(NeftaAdapterEvents).GetField("NoDynamicResponseRetryInMs", BindingFlags.NonPublic | BindingFlags.Static);
-            var noDynamicResponseRetryInMs = (int)noDynamicResponseRetryInMsField.GetValue(null);
-            Assert.AreEqual(10123, noDynamicResponseRetryInMs);
-            var noDefaultResponseRetryInMsField = typeof(NeftaAdapterEvents).GetField("NoDefaultResponseRetryInMs", BindingFlags.NonPublic | BindingFlags.Static);
-            var noDefaultResponseRetryInMs = (int)noDefaultResponseRetryInMsField.GetValue(null);
-            Assert.AreEqual(11654, noDefaultResponseRetryInMs);
+            Assert.AreEqual(10123, NeftaAdapterEvents.NoDynamicResponseRetryInMs);
+            Assert.AreEqual(11654, NeftaAdapterEvents.NoDefaultResponseRetryInMs);
         }
         
         [UnityTest]

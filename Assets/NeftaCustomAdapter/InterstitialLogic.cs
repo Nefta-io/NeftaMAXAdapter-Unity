@@ -24,10 +24,10 @@ namespace NeftaCustomAdapter
             LoadOrTriggerAlreadyLoaded();
         }
         
-        protected override void LoadInternal(string adUnitId, string bidFloor)
+        protected override void LoadInternal(string adUnitId, bool disableAutoRetries, string bidFloor)
         {
-            MaxSdk.SetInterstitialExtraParameter(adUnitId, "disable_auto_retries", bidFloor != null ? "true" : "false");
-            MaxSdk.SetInterstitialExtraParameter(adUnitId, "jC7Fp", bidFloor ?? "");
+            MaxSdk.SetInterstitialExtraParameter(adUnitId, "disable_auto_retries", disableAutoRetries ? "true" : "false");
+            MaxSdk.SetInterstitialExtraParameter(adUnitId, "jC7Fp", bidFloor);
             MaxSdk.LoadInterstitial(adUnitId);
         }
 
