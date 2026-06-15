@@ -74,6 +74,11 @@ namespace AdDemo
         
         public void Load()
         {
+            if (!_ui.IsAutoLoad)
+            {
+                return;
+            }
+            
             TrackLoad(_trackA, _trackB.State);
             TrackLoad(_trackB, _trackA.State);
         }
@@ -203,7 +208,7 @@ namespace AdDemo
             {
                 track.State = State.Shown;
                 _ui.SetStatus($"Showing {track.AdUnitId}");
-                MaxSdk.IsRewardedAdReady(track.AdUnitId);
+                MaxSdk.ShowRewardedAd(track.AdUnitId);
                 return true;
             }
             track.State = State.Idle;
@@ -263,20 +268,14 @@ namespace AdDemo
         {
             _ui.SetStatus("OnAdDisplayFailedEvent");
             
-            if (_ui.IsAutoLoad)
-            {
-                Load();
-            }
+            Load();
         }
         
         private void OnAdHiddenEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
             _ui.SetStatus("OnAdHideEvent");
 
-            if (_ui.IsAutoLoad)
-            {
-                Load();
-            }
+            Load();
         }
         
         private void OnAdReceivedRewardEvent(string adUnitId, MaxSdkBase.Reward reward, MaxSdkBase.AdInfo adInfo)

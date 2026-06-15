@@ -30,6 +30,11 @@ namespace AdDemo
         
         public void Load()
         {
+            if (!_ui.IsAutoLoad)
+            {
+                return;
+            }
+            
             NeftaSdk.LoadInterstitial(InterstitialUi.AdUnitIdA);
         }
         
@@ -69,20 +74,14 @@ namespace AdDemo
         {
             _ui.SetStatus("OnAdDisplayFailedEvent");
             
-            if (_ui.IsAutoLoad)
-            {
-                Load();
-            }
+            Load();
         }
         
         private void OnAdHiddenEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
             _ui.SetStatus("OnAdHideEvent");
 
-            if (_ui.IsAutoLoad)
-            {
-                Load();
-            }
+            Load();
         }
         private async Task LoadWithDelay()
         {

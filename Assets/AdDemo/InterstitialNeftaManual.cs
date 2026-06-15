@@ -73,6 +73,11 @@ namespace AdDemo
         
         public void Load()
         {
+            if (!_ui.IsAutoLoad)
+            {
+                return;
+            }
+            
             TrackLoad(_trackA, _trackB.State);
             TrackLoad(_trackB, _trackA.State);
         }
@@ -261,20 +266,14 @@ namespace AdDemo
         {
             _ui.SetStatus("OnAdDisplayFailedEvent");
             
-            if (_ui.IsAutoLoad)
-            {
-                Load();
-            }
+            Load();
         }
         
         private void OnAdHiddenEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
             _ui.SetStatus("OnAdHideEvent");
 
-            if (_ui.IsAutoLoad)
-            {
-                Load();
-            }
+            Load();
         }
         
         private void OnAdRevenuePaidEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)

@@ -24,6 +24,11 @@ namespace AdDemo
 
         public void Load()
         {
+            if (!_ui.IsAutoLoad)
+            {
+                return;
+            }
+            
             NeftaAdapterEvents.OnExternalMediationRequest(NeftaAdapterEvents.AdType.Interstitial, InterstitialUi.AdUnitIdA);
             
             MaxSdk.LoadInterstitial(InterstitialUi.AdUnitIdA);
@@ -35,7 +40,7 @@ namespace AdDemo
             {
                 MaxSdk.ShowInterstitial(InterstitialUi.AdUnitIdA);
             }
-            else if (_ui.IsAutoLoad)
+            else
             {
                 Load();
             }
@@ -69,20 +74,14 @@ namespace AdDemo
         {
             _ui.SetStatus("OnAdDisplayFailedEvent");
             
-            if (_ui.IsAutoLoad)
-            {
-                Load();
-            }
+            Load();
         }
         
         private void OnAdHiddenEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
             _ui.SetStatus("OnAdHideEvent");
 
-            if (_ui.IsAutoLoad)
-            {
-                Load();
-            }
+            Load();
         }
         
         private async Task LoadWithDelay()
