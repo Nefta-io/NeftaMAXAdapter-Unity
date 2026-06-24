@@ -82,24 +82,8 @@ namespace AdDemo
             _trackA = new Track("Rewarded A");
             _trackB = new Track("Rewarded B");
             NeftaSdk.Initialize();
-            IsDualTrackInitialized = true;
-        }
-        
-        public override void OnNewSession()
-        {
-            _simAFloor = -1;
-            _simAAdInfo = null;
-            ToggleTrackA(true);
-            ToggleTrackA(false);
-            _statusA.text = "";
-            
-            _simBFloor = -1;
-            _simBAdInfo = null;
-            ToggleTrackB(true);
-            ToggleTrackB(false);
-            _statusB.text = "";
-            
-            base.OnNewSession();
+            NeftaAdapterEvents.SetRewardedLogic(true);
+            IsOptimized = true;
         }
 
         protected override void LoadInternal(string adUnitId, bool disableAutoRetires, string bidFloor)
@@ -248,17 +232,8 @@ namespace AdDemo
                 }
                 return;
             }
-            
-            var adInfo = new MaxSdkBase.AdInfo(new Dictionary<string, object>()
-            {
-                { "adUnitId", track.AdUnitId },
-                { "adFormat", "REWARDED" },
-                { "networkName", "simulator network" },
-                { "creativeId", "simulator creative"+ track.AdUnitId },
-                { "revenue", revenue },
-                { "revenuePrecision", "exact" },
-                { "waterfallInfo", GetWaterfallDictionary(new [] { MaxSdkBase.MaxAdLoadState.AdLoaded, MaxSdkBase.MaxAdLoadState.AdLoadNotAttempted })}
-            });
+
+            var adInfo = SimulatorUi.GetAdInfo(track.AdUnitId, "REWARDED", revenue);
             if (track == _trackA)
             {
                 _simAAdInfo = adInfo;
@@ -333,53 +308,36 @@ namespace AdDemo
                 {
                     { "errorCode", status == 2 ? 204 : -1 },
                     { "errorMessage", status == 2 ? "no fill" : "other" },
-                    { "waterfallInfo", GetWaterfallDictionary(new [] { MaxSdkBase.MaxAdLoadState.FailedToLoad , MaxSdkBase.MaxAdLoadState.FailedToLoad }) }
+                    { "waterfallInfo", SimulatorUi.GetWaterfallDictionary(new [] { MaxSdkBase.MaxAdLoadState.FailedToLoad , MaxSdkBase.MaxAdLoadState.FailedToLoad }) }
                 })
             ); 
         }
-
-        private Dictionary<string, object> GetWaterfallDictionary(MaxSdkBase.MaxAdLoadState[] loadStates)
+        
+        public class TrackStatus
         {
-            var responses = new List<object>();
-            for (var i = 0; i < loadStates.Length; i++)
+            public enum State
             {
-                Dictionary<string, object> error = null;
-                if (loadStates[i] == MaxSdkBase.MaxAdLoadState.FailedToLoad)
-                {
-                    error = new Dictionary<string, object>()
-                    {
-                        { "errorCode", "-1" },
-                        { "errorMessage", "simulator error message" },
-                        { "latencyMillis", "45" }
-                    };
-                }
-
-                responses.Add(new Dictionary<string, object>()
-                {
-                    { "adLoadState", ((int)loadStates[i]).ToString() },
-                    {
-                        "mediatedNetwork", new Dictionary<string, object>
-                        {
-                            { "name", $"simulator network {i}" },
-                            { "adapterClassName", "simulator adapter" },
-                            { "adapterVersion", "1.0.0" },
-                            { "sdkVersion", "13.0.0" }
-                        }
-                    },
-                    { "credentials", new Dictionary<string, object>() },
-                    { "isBidding", "true" },
-                    { "latencyMillis", Random.Range(0, 200).ToString() },
-                    { "error", error }
-                });
+                Idle,
+                LoadingWithInsights,
+                Loading,
+                Ready,
+                Shown
             }
 
-            return new Dictionary<string, object>()
+            private Track _track;
+
+            public TrackStatus(object track)
             {
-                { "name", "simulator waterfall" },
-                { "testName", "waterfall test name" },
-                { "networkResponses", responses },
-                { "latencyMillis", Random.Range(0, 200).ToString() }
-            };
+                _track = (Track) track;
+            }
+
+            public State GetState => (State)(int) _track.State;
+            public AdInsight GetInsight => _track.Insight;
+        }
+        
+        public TrackStatus GetTrack(bool a)
+        {
+            return a ? new TrackStatus(_trackA) : new TrackStatus(_trackB);
         }
     }
 }

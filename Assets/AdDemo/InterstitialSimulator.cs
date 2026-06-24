@@ -14,28 +14,6 @@ namespace AdDemo
         
         protected override string LogTag => "SimInterstitial";
 
-        public class TrackStatus
-        {
-            public enum State
-            {
-                Idle,
-                LoadingWithInsights,
-                Loading,
-                Ready,
-                Shown
-            }
-
-            private Track _track;
-
-            public TrackStatus(object track)
-            {
-                _track = (Track) track;
-            }
-
-            public State GetState => (State)(int) _track.State;
-            public AdInsight GetInsight => _track.Insight;
-        }
-
         private readonly Image _rendererFill2A;
         private readonly Button _fill2A;
         private readonly Image _rendererFill1A;
@@ -104,24 +82,8 @@ namespace AdDemo
             _trackA = new Track("Interstitial A");
             _trackB = new Track("Interstitial B");
             NeftaSdk.Initialize();
-            IsDualTrackInitialized = true;
-        }
-
-        public override void OnNewSession()
-        {
-            _simAFloor = -1;
-            _simAAdInfo = null;
-            ToggleTrackA(true);
-            ToggleTrackA(false);
-            _statusA.text = "";
-            
-            _simBFloor = -1;
-            _simBAdInfo = null;
-            ToggleTrackB(true);
-            ToggleTrackB(false);
-            _statusB.text = "";
-            
-            base.OnNewSession();
+            NeftaAdapterEvents.SetInterstitialLogic(true);
+            IsOptimized = true;
         }
 
         protected override void LoadInternal(string adUnitId, bool disableAutoRetries, string bidFloor)
@@ -184,11 +146,6 @@ namespace AdDemo
                 () => { OnAdHiddenCallback(track.AdUnitId, adInfo); });
             
             return true;
-        }
-
-        public TrackStatus GetTrack(bool a)
-        {
-            return a ? new TrackStatus(_trackA) : new TrackStatus(_trackB);
         }
         
         private void SimLoad(string adUnitId)
@@ -268,17 +225,8 @@ namespace AdDemo
                 }
                 return;
             }
-            
-            var adInfo = new MaxSdkBase.AdInfo(new Dictionary<string, object>()
-            {
-                { "adUnitId", track.AdUnitId },
-                { "adFormat", "INTER" },
-                { "networkName", "simulator network" },
-                { "creativeId", "simulator creative"+ track.AdUnitId },
-                { "revenue", revenue },
-                { "revenuePrecision", "exact" },
-                { "waterfallInfo", GetWaterfallDictionary(new [] { MaxSdkBase.MaxAdLoadState.AdLoaded, MaxSdkBase.MaxAdLoadState.AdLoadNotAttempted })}
-            });
+
+            var adInfo = SimulatorUi.GetAdInfo(track.AdUnitId, "INTER", revenue);
             if (track == _trackA)
             {
                 _simAAdInfo = adInfo;
@@ -353,53 +301,36 @@ namespace AdDemo
                 {
                     { "errorCode", status == 2 ? 204 : -1 },
                     { "errorMessage", status == 2 ? "no fill" : "other" },
-                    { "waterfallInfo", GetWaterfallDictionary(new [] { MaxSdkBase.MaxAdLoadState.FailedToLoad , MaxSdkBase.MaxAdLoadState.FailedToLoad }) }
+                    { "waterfallInfo", SimulatorUi.GetWaterfallDictionary(new [] { MaxSdkBase.MaxAdLoadState.FailedToLoad , MaxSdkBase.MaxAdLoadState.FailedToLoad }) }
                 })
             ); 
         }
-
-        private Dictionary<string, object> GetWaterfallDictionary(MaxSdkBase.MaxAdLoadState[] loadStates)
+        
+        public class TrackStatus
         {
-            var responses = new List<object>();
-            for (var i = 0; i < loadStates.Length; i++)
+            public enum State
             {
-                Dictionary<string, object> error = null;
-                if (loadStates[i] == MaxSdkBase.MaxAdLoadState.FailedToLoad)
-                {
-                    error = new Dictionary<string, object>()
-                    {
-                        { "errorCode", "-1" },
-                        { "errorMessage", "simulator error message" },
-                        { "latencyMillis", "45" }
-                    };
-                }
-
-                responses.Add(new Dictionary<string, object>()
-                {
-                    { "adLoadState", ((int)loadStates[i]).ToString() },
-                    {
-                        "mediatedNetwork", new Dictionary<string, object>
-                        {
-                            { "name", $"simulator network {i}" },
-                            { "adapterClassName", "simulator adapter" },
-                            { "adapterVersion", "1.0.0" },
-                            { "sdkVersion", "13.0.0" }
-                        }
-                    },
-                    { "credentials", new Dictionary<string, object>() },
-                    { "isBidding", "true" },
-                    { "latencyMillis", UnityEngine.Random.Range(0, 200).ToString() },
-                    { "error", error }
-                });
+                Idle,
+                LoadingWithInsights,
+                Loading,
+                Ready,
+                Shown
             }
 
-            return new Dictionary<string, object>()
+            private Track _track;
+
+            public TrackStatus(object track)
             {
-                { "name", "simulator waterfall" },
-                { "testName", "waterfall test name" },
-                { "networkResponses", responses },
-                { "latencyMillis", UnityEngine.Random.Range(0, 200).ToString() }
-            };
+                _track = (Track) track;
+            }
+
+            public State GetState => (State)(int) _track.State;
+            public AdInsight GetInsight => _track.Insight;
+        }
+        
+        public TrackStatus GetTrack(bool a)
+        {
+            return a ? new TrackStatus(_trackA) : new TrackStatus(_trackB);
         }
     }
 }

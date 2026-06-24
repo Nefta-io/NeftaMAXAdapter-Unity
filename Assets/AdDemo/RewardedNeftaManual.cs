@@ -28,13 +28,6 @@ namespace AdDemo
             {
                 AdUnitId = adUnitId;
             }
-
-            public void Reset()
-            {
-                Insight = null;
-                State = State.Idle;
-                AdInfo = null;
-            }
         }
         
         private Track _trackA;
@@ -49,7 +42,6 @@ namespace AdDemo
             
             _trackA = new Track(RewardedUi.AdUnitIdA);
             _trackB = new Track(RewardedUi.AdUnitIdB);
-            NeftaAdapterEvents.AddNewSessionCallback(OnNewSession);
             
             MaxSdkCallbacks.Rewarded.OnAdLoadedEvent += OnAdLoadedEvent;
             MaxSdkCallbacks.Rewarded.OnAdLoadFailedEvent += OnAdLoadFailedEvent;
@@ -58,18 +50,6 @@ namespace AdDemo
             MaxSdkCallbacks.Rewarded.OnAdReceivedRewardEvent += OnAdReceivedRewardEvent;
             MaxSdkCallbacks.Rewarded.OnAdRevenuePaidEvent += OnAdRevenuePaidEvent;
             MaxSdkCallbacks.Rewarded.OnAdClickedEvent += OnAdClickedEvent;
-        }
-        
-        // this fires on app resume if the app was in background fore more than 30m
-        // in case ads are preloaded from previous session discard them
-        // and load new ones which will most likely have higher revenue
-        private void OnNewSession()
-        {
-            _trackA.Reset();
-            _trackB.Reset();
-            
-            _isFirstResponseReceived = false;
-            Load();
         }
         
         public void Load()
@@ -225,7 +205,7 @@ namespace AdDemo
         
         private async Task RetryLoadWithDelay(Track track)
         {
-            var delay = NeftaAdapterEvents.GetRetryDelayInSeconds(track.Insight);
+            var delay = NeftaAdapterEvents.GetRetryDelayInSeconds(track.Insight, track.AdUnitId);
             await Task.Delay((int)(delay * 1000));
 #if UNITY_EDITOR
             if (!Application.isPlaying)

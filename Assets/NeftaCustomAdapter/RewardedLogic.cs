@@ -9,10 +9,15 @@ namespace NeftaCustomAdapter
         protected override int InsightType => Insights.Rewarded;
         
         public Action<string, MaxSdkBase.Reward, MaxSdkBase.AdInfo> OnAdReceivedRewardEvent;
-
-        public override void InitializeDualTrack(string adUnitIdA, string adUnitIdB)
+        
+        public void Initialize(bool isOptimized, string adUnitIdA, string adUnitIdB)
         {
-            base.InitializeDualTrack(adUnitIdA, adUnitIdB);
+            NeftaSdk.Initialize();
+            NeftaAdapterEvents.SetRewardedLogic(isOptimized);
+            if (isOptimized)
+            {
+                InitializeDualTrack(adUnitIdA, adUnitIdB);
+            }
             
             MaxSdkCallbacks.Rewarded.OnAdLoadedEvent += OnAdLoadedCallback;
             MaxSdkCallbacks.Rewarded.OnAdLoadFailedEvent += OnAdFailedCallback;
@@ -41,17 +46,17 @@ namespace NeftaCustomAdapter
             return IsAdReady();
         }
         
-        protected override bool TryShow(Track adRequest)
+        protected override bool TryShow(Track track)
         {
-            adRequest.AdInfo = null;
-            if (MaxSdk.IsRewardedAdReady(adRequest.AdUnitId))
+            track.AdInfo = null;
+            if (MaxSdk.IsRewardedAdReady(track.AdUnitId))
             {
-                adRequest.State = State.Shown;
-                Log($"Showing {adRequest.AdUnitId}");
-                MaxSdk.ShowRewardedAd(adRequest.AdUnitId);
+                track.State = State.Shown;
+                Log($"Showing {track.AdUnitId}");
+                MaxSdk.ShowRewardedAd(track.AdUnitId);
                 return true;
             }
-            adRequest.State = State.Idle;
+            track.State = State.Idle;
             return false;
         }
         

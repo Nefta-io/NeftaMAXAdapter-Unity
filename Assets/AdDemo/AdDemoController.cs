@@ -36,6 +36,7 @@ namespace AdDemo
         }
 
         [SerializeField] private Text _title;
+        [SerializeField] private Toggle _consetCheckBox;
         [SerializeField] private GameObject _integrationSelection;
         [SerializeField] private Button _integrationManualButton;
         [SerializeField] private Button _integrationWrapperButton;
@@ -56,17 +57,27 @@ namespace AdDemo
         {
             _title.text = $"MAX Integration {MaxSdk.Version}";
             
+            _consetCheckBox.onValueChanged.AddListener(OnConsentChange);
             _integrationManualButton.onClick.AddListener(OnManualClick);
             _integrationWrapperButton.onClick.AddListener(OnWrapperClick);
             _groupDefaultButton.onClick.AddListener(OnDefaultClick);
             _groupOptimizedButton.onClick.AddListener(OnOptimizedClick);
             _simulatorButton.onClick.AddListener(OnSimulatorClick);
-            
+        }
+
+        private void InitializeNefta()
+        {
             NeftaAdapterEvents.EnableLogging(true);
             NeftaAdapterEvents.InitWithAppId(_neftaAppId, (InitConfiguration config) =>
             {
                 Debug.Log($"[NeftaPluginMAX] Nefta Initialized, nuid: {config._nuid}");
             });
+        }
+
+        private void OnConsentChange(bool consent)
+        {
+            NeftaAdapterEvents.SetHasUserConsent(false);
+            _consetCheckBox.interactable = false;
         }
         
         private void OnManualClick()
@@ -91,6 +102,7 @@ namespace AdDemo
         
         private void OnDefaultClick()
         {
+            InitializeNefta();
             _integrationSelection.SetActive(false);
             
             InitializeMAX(false);
@@ -98,6 +110,7 @@ namespace AdDemo
         
         private void OnOptimizedClick()
         {
+            InitializeNefta();
             _integrationSelection.SetActive(false);
             
             InitializeMAX(true);
@@ -127,6 +140,8 @@ namespace AdDemo
 
             if (_integrationType == IntegrationType.Manual)
             {
+                NeftaAdapterEvents.SetInterstitialLogic(isOptimized);
+                NeftaAdapterEvents.SetRewardedLogic(isOptimized);
                 if (isOptimized)
                 {
                     _interstitialUi.Init(new InterstitialNeftaManual());
@@ -147,6 +162,7 @@ namespace AdDemo
 
         private void OnSimulatorClick()
         {
+            InitializeNefta();
             _integrationSelection.SetActive(false);
             
             _interstitialSimulator.Init();

@@ -9,6 +9,9 @@ EditorBuildSettings:
     path: Assets/AdDemo/AdDemoScene.unity
     guid: d751acd2c41b34bce9b0959a1633577a
   - enabled: 1
-    path: Assets/Editor/Tests/PlayTests/PlayTestScene.unity
+    path: Assets/Editor/Tests/PlayTests/SimulatorScene.unity
     guid: f58f5f1dd77c34fbcbeabda0056ed2d9
+  - enabled: 1
+    path: Assets/Editor/Tests/PlayTests/WrapperScene.unity
+    guid: 88284e9039b55452c80d4df7c0e0112b
   m_configObjects: {}

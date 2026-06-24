@@ -14,11 +14,13 @@ extern "C" {
 #endif
     typedef void (*OnReady)(const char *initConfig);
     typedef void (*OnInsights)(int requestId, int adapterResponseType, const char *adapterResponse);
-    typedef void (*OnNewSession)();
 
     void EnableLogging(bool enable);
     void NeftaPlugin_SetExtraParameter(const char *key, const char *value);
-    void NeftaPlugin_Init(const char *appId, const char *clientId, OnReady onReady, OnInsights onInsights, OnNewSession onNewSession, const char *mediationVersion);
+    void NeftaPlugin_SetInterstitialLogic(bool isOptimized);
+    void NeftaPlugin_SetRewardedLogic(bool isOptimized);
+    void NeftaPlugin_SetHasUserConsent(bool hasUserConsent);
+    void NeftaPlugin_Init(const char *appId, const char *clientId, OnReady onReady, OnInsights onInsights, const char *mediationVersion);
     void NeftaPlugin_Record(int type, int category, int subCategory, const char *name, long value, const char *customPayload);
     void NeftaPlugin_OnExternalMediationRequest(const char *provider, int adType, const char *id0, const char *requestedAdUnitId, double requestedFloorPrice, int requestId);
     void NeftaPlugin_OnExternalMediationResponseAsString(const char *provider, const char *id0, const char *id2, double revenue, const char *precision, int status, const char *providerStatus, const char *networkStatus, const char *baseString);
@@ -42,10 +44,21 @@ void NeftaPlugin_SetExtraParameter(const char *key, const char *value) {
     [NeftaPlugin SetExtraParameterWithKey: k value: v];
 }
 
-void NeftaPlugin_Init(const char *appId, const char *clientId, OnReady onReady, OnInsights onInsights, OnNewSession onNewSession, const char *mediationVersion) {
+void NeftaPlugin_SetInterstitialLogic(bool isOptimized) {
+    [NeftaPlugin SetInterstitialLogic: isOptimized];
+}
+
+void NeftaPlugin_SetRewardedLogic(bool isOptimized) {
+    [NeftaPlugin SetRewardedLogic: isOptimized];
+}
+
+void NeftaPlugin_SetHasUserConsent(bool hasUserConsent) {
+    [NeftaPlugin SetHasUserConsent: hasUserConsent];
+}
+
+void NeftaPlugin_Init(const char *appId, const char *clientId, OnReady onReady, OnInsights onInsights, const char *mediationVersion) {
 	NSString *a = appId ? [NSString stringWithUTF8String: appId] : nil;
 	NSString *c = clientId ? [NSString stringWithUTF8String: clientId] : nil;
-    [NeftaPlugin AddNewSessionCallback: ^void(void) { onNewSession(); }];
     _plugin = [NeftaPlugin UnityInitWithAppId: a clientId: c onReadyAsString: ^void(NSString * _Nullable initConfig) {
         const char *iC = initConfig ? [initConfig UTF8String] : NULL;
         onReady(iC);

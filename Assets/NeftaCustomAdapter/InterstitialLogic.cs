@@ -5,11 +5,16 @@ namespace NeftaCustomAdapter
         protected override string LogTag => "NeftaInterstitial";
         protected override NeftaAdapterEvents.AdType AdType => NeftaAdapterEvents.AdType.Interstitial;
         protected override int InsightType => Insights.Interstitial;
-
-        public override void InitializeDualTrack(string adUnitIdA, string adUnitIdB)
+        
+        public void Initialize(bool isOptimized, string adUnitIdA, string adUnitIdB)
         {
-            base.InitializeDualTrack(adUnitIdA, adUnitIdB);
-            
+            NeftaSdk.Initialize();
+            NeftaAdapterEvents.SetInterstitialLogic(isOptimized);
+            if (isOptimized)
+            {
+                InitializeDualTrack(adUnitIdA, adUnitIdB);
+            }
+
             MaxSdkCallbacks.Interstitial.OnAdLoadedEvent += OnAdLoadedCallback;
             MaxSdkCallbacks.Interstitial.OnAdLoadFailedEvent += OnAdFailedCallback;
             MaxSdkCallbacks.Interstitial.OnAdDisplayFailedEvent += OnAdDisplayFailedCallback;

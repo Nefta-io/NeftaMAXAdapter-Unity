@@ -100,7 +100,7 @@ namespace Editor.Tests
                 Assert.IsTrue(_insight._rewarded != null);
                 Assert.AreEqual(delay, _insight._rewarded._floorPrice, 0.0001);
                 
-                Assert.AreEqual(delay, NeftaAdapterEvents.GetRetryDelayInSeconds(_insight.Insight), 0.0001);
+                Assert.AreEqual(delay, NeftaAdapterEvents.GetRetryDelayInSeconds(_insight.Insight, _insight.Insight._adUnit), 0.0001);
             }
         }
 

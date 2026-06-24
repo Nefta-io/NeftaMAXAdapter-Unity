@@ -20,10 +20,5 @@ namespace NeftaCustomAdapter
         {
             NeftaAdapterEvents.IOnInsights(id, adapterResponseType, adapterResponse);
         }
-
-        public void IOnNewSessionCallback()
-        {
-            NeftaAdapterEvents.IOnNewSessionCallback();
-        }
     }
 }

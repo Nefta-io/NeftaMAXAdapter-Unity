@@ -12,10 +12,7 @@ namespace AdDemo
         
         public InterstitialNeftaWrapper(bool isOptimized)
         {
-            if (isOptimized)
-            {
-                NeftaSdk.Interstitial.InitializeDualTrack(InterstitialUi.AdUnitIdA, InterstitialUi.AdUnitIdB);   
-            }
+            NeftaSdk.Interstitial.Initialize(isOptimized, InterstitialUi.AdUnitIdA, InterstitialUi.AdUnitIdB);   
         }
         
         public void Init(InterstitialUi ui)
@@ -83,6 +80,7 @@ namespace AdDemo
 
             Load();
         }
+        
         private async Task LoadWithDelay()
         {
             var delay = new[] { 0, 2, 4, 8, 16, 32, 64 }[Math.Min(_consecutiveAdFails, 6)];

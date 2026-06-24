@@ -5,7 +5,8 @@
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "NeftaCustomAdapter",
-        "AdDemo"
+        "AdDemo",
+        "MaxSdk.Scripts"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

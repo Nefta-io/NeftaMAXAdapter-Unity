@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using NeftaCustomAdapter;
 using UnityEngine;
@@ -256,6 +257,64 @@ namespace AdDemo
             {
                 action?.Invoke();
             }
+        }
+
+        public static MaxSdkBase.AdInfo GetAdInfo(string adUnitId, string format, double revenue)
+        {
+            return new MaxSdkBase.AdInfo(new Dictionary<string, object>()
+            {
+                { "adUnitId", adUnitId },
+                { "adFormat",  format },
+                { "networkName", "simulator network" },
+                { "creativeId", "simulator creative"+ adUnitId },
+                { "revenue", revenue },
+                { "revenuePrecision", "exact" },
+                { "waterfallInfo", GetWaterfallDictionary(new [] { MaxSdkBase.MaxAdLoadState.AdLoaded, MaxSdkBase.MaxAdLoadState.AdLoadNotAttempted })}
+            });
+        }
+        
+        public static Dictionary<string, object> GetWaterfallDictionary(MaxSdkBase.MaxAdLoadState[] loadStates)
+        {
+            var responses = new List<object>();
+            for (var i = 0; i < loadStates.Length; i++)
+            {
+                Dictionary<string, object> error = null;
+                if (loadStates[i] == MaxSdkBase.MaxAdLoadState.FailedToLoad)
+                {
+                    error = new Dictionary<string, object>()
+                    {
+                        { "errorCode", "-1" },
+                        { "errorMessage", "simulator error message" },
+                        { "latencyMillis", "45" }
+                    };
+                }
+
+                responses.Add(new Dictionary<string, object>()
+                {
+                    { "adLoadState", ((int)loadStates[i]).ToString() },
+                    {
+                        "mediatedNetwork", new Dictionary<string, object>
+                        {
+                            { "name", $"simulator network {i}" },
+                            { "adapterClassName", "simulator adapter" },
+                            { "adapterVersion", "1.0.0" },
+                            { "sdkVersion", "13.0.0" }
+                        }
+                    },
+                    { "credentials", new Dictionary<string, object>() },
+                    { "isBidding", "true" },
+                    { "latencyMillis", UnityEngine.Random.Range(0, 200).ToString() },
+                    { "error", error }
+                });
+            }
+
+            return new Dictionary<string, object>()
+            {
+                { "name", "simulator waterfall" },
+                { "testName", "waterfall test name" },
+                { "networkResponses", responses },
+                { "latencyMillis", UnityEngine.Random.Range(0, 200).ToString() }
+            };
         }
     }
 }

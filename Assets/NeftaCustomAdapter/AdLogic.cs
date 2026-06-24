@@ -29,21 +29,13 @@ namespace NeftaCustomAdapter
             {
                 AdUnitId = adUnitId;
             }
-
-            public void  Reset()
-            {
-                IsAdLoadCallbackAvailable = false;
-                Insight = null;
-                State = State.Idle;
-                AdInfo = null;
-            }
         }
         
         protected abstract string LogTag { get; }
         protected abstract NeftaAdapterEvents.AdType AdType { get; }
         protected abstract int InsightType { get; }
         protected abstract void LoadInternal(string adUnitId, bool disableAutoRetries, string bidFloor);
-        protected abstract bool TryShow(Track adRequest);
+        protected abstract bool TryShow(Track track);
         
         protected Track _trackA;
         protected Track _trackB;
@@ -59,27 +51,14 @@ namespace NeftaCustomAdapter
         public Action<string, string, MaxSdkBase.AdInfo> OnAdReviewCreativeIdGeneratedEvent;
         public Action<string, MaxSdkBase.AdInfo> OnAdHiddenEvent;
         
-        public bool IsDualTrackInitialized { get; protected set; }
+        public bool IsOptimized { get; protected set; }
 
-        public virtual void InitializeDualTrack(string adUnitIdA, string adUnitIdB)
+        protected void InitializeDualTrack(string adUnitIdA, string adUnitIdB)
         {
             _trackA = new Track(adUnitIdA);
             _trackB = new Track(adUnitIdB);
-            NeftaSdk.Initialize();
 
-            IsDualTrackInitialized = true;
-        }
-
-        // this fires on app resume if the app was in background fore more than 30m
-        // in case ads are preloaded from previous session discard them
-        // and load new ones which will most likely have higher revenue
-        public virtual void OnNewSession()
-        {
-            _trackA.Reset();
-            _trackB.Reset();
-            
-            _isFirstResponseReceived = false;
-            LoadTracks();
+            IsOptimized = true;
         }
 
         /// <summary>
@@ -198,7 +177,7 @@ namespace NeftaCustomAdapter
         
         private async Task RetryLoadWithDelay(Track track)
         {
-            var delay = NeftaAdapterEvents.GetRetryDelayInSeconds(track.Insight);
+            var delay = NeftaAdapterEvents.GetRetryDelayInSeconds(track.Insight, track.AdUnitId);
             await Task.Delay((int)(delay * 1000));
 #if UNITY_EDITOR
             if (!Application.isPlaying)
@@ -241,7 +220,7 @@ namespace NeftaCustomAdapter
         protected void OnAdFailedCallback(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
         {
             NeftaAdapterEvents.OnExternalMediationRequestFailed(adUnitId, errorInfo);
-            if (!IsDualTrackInitialized)
+            if (!IsOptimized)
             {
                 if (OnAdLoadFailedEvent != null)
                 {
@@ -260,7 +239,7 @@ namespace NeftaCustomAdapter
         protected void OnAdLoadedCallback(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
             NeftaAdapterEvents.OnExternalMediationRequestLoaded(adInfo);
-            if (!IsDualTrackInitialized)
+            if (!IsOptimized)
             {
                 if (OnAdLoadedEvent != null)
                 {
@@ -297,7 +276,7 @@ namespace NeftaCustomAdapter
         
         protected void OnAdDisplayFailedCallback(string adUnitId, MaxSdkBase.ErrorInfo errorInfo, MaxSdkBase.AdInfo adInfo)
         {
-            if (!IsDualTrackInitialized)
+            if (!IsOptimized)
             {
                 if (OnAdDisplayFailedEvent != null)
                 {
@@ -347,7 +326,7 @@ namespace NeftaCustomAdapter
         
         protected void OnAdHiddenCallback(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
-            if (!IsDualTrackInitialized)
+            if (!IsOptimized)
             {
                 if (OnAdHiddenEvent != null)
                 {

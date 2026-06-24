@@ -35,16 +35,6 @@ namespace NeftaCustomAdapter
             public int noDynamicResponseRetryInMs;
             public int noDefaultResponseRetryInMs;
         }
-        
-        public struct ExtParams
-        {
-            public const string TestGroup = "test_group";
-            public const string AttributionSource = "attribution_source";
-            public const string AttributionCampaign = "attribution_campaign";
-            public const string AttributionAdset = "attribution_adset";
-            public const string AttributionCreative = "attribution_creative";
-            public const string AttributionIncentivized = "attribution_incentivized";
-        }
 
         private const string _mediationProvider = "applovin-max";
 
@@ -76,7 +66,6 @@ namespace NeftaCustomAdapter
 #elif UNITY_IOS
         private delegate void OnReadyDelegate(string initConfig);
         private delegate void OnInsightsDelegate(int requestId, int adapterResponseType, string adapterResponse);
-        private delegate void OnNewSessionCallbackDelegate();
 
         [MonoPInvokeCallback(typeof(OnReadyDelegate))] 
         private static void OnReadyBridge(string initConfig) {
@@ -88,19 +77,23 @@ namespace NeftaCustomAdapter
             IOnInsights(requestId, adapterResponseType, adapterResponse);
         }
 
-        [MonoPInvokeCallback(typeof(OnNewSessionCallbackDelegate))] 
-        private static void OnNewSessionCallbackBridge() {
-            IOnNewSessionCallback();
-        }
-
         [DllImport ("__Internal")]
         private static extern void NeftaPlugin_EnableLogging(bool enable);
+
+        [DllImport ("__Internal")]
+        private static extern void NeftaPlugin_SetInterstitialLogic(bool isOptimized);
+
+        [DllImport ("__Internal")]
+        private static extern void NeftaPlugin_SetRewardedLogic(bool isOptimized);
+
+        [DllImport ("__Internal")]
+        private static extern void NeftaPlugin_SetHasUserConsent(bool hasUserConsent);
 
         [DllImport ("__Internal")]
         private static extern void NeftaPlugin_SetExtraParameter(string key, string value);
 
         [DllImport ("__Internal")]
-        private static extern void NeftaPlugin_Init(string appId, string clientId, OnReadyDelegate onReady, OnInsightsDelegate onInsights, OnNewSessionCallbackDelegate onNewSessionCallback, string mediationVersion);
+        private static extern void NeftaPlugin_Init(string appId, string clientId, OnReadyDelegate onReady, OnInsightsDelegate onInsights, string mediationVersion);
 
         [DllImport ("__Internal")]
         private static extern void NeftaPlugin_Record(int type, int category, int subCategory, string nameValue, long value, string customPayload);
@@ -146,7 +139,7 @@ namespace NeftaCustomAdapter
 
         private static SynchronizationContext _mainContext;
         private static Action<InitConfiguration> _onReady;
-        private static List<Action> _newSessionCallbacks = new List<Action>();
+        private static readonly Dictionary<string, int> ConsecutiveAdFails = new Dictionary<string, int>();
 
         public static InitConfiguration InitConfiguration;
         public static bool IsLoggingEnabled;
@@ -181,7 +174,7 @@ namespace NeftaCustomAdapter
             _plugin = NeftaPlugin.Init(appId, clientId, "unity-applovin-max", MaxSdk.Version);
             _plugin.Listener = new NeftaListener();
 #elif UNITY_IOS
-            NeftaPlugin_Init(appId, clientId, OnReadyBridge, OnInsightsBridge, OnNewSessionCallbackBridge, MaxSdk.Version);
+            NeftaPlugin_Init(appId, clientId, OnReadyBridge, OnInsightsBridge, MaxSdk.Version);
 #elif UNITY_ANDROID
             var unityClass = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
             var unityActivity = unityClass.GetStatic<AndroidJavaObject>("currentActivity");
@@ -189,6 +182,40 @@ namespace NeftaCustomAdapter
 #endif
             _insightRequests = new List<InsightRequest>();
             _delays = new List<float>() { 2 };
+        }
+
+        public static void SetInterstitialLogic(bool isOptimized)
+        {
+            Debug.Log("set inter lgoic: "+ isOptimized);
+#if UNITY_EDITOR
+            NeftaPlugin.SetInterstitialLogic(isOptimized);
+#elif UNITY_IOS
+            NeftaPlugin_SetInterstitialLogic(isOptimized);
+#elif UNITY_ANDROID
+            NeftaPluginClass.CallStatic("SetInterstitialLogic", isOptimized);
+#endif
+        }
+        
+        public static void SetRewardedLogic(bool isOptimized)
+        {
+#if UNITY_EDITOR
+            NeftaPlugin.SetRewardedLogic(isOptimized);
+#elif UNITY_IOS
+            NeftaPlugin_SetRewardedLogic(isOptimized);
+#elif UNITY_ANDROID
+            NeftaPluginClass.CallStatic("SetRewardedLogic", isOptimized);
+#endif
+        }
+        
+        public static void SetHasUserConsent(bool hasUserConsent)
+        {
+#if UNITY_EDITOR
+            NeftaPlugin.SetHasUserConsent(hasUserConsent);
+#elif UNITY_IOS
+            NeftaPlugin_SetHasUserConsent(hasUserConsent);
+#elif UNITY_ANDROID
+            NeftaPluginClass.CallStatic("SetHasUserConsent", hasUserConsent);
+#endif
         }
 
         public static void Record(GameEvent gameEvent)
@@ -265,7 +292,7 @@ namespace NeftaCustomAdapter
             string baseString = null;
             if (errorInfo.WaterfallInfo != null)
             {
-                StringBuilder sb = new StringBuilder();
+                var sb = new StringBuilder();
                 sb.Append('{');
                 SerializeWaterfall(sb, errorInfo.WaterfallInfo);
                 sb.Append("}");
@@ -287,6 +314,21 @@ namespace NeftaCustomAdapter
 
         private static void OnExternalMediationResponse(string provider, string id, string id2, double revenue, string precision, int status, string providerStatus, string networkStatus, string baseString)
         {
+            if (status == 1)
+            {
+                ConsecutiveAdFails[id] = 0;
+            }
+            else
+            {
+                if (ConsecutiveAdFails.TryGetValue(id, out int count))
+                {
+                    ConsecutiveAdFails[id] = count + 1;
+                }
+                else
+                {
+                    ConsecutiveAdFails[id] = 1;
+                }   
+            }
 #if UNITY_EDITOR
             _plugin.OnExternalMediationResponseAsString(provider, id, id2, revenue, precision, status, providerStatus, networkStatus, baseString);
 #elif UNITY_IOS
@@ -445,16 +487,6 @@ namespace NeftaCustomAdapter
             _plugin.CallStatic("OnExternalMediationImpressionAsString", isClick, provider, data, id, id2);
 #endif
         }
-
-        public static void AddNewSessionCallback(Action newSessionCallback)
-        {
-            _newSessionCallbacks.Add(newSessionCallback);
-        }
-
-        public static void RemoveNewSessionCallback(Action newSessionCallback)
-        {
-            _newSessionCallbacks.Remove(newSessionCallback);
-        }
         
         public static void GetInsights(int insights, AdInsight previousInsight, OnInsightsCallback callback)
         {
@@ -481,7 +513,7 @@ namespace NeftaCustomAdapter
 #endif
         }
         
-        public static float GetRetryDelayInSeconds(AdInsight insight)
+        public static float GetRetryDelayInSeconds(AdInsight insight, string adUnitId)
         {
             var consecutiveFails = 1;
             if (insight != null) {
@@ -489,6 +521,10 @@ namespace NeftaCustomAdapter
                     return insight._delay;
                 }
                 consecutiveFails = insight._auctionId;
+            }
+            else
+            {
+                ConsecutiveAdFails.TryGetValue(adUnitId, out consecutiveFails);
             }
             var delayIndex = consecutiveFails - 1;
             if (delayIndex < 0) {
@@ -590,17 +626,6 @@ namespace NeftaCustomAdapter
                     }
                 }
             }
-        }
-
-        internal static void IOnNewSessionCallback()
-        {
-            _mainContext.Post(_ =>
-            {
-                foreach (var newSessionCallback in _newSessionCallbacks)
-                {
-                    newSessionCallback?.Invoke();
-                }
-            }, null);
         }
         
         internal static string JavaScriptStringEncode(string value)

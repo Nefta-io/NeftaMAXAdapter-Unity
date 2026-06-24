@@ -596,18 +596,6 @@ SWIFT_CLASS("_TtC8NeftaSDK11NeftaPlugin")
 @interface NeftaPlugin : NSObject
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull Version;)
 + (NSString * _Nonnull)Version SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ExtParam_TestGroup;)
-+ (NSString * _Nonnull)ExtParam_TestGroup SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ExtParam_AttributionSource;)
-+ (NSString * _Nonnull)ExtParam_AttributionSource SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ExtParam_AttributionCampaign;)
-+ (NSString * _Nonnull)ExtParam_AttributionCampaign SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ExtParam_AttributionAdset;)
-+ (NSString * _Nonnull)ExtParam_AttributionAdset SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ExtParam_AttributionCreative;)
-+ (NSString * _Nonnull)ExtParam_AttributionCreative SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ExtParam_AttributionIncentivized;)
-+ (NSString * _Nonnull)ExtParam_AttributionIncentivized SWIFT_WARN_UNUSED_RESULT;
 @property (nonatomic, strong) NeftaEvents * _Nonnull Events;
 @property (nonatomic, copy) void (^ _Nullable OnInsightsAsString)(NSInteger, NSInteger, NSString * _Nullable);
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NeftaPlugin * _Nullable _instance;)
@@ -619,8 +607,10 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NeftaPlugin * _Nullabl
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 + (void)SetExtraParameterWithKey:(NSString * _Nonnull)key value:(NSString * _Nonnull)value;
++ (void)SetInterstitialLogic:(BOOL)isOptimized;
++ (void)SetRewardedLogic:(BOOL)isOptimized;
++ (void)SetHasUserConsent:(BOOL)hasUserConsent;
 - (void)RecordWithType:(NSInteger)type category:(NSInteger)category subCategory:(NSInteger)subCategory name:(NSString * _Nullable)name value:(int64_t)value customPayload:(NSString * _Nullable)customPayload;
-+ (void)AddNewSessionCallback:(void (^ _Nonnull)(void))callback;
 - (void)GetInsightsBridge:(NSInteger)requestId insights:(NSInteger)insights previousRequestId:(NSInteger)previousRequestId;
 - (void)GetInsights:(NSInteger)insights previousInsight:(AdInsight * _Nullable)previousInsight callback:(void (^ _Nonnull)(Insights * _Nonnull))callback;
 - (NSString * _Nonnull)GetNuidWithPresent:(BOOL)present SWIFT_WARN_UNUSED_RESULT;
@@ -629,7 +619,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NeftaPlugin * _Nullabl
 + (void)OnExternalMediationResponseAsString:(NSString * _Nonnull)provider id:(NSString * _Nonnull)id id2:(NSString * _Nullable)id2 revenue:(double)revenue precision:(NSString * _Nullable)precision status:(NSInteger)status providerStatus:(NSString * _Nullable)providerStatus networkStatus:(NSString * _Nullable)networkStatus baseString:(NSString * _Nullable)baseString;
 + (void)OnExternalMediationImpression:(BOOL)isClick provider:(NSString * _Nonnull)provider data:(NSMutableDictionary * _Nullable)data id:(NSString * _Nullable)id id2:(NSString * _Nullable)id2;
 + (void)OnExternalMediationImpressionAsString:(BOOL)isClick provider:(NSString * _Nonnull)provider data:(NSString * _Nonnull)data id:(NSString * _Nullable)id id2:(NSString * _Nullable)id2;
-+ (float)GetRetryDelayInSeconds:(AdInsight * _Nullable)insight SWIFT_WARN_UNUSED_RESULT;
++ (float)GetRetryDelayInSeconds:(AdInsight * _Nullable)insight adUnitId:(NSString * _Nonnull)adUnitId SWIFT_WARN_UNUSED_RESULT;
 + (void)SetOverrideWithUrl:(NSString * _Nullable)url;
 @end
 
@@ -1239,18 +1229,6 @@ SWIFT_CLASS("_TtC8NeftaSDK11NeftaPlugin")
 @interface NeftaPlugin : NSObject
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull Version;)
 + (NSString * _Nonnull)Version SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ExtParam_TestGroup;)
-+ (NSString * _Nonnull)ExtParam_TestGroup SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ExtParam_AttributionSource;)
-+ (NSString * _Nonnull)ExtParam_AttributionSource SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ExtParam_AttributionCampaign;)
-+ (NSString * _Nonnull)ExtParam_AttributionCampaign SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ExtParam_AttributionAdset;)
-+ (NSString * _Nonnull)ExtParam_AttributionAdset SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ExtParam_AttributionCreative;)
-+ (NSString * _Nonnull)ExtParam_AttributionCreative SWIFT_WARN_UNUSED_RESULT;
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull ExtParam_AttributionIncentivized;)
-+ (NSString * _Nonnull)ExtParam_AttributionIncentivized SWIFT_WARN_UNUSED_RESULT;
 @property (nonatomic, strong) NeftaEvents * _Nonnull Events;
 @property (nonatomic, copy) void (^ _Nullable OnInsightsAsString)(NSInteger, NSInteger, NSString * _Nullable);
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NeftaPlugin * _Nullable _instance;)
@@ -1262,8 +1240,10 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NeftaPlugin * _Nullabl
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 + (void)SetExtraParameterWithKey:(NSString * _Nonnull)key value:(NSString * _Nonnull)value;
++ (void)SetInterstitialLogic:(BOOL)isOptimized;
++ (void)SetRewardedLogic:(BOOL)isOptimized;
++ (void)SetHasUserConsent:(BOOL)hasUserConsent;
 - (void)RecordWithType:(NSInteger)type category:(NSInteger)category subCategory:(NSInteger)subCategory name:(NSString * _Nullable)name value:(int64_t)value customPayload:(NSString * _Nullable)customPayload;
-+ (void)AddNewSessionCallback:(void (^ _Nonnull)(void))callback;
 - (void)GetInsightsBridge:(NSInteger)requestId insights:(NSInteger)insights previousRequestId:(NSInteger)previousRequestId;
 - (void)GetInsights:(NSInteger)insights previousInsight:(AdInsight * _Nullable)previousInsight callback:(void (^ _Nonnull)(Insights * _Nonnull))callback;
 - (NSString * _Nonnull)GetNuidWithPresent:(BOOL)present SWIFT_WARN_UNUSED_RESULT;
@@ -1272,7 +1252,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NeftaPlugin * _Nullabl
 + (void)OnExternalMediationResponseAsString:(NSString * _Nonnull)provider id:(NSString * _Nonnull)id id2:(NSString * _Nullable)id2 revenue:(double)revenue precision:(NSString * _Nullable)precision status:(NSInteger)status providerStatus:(NSString * _Nullable)providerStatus networkStatus:(NSString * _Nullable)networkStatus baseString:(NSString * _Nullable)baseString;
 + (void)OnExternalMediationImpression:(BOOL)isClick provider:(NSString * _Nonnull)provider data:(NSMutableDictionary * _Nullable)data id:(NSString * _Nullable)id id2:(NSString * _Nullable)id2;
 + (void)OnExternalMediationImpressionAsString:(BOOL)isClick provider:(NSString * _Nonnull)provider data:(NSString * _Nonnull)data id:(NSString * _Nullable)id id2:(NSString * _Nullable)id2;
-+ (float)GetRetryDelayInSeconds:(AdInsight * _Nullable)insight SWIFT_WARN_UNUSED_RESULT;
++ (float)GetRetryDelayInSeconds:(AdInsight * _Nullable)insight adUnitId:(NSString * _Nonnull)adUnitId SWIFT_WARN_UNUSED_RESULT;
 + (void)SetOverrideWithUrl:(NSString * _Nullable)url;
 @end
 

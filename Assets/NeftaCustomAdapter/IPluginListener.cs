@@ -6,8 +6,6 @@ namespace NeftaCustomAdapter
         void IOnReady(string initConfiguration);
 
         void IOnInsights(int id, int adapterResponseType, string adapterRerponse);
-
-        void IOnNewSessionCallback();
     }
 }
 #endif

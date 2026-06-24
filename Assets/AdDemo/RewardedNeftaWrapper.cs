@@ -12,10 +12,7 @@ namespace AdDemo
 
         public RewardedNeftaWrapper(bool isOptimized)
         {
-            if (isOptimized)
-            {
-                NeftaSdk.Rewarded.InitializeDualTrack(RewardedUi.AdUnitIdA, RewardedUi.AdUnitIdB);   
-            }
+            NeftaSdk.Rewarded.Initialize(isOptimized, RewardedUi.AdUnitIdA, RewardedUi.AdUnitIdB);   
         }
         
         public void Init(RewardedUi ui)

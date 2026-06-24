@@ -35,7 +35,7 @@ import os
   @objc public var _floorPrice: Swift.Double
   @objc public var _adUnit: Swift.String?
   @objc public var _delay: Swift.Float
-  public init(type: NeftaSDK.AdInsight.Types, sessionId: Swift.Int, adOpportunityId: Swift.Int, delay: Swift.Float)
+  public init(type: NeftaSDK.AdInsight.Types, sessionId: Swift.Int, adOpportunityId: Swift.Int)
   public func Parse(config: [Swift.String : Any]) -> NeftaSDK.AdInsight
   public func OnNewAuction()
   @objc override dynamic public var description: Swift.String {
@@ -61,14 +61,7 @@ import os
   public typealias OnReadyAsStringBlock = (Swift.String) -> Swift.Void
   public typealias OnInsightsBlock = (NeftaSDK.Insights) -> Swift.Void
   public typealias OnInsightsAsStringBlock = (Swift.Int, Swift.Int, Swift.String?) -> Swift.Void
-  public typealias OnNewSessionBlock = () -> Swift.Void
   @objc public static let Version: Swift.String
-  @objc public static let ExtParam_TestGroup: Swift.String
-  @objc public static let ExtParam_AttributionSource: Swift.String
-  @objc public static let ExtParam_AttributionCampaign: Swift.String
-  @objc public static let ExtParam_AttributionAdset: Swift.String
-  @objc public static let ExtParam_AttributionCreative: Swift.String
-  @objc public static let ExtParam_AttributionIncentivized: Swift.String
   public static var _initUrl: Swift.String
   final public let _info: NeftaSDK.NeftaPlugin.Info
   final public let _state: NeftaSDK.NeftaPlugin.State
@@ -80,8 +73,10 @@ import os
   @objc public static func UnityInit(appId: Swift.String?, clientId: Swift.String?, onReadyAsString: NeftaSDK.NeftaPlugin.OnReadyAsStringBlock?, integration: Swift.String, mediationVersion: Swift.String) -> NeftaSDK.NeftaPlugin
   @objc public static func SetExtraParameter(key: Swift.String, value: Swift.String)
   public static func SetDebugTime(offset: Swift.Int)
+  @objc(SetInterstitialLogic:) public static func SetInterstitialLogic(isOptimized: Swift.Bool)
+  @objc(SetRewardedLogic:) public static func SetRewardedLogic(isOptimized: Swift.Bool)
+  @objc(SetHasUserConsent:) public static func SetHasUserConsent(hasUserConsent: Swift.Bool)
   @objc public func Record(type: Swift.Int, category: Swift.Int, subCategory: Swift.Int, name: Swift.String?, value: Swift.Int64, customPayload: Swift.String?)
-  @objc(AddNewSessionCallback:) public static func AddNewSessionCallback(callback: @escaping NeftaSDK.NeftaPlugin.OnNewSessionBlock)
   @objc(GetInsightsBridge:insights:previousRequestId:) public func GetInsightsBridge(requestId: Swift.Int, insights: Swift.Int, previousRequestId: Swift.Int)
   @objc(GetInsights:previousInsight:callback:) public func GetInsights(_ insights: Swift.Int, previousInsight: NeftaSDK.AdInsight?, callback: @escaping NeftaSDK.NeftaPlugin.OnInsightsBlock)
   @objc public func GetNuid(present: Swift.Bool) -> Swift.String
@@ -90,7 +85,7 @@ import os
   @objc public static func OnExternalMediationResponseAsString(_ provider: Swift.String, id: Swift.String, id2: Swift.String?, revenue: Swift.Float64, precision: Swift.String?, status: Swift.Int, providerStatus: Swift.String?, networkStatus: Swift.String?, baseString: Swift.String?)
   @objc public static func OnExternalMediationImpression(_ isClick: Swift.Bool, provider: Swift.String, data: Foundation.NSMutableDictionary?, id: Swift.String?, id2: Swift.String?)
   @objc public static func OnExternalMediationImpressionAsString(_ isClick: Swift.Bool, provider: Swift.String, data: Swift.String, id: Swift.String?, id2: Swift.String?)
-  @objc(GetRetryDelayInSeconds:) public static func GetRetryDelayInSeconds(insight: NeftaSDK.AdInsight?) -> Swift.Float
+  @objc(GetRetryDelayInSeconds:adUnitId:) public static func GetRetryDelayInSeconds(insight: NeftaSDK.AdInsight?, adUnitId: Swift.String) -> Swift.Float
   public func GetDebugState() -> [Swift.String : Any?]
   @objc public static func SetOverride(url: Swift.String?)
   @objc deinit
