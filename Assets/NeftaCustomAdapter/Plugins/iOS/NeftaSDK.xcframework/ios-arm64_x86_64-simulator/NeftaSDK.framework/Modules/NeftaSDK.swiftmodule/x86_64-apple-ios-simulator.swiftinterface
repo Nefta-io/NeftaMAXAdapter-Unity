@@ -2,10 +2,9 @@
 // swift-compiler-version: Apple Swift version 6.1.2 effective-5.10 (swiftlang-6.1.2.1.2 clang-1700.0.13.5)
 // swift-module-flags: -target x86_64-apple-ios15.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -Onone -enable-experimental-feature DebugDescriptionMacro -enable-bare-slash-regex -module-name NeftaSDK
 // swift-module-flags-ignorable: -no-verify-emitted-module-interface -interface-compiler-version 6.1.2
-import AdSupport
-import CoreTelephony
 import Foundation
 @_exported import NeftaSDK
+import Network
 import Swift
 import SystemConfiguration
 import UIKit
@@ -52,9 +51,12 @@ import os
     public var _model: Swift.String?
     @objc deinit
   }
-  public class State {
-    public var _nuid: Swift.String
-    public init()
+  @_inheritsConvenienceInitializers @objc public class State : ObjectiveC.NSObject {
+    @objc public var _nuid: Swift.String
+    @objc public var _isDebugEnabled: Swift.Bool
+    @objc public var _adProviderCountry: Swift.String?
+    @objc public var _availableNetworks: [Swift.String]?
+    @objc override dynamic public init()
     @objc deinit
   }
   public typealias OnReadyBlock = (NeftaSDK.InitConfiguration) -> Swift.Void
@@ -64,8 +66,10 @@ import os
   @objc public static let Version: Swift.String
   public static var _initUrl: Swift.String
   final public let _info: NeftaSDK.NeftaPlugin.Info
-  final public let _state: NeftaSDK.NeftaPlugin.State
+  @objc final public let _state: NeftaSDK.NeftaPlugin.State
   @objc public var Events: NeftaSDK.NeftaEvents
+  @objc public static let _extraParamslock: Foundation.NSLock
+  @objc public static var _extraParams: Foundation.NSMutableDictionary
   @objc public var OnInsightsAsString: NeftaSDK.NeftaPlugin.OnInsightsAsStringBlock?
   @objc public static var _instance: NeftaSDK.NeftaPlugin?
   @objc(EnableLogging:) public static func EnableLogging(enable: Swift.Bool)
@@ -81,8 +85,8 @@ import os
   @objc(GetInsights:previousInsight:callback:) public func GetInsights(_ insights: Swift.Int, previousInsight: NeftaSDK.AdInsight?, callback: @escaping NeftaSDK.NeftaPlugin.OnInsightsBlock)
   @objc public func GetNuid(present: Swift.Bool) -> Swift.String
   @objc public static func OnExternalMediationRequest(_ provider: Swift.String, adType: Swift.Int, id: Swift.String, requestedAdUnitId: Swift.String, requestedFloorPrice: Swift.Float64, requestId: Swift.Int)
-  @objc public static func OnExternalMediationResponse(_ provider: Swift.String, id: Swift.String, id2: Swift.String?, revenue: Swift.Float64, precision: Swift.String?, status: Swift.Int, providerStatus: Swift.String?, networkStatus: Swift.String?, baseObject: [Swift.String : Any]?)
-  @objc public static func OnExternalMediationResponseAsString(_ provider: Swift.String, id: Swift.String, id2: Swift.String?, revenue: Swift.Float64, precision: Swift.String?, status: Swift.Int, providerStatus: Swift.String?, networkStatus: Swift.String?, baseString: Swift.String?)
+  @objc public static func OnExternalMediationResponse(_ provider: Swift.String, id: Swift.String, id2: Swift.String?, revenue: Swift.Float64, precision: Swift.String?, status: Swift.Int, providerStatus: Swift.String?, networkStatus: Swift.String?, network: Swift.String?, baseObject: [Swift.String : Any]?)
+  @objc public static func OnExternalMediationResponseAsString(_ provider: Swift.String, id: Swift.String, id2: Swift.String?, revenue: Swift.Float64, precision: Swift.String?, status: Swift.Int, providerStatus: Swift.String?, networkStatus: Swift.String?, network: Swift.String?, baseString: Swift.String?)
   @objc public static func OnExternalMediationImpression(_ isClick: Swift.Bool, provider: Swift.String, data: Foundation.NSMutableDictionary?, id: Swift.String?, id2: Swift.String?)
   @objc public static func OnExternalMediationImpressionAsString(_ isClick: Swift.Bool, provider: Swift.String, data: Swift.String, id: Swift.String?, id2: Swift.String?)
   @objc(GetRetryDelayInSeconds:adUnitId:) public static func GetRetryDelayInSeconds(insight: NeftaSDK.AdInsight?, adUnitId: Swift.String) -> Swift.Float

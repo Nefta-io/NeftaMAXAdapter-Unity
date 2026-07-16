@@ -591,12 +591,20 @@ typedef SWIFT_ENUM(NSInteger, SpendMethod, open) {
   SpendMethodOther = 7,
 };
 
+@class State;
+@class NSLock;
 @class NSMutableDictionary;
 SWIFT_CLASS("_TtC8NeftaSDK11NeftaPlugin")
 @interface NeftaPlugin : NSObject
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, copy) NSString * _Nonnull Version;)
 + (NSString * _Nonnull)Version SWIFT_WARN_UNUSED_RESULT;
+@property (nonatomic, readonly, strong) State * _Nonnull _state;
 @property (nonatomic, strong) NeftaEvents * _Nonnull Events;
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) NSLock * _Nonnull _extraParamslock;)
++ (NSLock * _Nonnull)_extraParamslock SWIFT_WARN_UNUSED_RESULT;
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NSMutableDictionary * _Nonnull _extraParams;)
++ (NSMutableDictionary * _Nonnull)_extraParams SWIFT_WARN_UNUSED_RESULT;
++ (void)set_extraParams:(NSMutableDictionary * _Nonnull)value;
 @property (nonatomic, copy) void (^ _Nullable OnInsightsAsString)(NSInteger, NSInteger, NSString * _Nullable);
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NeftaPlugin * _Nullable _instance;)
 + (NeftaPlugin * _Nullable)_instance SWIFT_WARN_UNUSED_RESULT;
@@ -615,12 +623,21 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NeftaPlugin * _Nullabl
 - (void)GetInsights:(NSInteger)insights previousInsight:(AdInsight * _Nullable)previousInsight callback:(void (^ _Nonnull)(Insights * _Nonnull))callback;
 - (NSString * _Nonnull)GetNuidWithPresent:(BOOL)present SWIFT_WARN_UNUSED_RESULT;
 + (void)OnExternalMediationRequest:(NSString * _Nonnull)provider adType:(NSInteger)adType id:(NSString * _Nonnull)id requestedAdUnitId:(NSString * _Nonnull)requestedAdUnitId requestedFloorPrice:(double)requestedFloorPrice requestId:(NSInteger)requestId;
-+ (void)OnExternalMediationResponse:(NSString * _Nonnull)provider id:(NSString * _Nonnull)id id2:(NSString * _Nullable)id2 revenue:(double)revenue precision:(NSString * _Nullable)precision status:(NSInteger)status providerStatus:(NSString * _Nullable)providerStatus networkStatus:(NSString * _Nullable)networkStatus baseObject:(NSDictionary<NSString *, id> * _Nullable)baseObject;
-+ (void)OnExternalMediationResponseAsString:(NSString * _Nonnull)provider id:(NSString * _Nonnull)id id2:(NSString * _Nullable)id2 revenue:(double)revenue precision:(NSString * _Nullable)precision status:(NSInteger)status providerStatus:(NSString * _Nullable)providerStatus networkStatus:(NSString * _Nullable)networkStatus baseString:(NSString * _Nullable)baseString;
++ (void)OnExternalMediationResponse:(NSString * _Nonnull)provider id:(NSString * _Nonnull)id id2:(NSString * _Nullable)id2 revenue:(double)revenue precision:(NSString * _Nullable)precision status:(NSInteger)status providerStatus:(NSString * _Nullable)providerStatus networkStatus:(NSString * _Nullable)networkStatus network:(NSString * _Nullable)network baseObject:(NSDictionary<NSString *, id> * _Nullable)baseObject;
++ (void)OnExternalMediationResponseAsString:(NSString * _Nonnull)provider id:(NSString * _Nonnull)id id2:(NSString * _Nullable)id2 revenue:(double)revenue precision:(NSString * _Nullable)precision status:(NSInteger)status providerStatus:(NSString * _Nullable)providerStatus networkStatus:(NSString * _Nullable)networkStatus network:(NSString * _Nullable)network baseString:(NSString * _Nullable)baseString;
 + (void)OnExternalMediationImpression:(BOOL)isClick provider:(NSString * _Nonnull)provider data:(NSMutableDictionary * _Nullable)data id:(NSString * _Nullable)id id2:(NSString * _Nullable)id2;
 + (void)OnExternalMediationImpressionAsString:(BOOL)isClick provider:(NSString * _Nonnull)provider data:(NSString * _Nonnull)data id:(NSString * _Nullable)id id2:(NSString * _Nullable)id2;
 + (float)GetRetryDelayInSeconds:(AdInsight * _Nullable)insight adUnitId:(NSString * _Nonnull)adUnitId SWIFT_WARN_UNUSED_RESULT;
 + (void)SetOverrideWithUrl:(NSString * _Nullable)url;
+@end
+
+SWIFT_CLASS("_TtCC8NeftaSDK11NeftaPlugin5State")
+@interface State : NSObject
+@property (nonatomic, copy) NSString * _Nonnull _nuid;
+@property (nonatomic) BOOL _isDebugEnabled;
+@property (nonatomic, copy) NSString * _Nullable _adProviderCountry;
+@property (nonatomic, copy) NSArray<NSString *> * _Nullable _availableNetworks;
+- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
 #endif

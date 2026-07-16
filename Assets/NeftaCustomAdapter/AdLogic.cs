@@ -154,7 +154,7 @@ namespace NeftaCustomAdapter
             
             LoadInternal(track.AdUnitId, false, "");
             
-            if (NeftaAdapterEvents.NoDefaultResponseRetryInMs > 0)
+            if (IsOptimized && NeftaAdapterEvents.NoDefaultResponseRetryInMs > 0)
             {
                 DelayExecutor.ExecuteAfterDelay(track, RetryOnNoResponse, NeftaAdapterEvents.NoDefaultResponseRetryInMs * 0.001f);
             }

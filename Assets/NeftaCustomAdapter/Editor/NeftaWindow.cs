@@ -1,8 +1,10 @@
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Xml;
 using UnityEditor;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace NeftaCustomAdapter.Editor
 {
@@ -13,6 +15,7 @@ namespace NeftaCustomAdapter.Editor
         private string _error;
         private string _androidVersion;
         private string _iosVersion;
+        private string _editorVersion;
         
         [MenuItem("Window/Nefta/Inspect", false, 200)]
         public static void ShowWindow()
@@ -23,10 +26,13 @@ namespace NeftaCustomAdapter.Editor
         public void OnEnable()
         {
             _error = null;
+            _iosVersion = GetIosVersions();
 #if UNITY_2021_1_OR_NEWER
             _androidVersion = GetAndroidVersions();
+#else
+            _androidVersion = _iosVersion;
 #endif
-            _iosVersion = GetIosVersions();
+            _editorVersion = GetEditorVersion();
         }
 
         private void OnGUI()
@@ -37,17 +43,17 @@ namespace NeftaCustomAdapter.Editor
                 return;
             }
             
-#if UNITY_2021_1_OR_NEWER
-            if (_androidVersion != _iosVersion)
+            if (_androidVersion == _iosVersion && _androidVersion == _editorVersion)
+            {
+                DrawVersion("Nefta SDK version", _androidVersion);
+            }
+            else
             {
                 DrawVersion("Nefta SDK Android version", _androidVersion);
                 EditorGUILayout.Space(5);
                 DrawVersion("Nefta SDK iOS version", _iosVersion);
-            }
-            else
-#endif
-            {
-                DrawVersion("Nefta SDK version", _androidVersion);
+                EditorGUILayout.Space(5);
+                DrawVersion("Nefta SDK Editor version", _editorVersion);
             }
             EditorGUILayout.Space(5);
         }
@@ -117,6 +123,23 @@ namespace NeftaCustomAdapter.Editor
                 if (dict.ChildNodes[i].InnerText == "Version")
                 {
                     return dict.ChildNodes[i + 1].InnerText;
+                }
+            }
+            return null;
+        }
+
+        private string GetEditorVersion()
+        {
+            var guids = AssetDatabase.FindAssets("NeftaPlugin");
+            foreach (var guid in guids)
+            {
+                var path = AssetDatabase.GUIDToAssetPath(guid);
+                if (path.EndsWith(".dll"))
+                {
+                    var versionInfo = FileVersionInfo.GetVersionInfo(path);
+                    var version = versionInfo.FileVersion;
+                    var lastDotIndex = version.LastIndexOf('.');
+                    return lastDotIndex > 0 ? version.Substring(0, lastDotIndex) : version;
                 }
             }
             return null;

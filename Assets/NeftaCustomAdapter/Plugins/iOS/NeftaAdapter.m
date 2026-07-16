@@ -8,6 +8,7 @@
 #import <Foundation/Foundation.h>
 #import <WebKit/WebKit.h>
 #import <NeftaSDK/NeftaSDK-Swift.h>
+#import <ALNeftaMediationAdapter.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,8 +23,8 @@ extern "C" {
     void NeftaPlugin_SetHasUserConsent(bool hasUserConsent);
     void NeftaPlugin_Init(const char *appId, const char *clientId, OnReady onReady, OnInsights onInsights, const char *mediationVersion);
     void NeftaPlugin_Record(int type, int category, int subCategory, const char *name, long value, const char *customPayload);
-    void NeftaPlugin_OnExternalMediationRequest(const char *provider, int adType, const char *id0, const char *requestedAdUnitId, double requestedFloorPrice, int requestId);
-    void NeftaPlugin_OnExternalMediationResponseAsString(const char *provider, const char *id0, const char *id2, double revenue, const char *precision, int status, const char *providerStatus, const char *networkStatus, const char *baseString);
+    void NeftaPlugin_OnExternalMediationRequest(int adType, const char *id0, const char *requestedAdUnitId, double requestedFloorPrice, int requestId);
+    void NeftaPlugin_OnExternalMediationResponseAsString(const char *provider, const char *id0, const char *id2, double revenue, const char *precision, int status, const char *providerStatus, const char *networkStatus, const char *network, const char *baseString);
     void NeftaPlugin_OnExternalMediationImpressionAsString(bool isClick, const char *provider, const char *data, const char *id0, const char *id2);
     const char * NeftaPlugin_GetNuid(bool present);
     void NeftaPlugin_GetInsights(int requestId, int insights, int previousRequestId);
@@ -75,22 +76,22 @@ void NeftaPlugin_Record(int type, int category, int subCategory, const char *nam
     [_plugin RecordWithType: type category: category subCategory: subCategory name: n value: value customPayload: cp];
 }
 
-void NeftaPlugin_OnExternalMediationRequest(const char *provider, int adType, const char *id0, const char *requestedAdUnitId, double requestedFloorPrice, int requestId) {
-    NSString *p = provider ? [NSString stringWithUTF8String: provider] : nil;
+void NeftaPlugin_OnExternalMediationRequest(int adType, const char *id0, const char *requestedAdUnitId, double requestedFloorPrice, int requestId) {
     NSString *i = id0 ? [NSString stringWithUTF8String: id0] : nil;
     NSString *rAI = requestedAdUnitId ? [NSString stringWithUTF8String: requestedAdUnitId] : nil;
-    [NeftaPlugin OnExternalMediationRequest: p adType: adType id: i requestedAdUnitId: rAI requestedFloorPrice: requestedFloorPrice requestId: requestId];
+    [ALNeftaMediationAdapter OnExternalMediationRequest: adType id: i requestedAdUnitId: rAI requestedFloor: requestedFloorPrice requestId: requestId];
 }
 
-void NeftaPlugin_OnExternalMediationResponseAsString(const char *provider, const char *id0, const char *id2, double revenue, const char *precision, int status, const char *providerStatus, const char *networkStatus, const char *baseString) {
+void NeftaPlugin_OnExternalMediationResponseAsString(const char *provider, const char *id0, const char *id2, double revenue, const char *precision, int status, const char *providerStatus, const char *networkStatus, const char *network, const char *baseString) {
     NSString *p = provider ? [NSString stringWithUTF8String: provider] : nil;
     NSString *i = id0 ? [NSString stringWithUTF8String: id0] : nil;
     NSString *i2 = id2 ? [NSString stringWithUTF8String: id2] : nil;
     NSString *pr = precision ? [NSString stringWithUTF8String: precision] : nil;
     NSString *pS = providerStatus ? [NSString stringWithUTF8String: providerStatus] : nil;
     NSString *nS = networkStatus ? [NSString stringWithUTF8String: networkStatus] : nil;
+    NSString *n = network ? [NSString stringWithUTF8String: network] : nil;
     NSString *bS = baseString ? [NSString stringWithUTF8String: baseString] : nil;
-    [NeftaPlugin OnExternalMediationResponseAsString: p id: i id2: i2 revenue: revenue precision: pr status: status providerStatus: pS networkStatus: nS baseString: bS];
+    [NeftaPlugin OnExternalMediationResponseAsString: p id: i id2: i2 revenue: revenue precision: pr status: status providerStatus: pS networkStatus: nS network: n baseString: bS];
 }
 
 void NeftaPlugin_OnExternalMediationImpressionAsString(bool isClick, const char *provider, const char *data, const char *id0, const char *id2) {
@@ -109,7 +110,7 @@ const char * NeftaPlugin_GetNuid(bool present) {
 }
 
 void NeftaPlugin_GetInsights(int requestId, int insights, int previousRequestId) {
-    [_plugin GetInsightsBridge: requestId insights: insights previousRequestId: previousRequestId];
+    [ALNeftaMediationAdapter GetInsightsBridge: requestId insights: insights previousRequestId: previousRequestId];
 }
 
 void NeftaPlugin_SetOverride(const char *root) {

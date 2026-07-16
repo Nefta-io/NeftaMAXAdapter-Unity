@@ -128,12 +128,12 @@ namespace Editor.Tests.PlayTests
                 if (simController.name == "SimulatorInterstitial")
                 {
                     _interstitialUi = simController;
-                    _interstitialUi.Init();
+                    _interstitialUi.Init(true);
                 }
                 else
                 {
                     _rewardedUi = simController;
-                    _rewardedUi.Init();
+                    _rewardedUi.Init(true);
                 }
             }
             

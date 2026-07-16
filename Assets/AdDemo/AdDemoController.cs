@@ -32,7 +32,8 @@ namespace AdDemo
         private enum IntegrationType
         {
             Manual,
-            Wrapper
+            Wrapper,
+            Simulator
         }
 
         [SerializeField] private Text _title;
@@ -40,9 +41,9 @@ namespace AdDemo
         [SerializeField] private GameObject _integrationSelection;
         [SerializeField] private Button _integrationManualButton;
         [SerializeField] private Button _integrationWrapperButton;
+        [SerializeField] private Button _integrationSimulatorButton;
         [SerializeField] private Button _groupDefaultButton;
         [SerializeField] private Button _groupOptimizedButton;
-        [SerializeField] private Button _simulatorButton;
         
         [SerializeField] private InterstitialUi _interstitialUi;
         [SerializeField] private RewardedUi _rewardedUi;
@@ -60,9 +61,9 @@ namespace AdDemo
             _consetCheckBox.onValueChanged.AddListener(OnConsentChange);
             _integrationManualButton.onClick.AddListener(OnManualClick);
             _integrationWrapperButton.onClick.AddListener(OnWrapperClick);
+            _integrationSimulatorButton.onClick.AddListener(OnSimulatorClick);
             _groupDefaultButton.onClick.AddListener(OnDefaultClick);
             _groupOptimizedButton.onClick.AddListener(OnOptimizedClick);
-            _simulatorButton.onClick.AddListener(OnSimulatorClick);
         }
 
         private void InitializeNefta()
@@ -76,44 +77,58 @@ namespace AdDemo
 
         private void OnConsentChange(bool consent)
         {
-            NeftaAdapterEvents.SetHasUserConsent(false);
+            NeftaAdapterEvents.SetHasUserConsent(consent);
             _consetCheckBox.interactable = false;
         }
         
         private void OnManualClick()
         {
-            if (_integrationType == IntegrationType.Wrapper)
-            {
-                _integrationManualButton.interactable = false;
-                _integrationWrapperButton.interactable = true;
-                _integrationType = IntegrationType.Manual;   
-            }
+            _integrationManualButton.interactable = false;
+            _integrationWrapperButton.interactable = true;
+            _integrationSimulatorButton.interactable = true;
+            _integrationType = IntegrationType.Manual;   
         }
         
         private void OnWrapperClick()
         {
-            if (_integrationType == IntegrationType.Manual)
-            {
-                _integrationManualButton.interactable = true;
-                _integrationWrapperButton.interactable = false;
-                _integrationType = IntegrationType.Wrapper;
-            }
+            _integrationManualButton.interactable = true;
+            _integrationWrapperButton.interactable = false;
+            _integrationSimulatorButton.interactable = true;
+            _integrationType = IntegrationType.Wrapper;
+        }
+        
+        private void OnSimulatorClick()
+        {
+            _integrationManualButton.interactable = true;
+            _integrationWrapperButton.interactable = true;
+            _integrationSimulatorButton.interactable = false;
+            _integrationType = IntegrationType.Simulator;
         }
         
         private void OnDefaultClick()
         {
-            InitializeNefta();
-            _integrationSelection.SetActive(false);
-            
-            InitializeMAX(false);
+            Initialize(false);
         }
         
         private void OnOptimizedClick()
         {
+            Initialize(true);
+        }
+
+        private void Initialize(bool isOptimized)
+        {
             InitializeNefta();
             _integrationSelection.SetActive(false);
             
-            InitializeMAX(true);
+            if (_integrationType == IntegrationType.Simulator)
+            {
+                _interstitialSimulator.Init(isOptimized);
+                _rewardedSimulator.Init(isOptimized);
+            }
+            else
+            {
+                InitializeMAX(true);   
+            }
         }
         
         private void InitializeMAX(bool isOptimized)
@@ -158,15 +173,6 @@ namespace AdDemo
                 _interstitialUi.Init(new InterstitialNeftaWrapper(isOptimized));
                 _rewardedUi.Init(new RewardedNeftaWrapper(isOptimized));
             }
-        }
-
-        private void OnSimulatorClick()
-        {
-            InitializeNefta();
-            _integrationSelection.SetActive(false);
-            
-            _interstitialSimulator.Init();
-            _rewardedSimulator.Init();
         }
     }
 }

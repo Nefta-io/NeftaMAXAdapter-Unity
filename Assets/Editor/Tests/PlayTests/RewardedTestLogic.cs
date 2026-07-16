@@ -26,7 +26,7 @@ namespace Editor.Tests.PlayTests
         
         public List<LoadRequest> LoadRequests;
 
-        public void Initialize(bool isOptimized, string adUnitIdA, string adUnitIdB)
+        public new void Initialize(bool isOptimized, string adUnitIdA, string adUnitIdB)
         {
             _trackA = new Track(adUnitIdA);
             _trackB = new Track(adUnitIdB);

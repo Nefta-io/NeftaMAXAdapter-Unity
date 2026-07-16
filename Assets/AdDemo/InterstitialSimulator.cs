@@ -38,7 +38,7 @@ namespace AdDemo
         private double _simBFloor = -1;
         private MaxSdkBase.AdInfo _simBAdInfo; 
 
-        public InterstitialSimulator(Image rendererFill2A, Button fill2A,
+        public InterstitialSimulator(bool isOptimized, Image rendererFill2A, Button fill2A,
             Image rendererFill1A, Button fill1A,
             Image rendererNoFillA, Button noFillA,
             Image rendererOtherA, Button otherA, Text statusA,
@@ -82,8 +82,17 @@ namespace AdDemo
             _trackA = new Track("Interstitial A");
             _trackB = new Track("Interstitial B");
             NeftaSdk.Initialize();
-            NeftaAdapterEvents.SetInterstitialLogic(true);
-            IsOptimized = true;
+            IsOptimized = isOptimized;
+            NeftaAdapterEvents.SetInterstitialLogic(IsOptimized);
+        }
+        
+        public void UnoptimizedLoad()
+        {
+            if (_trackA.State == State.Idle)
+            {
+                NeftaAdapterEvents.OnExternalMediationRequest(AdType, _trackA.AdUnitId);
+                SimLoad(_trackA.AdUnitId);
+            }
         }
 
         protected override void LoadInternal(string adUnitId, bool disableAutoRetries, string bidFloor)
@@ -99,10 +108,21 @@ namespace AdDemo
             SimLoad(adUnitId);
         }
 
+        public bool UnoptimizedShow()
+        {
+            return TryShow(_trackA);
+        }
+
+        public void ResetTrack()
+        {
+            _trackA.State = State.Idle;
+        }
+
         protected override bool TryShow(Track track)
         {
-            var adInfo = track.AdInfo;
+            MaxSdkBase.AdInfo adInfo = null;
             track.AdInfo = null;
+            track.State = State.Shown;
             
             if (track.AdUnitId == _trackA.AdUnitId)
             {
@@ -116,6 +136,7 @@ namespace AdDemo
                     return false;
                 }
                 _statusA.text = "Showing A";
+                adInfo = _simAAdInfo;
                 _simAAdInfo = null;
             }
             else
@@ -130,6 +151,7 @@ namespace AdDemo
                     return false;
                 }
                 _statusB.text = "Showing B";
+                adInfo = _simBAdInfo;
                 _simBAdInfo = null;
             }
             
@@ -143,7 +165,11 @@ namespace AdDemo
                 },
                 () => { OnAdClickedCallback(track.AdUnitId, adInfo); },
                 () => { },
-                () => { OnAdHiddenCallback(track.AdUnitId, adInfo); });
+                () =>
+                {
+                    track.State = State.Idle;
+                    OnAdHiddenCallback(track.AdUnitId, adInfo);
+                });
             
             return true;
         }
@@ -152,13 +178,17 @@ namespace AdDemo
         {
             if (adUnitId == _trackA.AdUnitId)
             {
+                var isDynamic = _simAFloor >= 0;
+                _trackA.State = isDynamic ? State.LoadingWithInsights : State.Loading;
                 ToggleTrackA(true);
-                _statusA.text = $"{adUnitId} loading " + (_simAFloor >= 0 ? "as Optimized": "as Default");
+                _statusA.text = $"{adUnitId} loading " + (isDynamic ? "as Optimized": "as Default");
             }
             else
             {
+                var isDynamic = _simBFloor >= 0;
+                _trackB.State = isDynamic ? State.LoadingWithInsights : State.Loading;
                 ToggleTrackB(true);
-                _statusB.text = $"{adUnitId} loading " + (_simBFloor >= 0 ? "as Optimized": "as Default");
+                _statusB.text = $"{adUnitId} loading " + (isDynamic ? "as Optimized": "as Default");
             }
         }
         
@@ -226,6 +256,7 @@ namespace AdDemo
                 return;
             }
 
+            track.State = State.Ready;
             var adInfo = SimulatorUi.GetAdInfo(track.AdUnitId, "INTER", revenue);
             if (track == _trackA)
             {

@@ -39,8 +39,9 @@ import OSLog
 }
 
 public class AdViewController : UIViewController {
-    
-    private var delayedTask: DispatchWorkItem?
+    private var _delayedTask: DispatchWorkItem?
+    private var _isDelayCallback: Bool = false
+    private var _delayedClickCount: Int = 0
     
     init() {
         super.init(nibName: nil, bundle: nil)
@@ -51,19 +52,19 @@ public class AdViewController : UIViewController {
     }
     
     public override func viewDidLoad() {
-        view.backgroundColor = .white
-                
+        view.backgroundColor = .black
         let screenBounds = UIScreen.main.bounds
         
         let titleLabel = UILabel()
         titleLabel.text = NDebug._title!
         titleLabel.font = UIFont.systemFont(ofSize: 24, weight: .bold)
+        titleLabel.textColor = .white
         titleLabel.textAlignment = .center
         titleLabel.sizeToFit()
         let labelWidth: CGFloat = 300
         titleLabel.frame = CGRect(
             x: (screenBounds.width - labelWidth) / 2,
-            y: 80 + view.safeAreaInsets.top,
+            y: 120 + view.safeAreaInsets.top,
             width: labelWidth,
             height: titleLabel.frame.height
         )
@@ -77,11 +78,10 @@ public class AdViewController : UIViewController {
         closeButton.layer.cornerRadius = 8
         closeButton.frame = CGRect(
             x: screenBounds.width - 80,
-            y: 40 + view.safeAreaInsets.top,
+            y: 80 + view.safeAreaInsets.top,
             width: 40,
             height: 40
         )
-        
         view.addSubview(closeButton)
         
         let centerButton = UIButton(type: .system)
@@ -96,26 +96,54 @@ public class AdViewController : UIViewController {
             width: 300,
             height: 400
         )
-        
         view.addSubview(centerButton)
+        
+        let delaySwitch = UISwitch()
+        let x = (screenBounds.width - 300)
+        let y = (screenBounds.height - 400) / 2 + 420
+        delaySwitch.frame = CGRect(x: x, y: y, width: 40, height: 40)
+        view.addSubview(delaySwitch)
+        let switchLabel = UILabel()
+        switchLabel.frame = CGRect(x: x + 70, y: y - 5, width: 200, height: 40)
+        switchLabel.font = UIFont.systemFont(ofSize: 18, weight: .regular)
+        switchLabel.textColor = .white
+        switchLabel.text = "Delayed callbacks"
+        view.addSubview(switchLabel)
         
         closeButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
         centerButton.addTarget(self, action: #selector(centerTapped), for: .touchUpInside)
+        delaySwitch.addTarget(self, action: #selector(switchToggle), for: .valueChanged)
     }
     
     @objc private func closeTapped() {
+        if _delayedClickCount > 0 {
+            let count = _delayedClickCount
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+                for _ in 0..<count {
+                    NDebug._onClick!()
+                }
+            }
+        }
         NDebug._onClose!()
         dismiss(animated: false, completion: nil)
     }
     
     @objc private func centerTapped() {
-        NDebug._onClick!()
+        if _isDelayCallback {
+            _delayedClickCount += 1
+        } else {
+            NDebug._onClick!()
+        }
+    }
+    
+    @objc private func switchToggle() {
+        _isDelayCallback = !_isDelayCallback
     }
     
     public override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        delayedTask?.cancel()
+        _delayedTask?.cancel()
         
         let task = DispatchWorkItem { [weak self] in
             guard let self = self else { return }
@@ -126,15 +154,15 @@ public class AdViewController : UIViewController {
                 onReward()
             }
         }
-        delayedTask = task
+        _delayedTask = task
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.0, execute: task)
     }
     
     public override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
-        delayedTask?.cancel()
-        delayedTask = nil
+        _delayedTask?.cancel()
+        _delayedTask = nil
     }
 }
 
@@ -168,8 +196,16 @@ public class AdViewController : UIViewController {
     init(viewController: UIViewController) {
         _viewController = viewController
         super.init()
-
-        _name = UIDevice.current.model
+        
+        let arguments = ProcessInfo.processInfo.arguments
+        if arguments.count > 1 {
+            let overrideUrl = arguments[1]
+            if  overrideUrl.count > 2 {
+                NeftaPlugin.SetOverride(url: overrideUrl)
+            }
+        }
+        
+        /*_name = UIDevice.current.model
 #if targetEnvironment(simulator)
         if let simModelCode = ProcessInfo().environment["SIMULATOR_MODEL_IDENTIFIER"] {
             _name = simModelCode
@@ -188,14 +224,6 @@ public class AdViewController : UIViewController {
         }
         _bundleId = Bundle.main.bundleIdentifier
         
-        let arguments = ProcessInfo.processInfo.arguments
-        if arguments.count > 1 {
-            let overrideUrl = arguments[1]
-            if  overrideUrl.count > 2 {
-                NeftaPlugin.SetOverride(url: overrideUrl)
-            }
-        }
-        
         NeftaPlugin._instance = nil
         NeftaPlugin.SetDebugTime(offset: 0)
         do {
@@ -210,7 +238,7 @@ public class AdViewController : UIViewController {
             print("DS:No wifi")
         } else {
             StartListening()
-        }
+        }*/
     }
     
     deinit {
@@ -449,7 +477,7 @@ public class AdViewController : UIViewController {
                         if segments.count > 12 {
                             networkStatus = segments[12]
                         }
-                        NeftaPlugin.OnExternalMediationResponse(provider, id: id1, id2: id2, revenue: revenue, precision: precision, status: status, providerStatus: providerStatus, networkStatus: networkStatus, baseObject: nil)
+                        NeftaPlugin.OnExternalMediationResponse(provider, id: id1, id2: id2, revenue: revenue, precision: precision, status: status, providerStatus: providerStatus, networkStatus: networkStatus, network: nil, baseObject: nil)
                         self.SendUdp(connection: connection, to: sourceName, message: "return|add_external_mediation_request")
                     }
                 case "add_external_mediation_impression":

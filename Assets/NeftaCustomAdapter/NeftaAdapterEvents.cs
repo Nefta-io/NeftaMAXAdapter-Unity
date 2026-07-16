@@ -99,10 +99,10 @@ namespace NeftaCustomAdapter
         private static extern void NeftaPlugin_Record(int type, int category, int subCategory, string nameValue, long value, string customPayload);
 
         [DllImport ("__Internal")]
-        private static extern void NeftaPlugin_OnExternalMediationRequest(string provider, int adType, string id, string requestedAdUnitId, double requestedFloorPrice, int requestId);
+        private static extern void NeftaPlugin_OnExternalMediationRequest(int adType, string id, string requestedAdUnitId, double requestedFloorPrice, int requestId);
 
         [DllImport ("__Internal")]
-        private static extern void NeftaPlugin_OnExternalMediationResponseAsString(string provider, string id, string id2, double revenue, string precision, int status, string providerStatus, string networkStatus, string baseData);
+        private static extern void NeftaPlugin_OnExternalMediationResponseAsString(string provider, string id, string id2, double revenue, string precision, int status, string providerStatus, string networkStatus, string network, string baseData);
 
         [DllImport ("__Internal")]
         private static extern void NeftaPlugin_OnExternalMediationImpressionAsString(bool isClick, string provider, string data, string id, string id2);
@@ -127,8 +127,20 @@ namespace NeftaCustomAdapter
                 return _neftaPluginClass;
             }
         }
+
+        private static AndroidJavaClass _neftaAdapterClass;
+        private static AndroidJavaClass NeftaAdapterClass {
+            get
+            {
+                if (_neftaAdapterClass == null)
+                {
+                    _neftaAdapterClass = new AndroidJavaClass("com.applovin.mediation.adapters.NeftaMediationAdapter");
+                }
+                return _neftaAdapterClass;
+            }
+        }
+
         private static AndroidJavaObject _plugin;
-        private static AndroidJavaClass _adapter;
 #endif
 
         private static List<InsightRequest> _insightRequests;
@@ -186,7 +198,6 @@ namespace NeftaCustomAdapter
 
         public static void SetInterstitialLogic(bool isOptimized)
         {
-            Debug.Log("set inter lgoic: "+ isOptimized);
 #if UNITY_EDITOR
             NeftaPlugin.SetInterstitialLogic(isOptimized);
 #elif UNITY_IOS
@@ -276,7 +287,7 @@ namespace NeftaCustomAdapter
                 SerializeWaterfall(sb, adInfo.WaterfallInfo);
             }
             sb.Append('}');
-            OnExternalMediationResponse(_mediationProvider, adInfo.AdUnitIdentifier, null, adInfo.Revenue, adInfo.RevenuePrecision, 1, null, null, sb.ToString());
+            OnExternalMediationResponse(_mediationProvider, adInfo.AdUnitIdentifier, null, adInfo.Revenue, adInfo.RevenuePrecision, 1, null, null, adInfo.NetworkName, sb.ToString());
         }
 
         /// <summary>
@@ -298,7 +309,7 @@ namespace NeftaCustomAdapter
                 sb.Append("}");
                 baseString = sb.ToString();
             }
-            OnExternalMediationResponse(_mediationProvider, adUnitId, null, -1, null, errorInfo.Code == MaxSdkBase.ErrorCode.NoFill ? 2 : 0, providerStatus, networkStatus, baseString);
+            OnExternalMediationResponse(_mediationProvider, adUnitId, null, -1, null, errorInfo.Code == MaxSdkBase.ErrorCode.NoFill ? 2 : 0, providerStatus, networkStatus, null, baseString);
         }
         
         private static void OnExternalMediationRequest(string provider, AdType adType, string id, string requestedAdUnitId, double requestedFloorPrice, int requestId)
@@ -306,13 +317,13 @@ namespace NeftaCustomAdapter
 #if UNITY_EDITOR
             _plugin.OnExternalMediationRequest(provider, (int)adType, id, requestedAdUnitId, requestedFloorPrice, requestId);
 #elif UNITY_IOS
-            NeftaPlugin_OnExternalMediationRequest(provider, (int)adType, id, requestedAdUnitId, requestedFloorPrice, requestId);
+            NeftaPlugin_OnExternalMediationRequest((int)adType, id, requestedAdUnitId, requestedFloorPrice, requestId);
 #elif UNITY_ANDROID
-            _plugin.CallStatic("OnExternalMediationRequest", provider, (int)adType, id, requestedAdUnitId, requestedFloorPrice, requestId);
+            NeftaAdapterClass.CallStatic("OnExternalMediationRequest", (int)adType, id, requestedAdUnitId, requestedFloorPrice, requestId);
 #endif
         }
 
-        private static void OnExternalMediationResponse(string provider, string id, string id2, double revenue, string precision, int status, string providerStatus, string networkStatus, string baseString)
+        private static void OnExternalMediationResponse(string provider, string id, string id2, double revenue, string precision, int status, string providerStatus, string networkStatus, string network, string baseString)
         {
             if (status == 1)
             {
@@ -330,11 +341,11 @@ namespace NeftaCustomAdapter
                 }   
             }
 #if UNITY_EDITOR
-            _plugin.OnExternalMediationResponseAsString(provider, id, id2, revenue, precision, status, providerStatus, networkStatus, baseString);
+            _plugin.OnExternalMediationResponseAsString(provider, id, id2, revenue, precision, status, providerStatus, networkStatus, network, baseString);
 #elif UNITY_IOS
-            NeftaPlugin_OnExternalMediationResponseAsString(provider, id, id2, revenue, precision, status, providerStatus, networkStatus, baseString);
+            NeftaPlugin_OnExternalMediationResponseAsString(provider, id, id2, revenue, precision, status, providerStatus, networkStatus, network, baseString);
 #elif UNITY_ANDROID
-            _plugin.CallStatic("OnExternalMediationResponseAsString", provider, id, id2, revenue, precision, status, providerStatus, networkStatus, baseString);
+            _plugin.CallStatic("OnExternalMediationResponseAsString", provider, id, id2, revenue, precision, status, providerStatus, networkStatus, network, baseString);
 #endif
         }
 
@@ -509,7 +520,7 @@ namespace NeftaCustomAdapter
 #elif UNITY_IOS
             NeftaPlugin_GetInsights(id, insights, previousRequestId);
 #elif UNITY_ANDROID
-            _plugin.Call("GetInsightsBridge", id, insights, previousRequestId);
+            NeftaAdapterClass.CallStatic("GetInsightsBridge", id, insights, previousRequestId);
 #endif
         }
         

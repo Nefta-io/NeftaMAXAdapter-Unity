@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -81,12 +82,12 @@ namespace AdDemo
 
         [NonSerialized] public AdLogic AdLogic;
         
-        public void Init()
+        public void Init(bool isOptimized)
         {
             if (_isRewarded)
             {
                 AdLogic = new RewardedSimulator(
-                    _aFill2Renderer, _aFill2, _aFill1Renderer, _aFill1, _aNoFillRenderer, _aNoFill,
+                    isOptimized, _aFill2Renderer, _aFill2, _aFill1Renderer, _aFill1, _aNoFillRenderer, _aNoFill,
                     _aOtherRenderer, _aOther, _aStatus,
                     _bFill2Renderer, _bFill2, _bFill1Renderer, _bFill1, _bNoFillRenderer, _bNoFill,
                     _bOtherRenderer, _bOther, _bStatus);
@@ -95,7 +96,7 @@ namespace AdDemo
             else
             {
                 AdLogic = new InterstitialSimulator(
-                    _aFill2Renderer, _aFill2, _aFill1Renderer, _aFill1, _aNoFillRenderer, _aNoFill,
+                    isOptimized, _aFill2Renderer, _aFill2, _aFill1Renderer, _aFill1, _aNoFillRenderer, _aNoFill,
                     _aOtherRenderer, _aOther, _aStatus,
                     _bFill2Renderer, _bFill2, _bFill1Renderer, _bFill1, _bNoFillRenderer, _bNoFill,
                     _bOtherRenderer, _bOther, _bStatus);
@@ -114,6 +115,19 @@ namespace AdDemo
         
         private void Load()
         {
+            if (!AdLogic.IsOptimized)
+            {
+                if (_isRewarded)
+                {
+                    ((RewardedSimulator)AdLogic).UnoptimizedLoad();
+                }
+                else
+                {
+                    ((InterstitialSimulator)AdLogic).UnoptimizedLoad();
+                }
+                return;
+            }
+
             if (_isRewarded)
             {
                 NeftaSdk.LoadRewardedAd("rewarded1");
@@ -135,6 +149,20 @@ namespace AdDemo
         
         private void OnShowClick()
         {
+            if (!AdLogic.IsOptimized)
+            {
+                if (_isRewarded)
+                {
+                    ((RewardedSimulator)AdLogic).UnoptimizedShow();
+                }
+                else
+                {
+                    ((InterstitialSimulator)AdLogic).UnoptimizedShow();
+                }
+                UpdateShowButton();
+                return;
+            }
+            
             if (_isRewarded)
             {
                 if (NeftaSdk.IsRewardedAdReady("rewarded1"))
@@ -170,6 +198,29 @@ namespace AdDemo
         private void OnAdLoadFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
         {
             SetStatus($"Load failed {adUnitId} with: {errorInfo}");
+
+            StartCoroutine(LoadFailedRetry());
+        }
+        
+        private IEnumerator LoadFailedRetry()
+        {
+            yield return new WaitForSeconds(2f);
+
+            if (!AdLogic.IsOptimized)
+            {
+                if (_isRewarded)
+                {
+                    ((RewardedSimulator)AdLogic).ResetTrack();
+                }
+                else
+                {
+                    ((InterstitialSimulator)AdLogic).ResetTrack();
+                }
+            }
+            if (_isAutoLoad)
+            {
+                Load();
+            }
         }
         
         private void OnAdDisplayFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo, MaxSdkBase.AdInfo adInfo)
@@ -209,7 +260,7 @@ namespace AdDemo
 
         private void UpdateShowButton()
         {
-            _show.interactable = AdLogic.IsAdReady();
+            _show.interactable = AdLogic.IsAdReady();  
         }
         
         private void SetStatus(string status)
