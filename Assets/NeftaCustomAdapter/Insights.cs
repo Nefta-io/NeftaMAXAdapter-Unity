@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace NeftaCustomAdapter
@@ -25,37 +26,65 @@ namespace NeftaCustomAdapter
         {
             if (adapterResponseType == Churn)
             {
-                var churn = JsonUtility.FromJson<ChurnDto>(adapterResponse);
-                if (churn != null)
+                try
                 {
-                    _churn = new Churn(churn);   
+                    var churn = JsonUtility.FromJson<ChurnDto>(adapterResponse);
+                    if (churn != null)
+                    {
+                        _churn = new Churn(churn);     
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.LogWarning("[NeftaPlugin] ParsingInsight: " + e.Message);
                 }
             }
             else if (adapterResponseType == Banner)
             {
-                var banner = JsonUtility.FromJson<AdConfigurationDto>(adapterResponse);
-                if (banner != null)
+                try
                 {
-                    _banner = new AdInsight(NeftaAdapterEvents.AdType.Banner, banner);
-                    Insight = _banner;
+                    var banner = JsonUtility.FromJson<AdConfigurationDto>(adapterResponse);
+                    if (banner != null)
+                    {
+                        _banner = new AdInsight(NeftaAdapterEvents.AdType.Banner, banner);
+                        Insight = _banner;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.LogWarning("[NeftaPlugin] ParsingInsight: " + e.Message);
                 }
             }
             else if (adapterResponseType == Interstitial)
             {
-                var interstitial = JsonUtility.FromJson<AdConfigurationDto>(adapterResponse);
-                if (interstitial != null)
+                try
                 {
-                    _interstitial = new AdInsight(NeftaAdapterEvents.AdType.Interstitial, interstitial);
-                    Insight = _interstitial;
+                    var interstitial = JsonUtility.FromJson<AdConfigurationDto>(adapterResponse);
+                    if (interstitial != null)
+                    {
+                        _interstitial = new AdInsight(NeftaAdapterEvents.AdType.Interstitial, interstitial);
+                        Insight = _interstitial;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.LogWarning("[NeftaPlugin] ParsingInsight: " + e.Message);
                 }
             }
             else if (adapterResponseType == Rewarded)
             {
-                var rewarded = JsonUtility.FromJson<AdConfigurationDto>(adapterResponse);
-                if (rewarded != null)
+                try
                 {
-                    _rewarded = new AdInsight(NeftaAdapterEvents.AdType.Rewarded, rewarded);
-                    Insight = _rewarded;
+                    var rewarded = JsonUtility.FromJson<AdConfigurationDto>(adapterResponse);
+                    if (rewarded != null)
+                    {
+                        _rewarded = new AdInsight(NeftaAdapterEvents.AdType.Rewarded, rewarded);
+                        Insight = _rewarded;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.LogWarning("[NeftaPlugin] ParsingInsight: " + e.Message);
                 }
             }
         }
