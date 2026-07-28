@@ -115,7 +115,7 @@ namespace AdDemo
             SimLoad(adUnitId);
         }
 
-        protected override bool TryShow(Track track)
+        protected override bool TryShow(Track track, string placement, string customData)
         {
             var adInfo = track.AdInfo;
             track.AdInfo = null;

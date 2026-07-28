@@ -41,14 +41,14 @@ namespace NeftaCustomAdapter
             return IsAdReady();
         }
         
-        protected override bool TryShow(Track adRequest)
+        protected override bool TryShow(Track adRequest, string placement, string customData)
         {
             adRequest.AdInfo = null;
             if (MaxSdk.IsRewardedAdReady(adRequest.AdUnitId))
             {
                 adRequest.State = State.Shown;
                 Log($"Showing {adRequest.AdUnitId}");
-                MaxSdk.ShowRewardedAd(adRequest.AdUnitId);
+                MaxSdk.ShowRewardedAd(adRequest.AdUnitId, placement, customData);
                 return true;
             }
             adRequest.State = State.Idle;
