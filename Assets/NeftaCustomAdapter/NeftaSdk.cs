@@ -40,15 +40,15 @@ namespace NeftaCustomAdapter
             return Interstitial.IsInterstitialReady();
         }
 
-        public static void ShowInterstitial(string adUnitId=null)
+        public static void ShowInterstitial(string adUnitId=null, string placement=null, string customData=null)
         {
             if (!Interstitial.IsOptimized)
             {
-                MaxSdk.ShowInterstitial(adUnitId);
+                MaxSdk.ShowInterstitial(adUnitId, placement, customData);
             }
             else
             {
-                Interstitial.ShowAd();   
+                Interstitial.ShowAd(placement, customData);   
             }
         }
 
@@ -74,15 +74,15 @@ namespace NeftaCustomAdapter
             return Rewarded.IsRewardedAdReady();
         }
 
-        public static void ShowRewardedAd(string adUnitId=null)
+        public static void ShowRewardedAd(string adUnitId=null, string placement=null, string customData=null)
         {
             if (!Rewarded.IsOptimized)
             {
-                MaxSdk.ShowRewardedAd(adUnitId);
+                MaxSdk.ShowRewardedAd(adUnitId,  placement, customData);
             }
             else
             {
-                Rewarded.ShowAd();   
+                Rewarded.ShowAd(placement, customData);   
             }
         }
     }

@@ -96,7 +96,7 @@ namespace Editor.Tests.PlayTests
             
             Assert.AreEqual(1, _loadCallbacks.Count);
 
-            interstitialLogic.ShowAd();
+            interstitialLogic.ShowAd(null, null);
 
             yield return null;
             NeftaSdk.LoadInterstitial(AdUnitInterA);

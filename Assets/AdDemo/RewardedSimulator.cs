@@ -110,7 +110,7 @@ namespace AdDemo
 
         public bool UnoptimizedShow()
         {
-            return TryShow(_trackA);
+            return TryShow(_trackA, null, null);
         }
         
         public void ResetTrack()
@@ -118,7 +118,7 @@ namespace AdDemo
             _trackA.State = State.Idle;
         }
 
-        protected override bool TryShow(Track track)
+        protected override bool TryShow(Track track, string placement, string customData)
         {
             MaxSdkBase.AdInfo adInfo = null;
             track.AdInfo = null;

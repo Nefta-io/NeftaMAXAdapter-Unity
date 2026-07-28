@@ -42,7 +42,7 @@ namespace Editor.Tests.PlayTests
             LoadRequests.Add(new LoadRequest(adUnitId, disableAutoRetries, bidFloor));
         }
 
-        protected override bool TryShow(Track track)
+        protected override bool TryShow(Track track, string placement, string customData)
         {
             track.State = State.Idle;
             if (track.AdInfo != null)

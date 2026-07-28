@@ -41,14 +41,14 @@ namespace NeftaCustomAdapter
             return IsAdReady();
         }
 
-        protected override bool TryShow(Track track)
+        protected override bool TryShow(Track track, string placement, string customData)
         {
             track.AdInfo = null;
             if (MaxSdk.IsInterstitialReady(track.AdUnitId))
             {
                 track.State = State.Shown;
                 Log($"Showing {track.AdUnitId}");
-                MaxSdk.ShowInterstitial(track.AdUnitId);
+                MaxSdk.ShowInterstitial(track.AdUnitId, placement, customData);
                 return true;
             }
             track.State = State.Idle;

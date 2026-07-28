@@ -35,7 +35,7 @@ namespace NeftaCustomAdapter
         protected abstract NeftaAdapterEvents.AdType AdType { get; }
         protected abstract int InsightType { get; }
         protected abstract void LoadInternal(string adUnitId, bool disableAutoRetries, string bidFloor);
-        protected abstract bool TryShow(Track track);
+        protected abstract bool TryShow(Track adRequest, string placement, string customData);
         
         protected Track _trackA;
         protected Track _trackB;
@@ -194,23 +194,23 @@ namespace NeftaCustomAdapter
             return _trackA.State == State.Ready || _trackB.State == State.Ready;
         }
         
-        public void ShowAd()
+        public void ShowAd(string placement, string customData)
         {
             var isShown = false;
             if (_trackA.State == State.Ready)
             {
                 if (_trackB.State == State.Ready && _trackB.AdInfo.Revenue > _trackA.AdInfo.Revenue)
                 {
-                    isShown = TryShow(_trackB);
+                    isShown = TryShow(_trackB, placement, customData);
                 }
                 if (!isShown)
                 {
-                    isShown = TryShow(_trackA);
+                    isShown = TryShow(_trackA, placement, customData);
                 }
             }
             if (!isShown && _trackB.State == State.Ready)
             {
-                if (!TryShow(_trackB))
+                if (!TryShow(_trackB, placement, customData))
                 {
                     LoadTracks();
                 }
