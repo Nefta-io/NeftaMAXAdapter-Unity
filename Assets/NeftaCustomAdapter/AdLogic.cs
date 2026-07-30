@@ -41,7 +41,9 @@ namespace NeftaCustomAdapter
         protected Track _trackB;
         protected bool _isFirstResponseReceived;
         protected bool _isAdRequested;
+        internal MaxSdkBase.AdInfo _adInfo;
         
+        public Action<string> OnAdRequestedEvent;
         public Action<string, MaxSdkBase.AdInfo> OnAdLoadedEvent;
         public Action<string, MaxSdkBase.ErrorInfo> OnAdLoadFailedEvent;
         public Action<string, MaxSdkBase.AdInfo> OnAdDisplayedEvent;
@@ -133,6 +135,7 @@ namespace NeftaCustomAdapter
                     Log($"Loading {track.AdUnitId} as Optimized with floor: {bidFloor}");
                     
                     LoadInternal(track.AdUnitId, true, bidFloor);
+                    OnAdRequestedEvent?.Invoke(track.AdUnitId);
 
                     if (NeftaAdapterEvents.NoDynamicResponseRetryInMs > 0)
                     {
@@ -153,6 +156,7 @@ namespace NeftaCustomAdapter
             Log($"Loading {track.AdUnitId} as Default");
             
             LoadInternal(track.AdUnitId, false, "");
+            OnAdRequestedEvent?.Invoke(track.AdUnitId);
             
             if (IsOptimized && NeftaAdapterEvents.NoDefaultResponseRetryInMs > 0)
             {
@@ -192,6 +196,28 @@ namespace NeftaCustomAdapter
         public bool IsAdReady()
         {
             return _trackA.State == State.Ready || _trackB.State == State.Ready;
+        }
+
+        public MaxSdkBase.AdInfo GetAdReady()
+        {
+            if (!IsOptimized)
+            {
+                return _adInfo;
+            }
+
+            if (_trackA.State == State.Ready)
+            {
+                if (_trackB.State == State.Ready && _trackB.AdInfo.Revenue > _trackA.AdInfo.Revenue)
+                {
+                    return _trackB.AdInfo;
+                }
+                return _trackA.AdInfo;
+            }
+            if (_trackB.State == State.Ready)
+            {
+                return _trackB.AdInfo;
+            }
+            return null;
         }
         
         public void ShowAd(string placement, string customData)
@@ -241,6 +267,7 @@ namespace NeftaCustomAdapter
             NeftaAdapterEvents.OnExternalMediationRequestLoaded(adInfo);
             if (!IsOptimized)
             {
+                _adInfo = adInfo;
                 if (OnAdLoadedEvent != null)
                 {
                     OnAdLoadedEvent(adUnitId, adInfo);
@@ -278,6 +305,7 @@ namespace NeftaCustomAdapter
         {
             if (!IsOptimized)
             {
+                _adInfo = null;
                 if (OnAdDisplayFailedEvent != null)
                 {
                     OnAdDisplayFailedEvent(adUnitId, errorInfo, adInfo);
@@ -300,6 +328,7 @@ namespace NeftaCustomAdapter
         
         protected void OnAdDisplayedCallback(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
+            _adInfo = null;
             if (OnAdDisplayedEvent != null)
             {
                 OnAdDisplayedEvent(adUnitId, adInfo);

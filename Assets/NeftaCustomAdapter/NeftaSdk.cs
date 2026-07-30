@@ -2,7 +2,7 @@ namespace NeftaCustomAdapter
 {
     public class NeftaSdk
     {
-        private const string IntegrationVersion = "1.3.0";
+        private const string IntegrationVersion = "1.3.1";
         
         private static bool _isInitialized;
         
@@ -35,15 +35,29 @@ namespace NeftaCustomAdapter
         {
             if (!Interstitial.IsOptimized)
             {
-                return MaxSdk.IsInterstitialReady(adUnitId);
+                var isReady = MaxSdk.IsInterstitialReady(adUnitId);
+                if (!isReady && Interstitial._adInfo != null && Interstitial._adInfo.AdUnitIdentifier == adUnitId)
+                {
+                    Interstitial._adInfo = null;
+                }
+                return isReady;
             }
             return Interstitial.IsInterstitialReady();
+        }
+        
+        // Returns tracked adInfo to be shown
+        // It's tracked from OnAdLoadedEvent till consumption of it (ShowInterstitial | OnAdDisplayedEvent | OnAdDisplayedFailedEvent | false IsInterstitialReady)
+        // It can happen that ad invalidates on native, so if you need exact status call IsInterstitialReady(GetInterstitialAdReady()?.AdUnitIdentifier)
+        public static MaxSdkBase.AdInfo GetInterstitialAdReady()
+        {
+            return Interstitial.GetAdReady();
         }
 
         public static void ShowInterstitial(string adUnitId=null, string placement=null, string customData=null)
         {
             if (!Interstitial.IsOptimized)
             {
+                Interstitial._adInfo = null;
                 MaxSdk.ShowInterstitial(adUnitId, placement, customData);
             }
             else
@@ -69,15 +83,29 @@ namespace NeftaCustomAdapter
         {
             if (!Rewarded.IsOptimized)
             {
-                return MaxSdk.IsRewardedAdReady(adUnitId);
+                var isReady = MaxSdk.IsRewardedAdReady(adUnitId);
+                if (!isReady && Rewarded._adInfo != null && Rewarded._adInfo.AdUnitIdentifier == adUnitId)
+                {
+                    Rewarded._adInfo = null;
+                }
+                return isReady;
             }
             return Rewarded.IsRewardedAdReady();
+        }
+
+        // Returns tracked adInfo to be shown
+        // It's tracked from OnAdLoadedEvent till consumption of it (ShowRewardedAd | OnAdDisplayedEvent | OnAdDisplayedFailedEvent | false IsRewardAdReady)
+        // It can happen that ad invalidates on native, so if you need exact status call IRewardedAdReady(GetRewardedAdReady()?.AdUnitIdentifier)
+        public static MaxSdkBase.AdInfo GetRewardedAdReady()
+        {
+            return Rewarded.GetAdReady();
         }
 
         public static void ShowRewardedAd(string adUnitId=null, string placement=null, string customData=null)
         {
             if (!Rewarded.IsOptimized)
             {
+                Rewarded._adInfo = null;
                 MaxSdk.ShowRewardedAd(adUnitId,  placement, customData);
             }
             else
