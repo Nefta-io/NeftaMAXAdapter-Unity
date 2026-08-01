@@ -31,6 +31,11 @@ namespace AdDemo
             _logic.Init(this);
         }
 
+        public void OnAdLogicReady()
+        {
+            _load.interactable = true;
+        }
+
         private void Update()
         {
             _logic.OnUpdate(Time.unscaledDeltaTime);

@@ -592,7 +592,7 @@ namespace NeftaCustomAdapter
                 }
                 catch (Exception e)
                 {
-                    Debug.Log("IOnReady error: " + e.Message);
+                    Debug.LogWarning("[NeftaPlugin] IOnReady error: " + e.Message);
                 }
                 
                 _delays.Clear();
@@ -613,10 +613,11 @@ namespace NeftaCustomAdapter
                     _delays.Add(2);
                 }
                 
+                InitConfiguration = new InitConfiguration(initDto);
+                NeftaSdk.OnInit();
                 if (_onReady != null)
                 {
-                    InitConfiguration = new InitConfiguration(initDto);
-                    _onReady.Invoke(InitConfiguration);
+                    _onReady.Invoke(InitConfiguration);   
                 }
             }, null);
         }

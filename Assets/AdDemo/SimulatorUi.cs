@@ -113,6 +113,11 @@ namespace AdDemo
             UpdateShowButton();
         }
         
+        public void OnAdLogicReady()
+        {
+            _load.interactable = true;
+        }
+        
         private void Load()
         {
             if (!AdLogic.IsOptimized)

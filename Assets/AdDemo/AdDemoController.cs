@@ -53,6 +53,8 @@ namespace AdDemo
         
         // When integrating Nefta chose either Manual or Wrapper
         private IntegrationType _integrationType;
+        private bool _isMaxReady;
+        private bool _isNeftaReady;
         
         private void Awake()
         {
@@ -72,6 +74,8 @@ namespace AdDemo
             NeftaAdapterEvents.InitWithAppId(_neftaAppId, (InitConfiguration config) =>
             {
                 Debug.Log($"[NeftaPluginMAX] Nefta Initialized, nuid: {config._nuid}");
+                _isNeftaReady = true;
+                OnAdLogicReady();
             });
         }
 
@@ -79,6 +83,18 @@ namespace AdDemo
         {
             NeftaAdapterEvents.SetHasUserConsent(consent);
             _consetCheckBox.interactable = false;
+        }
+
+        private void OnAdLogicReady()
+        {
+            if (_isMaxReady && _isNeftaReady)
+            {
+                _interstitialUi.OnAdLogicReady();
+                _rewardedUi.OnAdLogicReady();
+                
+                _interstitialSimulator.OnAdLogicReady();
+                _rewardedSimulator.OnAdLogicReady();
+            }
         }
         
         private void OnManualClick()
@@ -122,6 +138,8 @@ namespace AdDemo
             
             if (_integrationType == IntegrationType.Simulator)
             {
+                _isMaxReady = true;
+                
                 _interstitialSimulator.Init(isOptimized);
                 _rewardedSimulator.Init(isOptimized);
             }
@@ -150,6 +168,8 @@ namespace AdDemo
             MaxSdkCallbacks.OnSdkInitializedEvent += sdkConfiguration =>
             {
                 Debug.Log("MAX SDK Initialized");
+                _isMaxReady = true;
+                OnAdLogicReady();
             };
             MaxSdk.InitializeSdk();
 

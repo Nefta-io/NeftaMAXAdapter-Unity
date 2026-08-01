@@ -1,10 +1,15 @@
+using UnityEngine;
+
 namespace NeftaCustomAdapter
 {
     public class NeftaSdk
     {
-        private const string IntegrationVersion = "1.3.1";
+        private const string IntegrationVersion = "1.3.2";
         
         private static bool _isInitialized;
+        private static bool _isNeftaInitialized;
+        private static bool _isInterstitialLoadScheduled;
+        private static bool _isRewardedLoadScheduled;
         
         public static InterstitialLogic Interstitial = new InterstitialLogic();
         public static RewardedLogic Rewarded = new RewardedLogic();
@@ -27,7 +32,15 @@ namespace NeftaCustomAdapter
             }
             else
             {
-                Interstitial.LoadInterstitialAd();   
+                if (_isNeftaInitialized)
+                {
+                    Interstitial.LoadInterstitialAd();
+                }
+                else
+                {
+                    Debug.Log("[NeftaPlugin] Delaying load request until Nefta Initialized");
+                    _isInterstitialLoadScheduled = true;
+                }
             }
         }
 
@@ -75,7 +88,15 @@ namespace NeftaCustomAdapter
             }
             else
             {
-                Rewarded.LoadRewardedAd();   
+                if (_isNeftaInitialized)
+                {
+                    Rewarded.LoadRewardedAd();
+                }
+                else
+                {
+                    Debug.Log("[NeftaPlugin] Delaying load request until Nefta Initialized");
+                    _isRewardedLoadScheduled = true;
+                }
             }
         }
 
@@ -111,6 +132,21 @@ namespace NeftaCustomAdapter
             else
             {
                 Rewarded.ShowAd(placement, customData);   
+            }
+        }
+
+        internal static void OnInit()
+        {
+            _isNeftaInitialized = true;
+            if (_isInterstitialLoadScheduled)
+            {
+                _isInterstitialLoadScheduled = false;
+                LoadInterstitial();
+            }
+            if (_isRewardedLoadScheduled)
+            {
+                _isRewardedLoadScheduled = true;
+                LoadRewardedAd();
             }
         }
     }
