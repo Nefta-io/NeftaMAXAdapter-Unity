@@ -631,8 +631,10 @@ namespace NeftaCustomAdapter
                     var insightRequest = _insightRequests[i];
                     if (insightRequest._id == id)
                     {
-                        var insights = new Insights(adapterResponseType, adapterResponse);
-                        _mainContext.Post(_ => insightRequest._callback(insights), null);
+                        _mainContext.Post(_ => {
+                            var insights = new Insights(adapterResponseType, adapterResponse);
+                            insightRequest._callback(insights);
+                        }, null);
                         _insightRequests.RemoveAt(i);
                         break;
                     }
