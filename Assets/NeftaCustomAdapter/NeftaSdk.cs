@@ -44,7 +44,7 @@ namespace NeftaCustomAdapter
             }
         }
 
-        public static bool IsInterstitialReady(string adUnitId=null)
+        public static bool IsInterstitialReady(string adUnitId)
         {
             if (!Interstitial.IsOptimized)
             {
@@ -100,7 +100,7 @@ namespace NeftaCustomAdapter
             }
         }
 
-        public static bool IsRewardedAdReady(string adUnitId=null)
+        public static bool IsRewardedAdReady(string adUnitId)
         {
             if (!Rewarded.IsOptimized)
             {
@@ -145,7 +145,7 @@ namespace NeftaCustomAdapter
             }
             if (_isRewardedLoadScheduled)
             {
-                _isRewardedLoadScheduled = true;
+                _isRewardedLoadScheduled = false;
                 LoadRewardedAd();
             }
         }
