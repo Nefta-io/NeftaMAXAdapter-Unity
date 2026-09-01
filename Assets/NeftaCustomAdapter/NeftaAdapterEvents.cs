@@ -624,22 +624,22 @@ namespace NeftaCustomAdapter
         
         internal static void IOnInsights(int id, int adapterResponseType, string adapterResponse)
         {
-            lock (_insightRequests)
-            {
-                for (var i = _insightRequests.Count - 1; i >= 0; i--)
+            _mainContext.Post(_ => {
+                lock (_insightRequests)
                 {
-                    var insightRequest = _insightRequests[i];
-                    if (insightRequest._id == id)
+                    for (var i = _insightRequests.Count - 1; i >= 0; i--)
                     {
-                        _mainContext.Post(_ => {
+                        var insightRequest = _insightRequests[i];
+                        if (insightRequest._id == id)
+                        {
                             var insights = new Insights(adapterResponseType, adapterResponse);
                             insightRequest._callback(insights);
-                        }, null);
+                        }
                         _insightRequests.RemoveAt(i);
                         break;
                     }
                 }
-            }
+            }, null);
         }
         
         internal static string JavaScriptStringEncode(string value)
