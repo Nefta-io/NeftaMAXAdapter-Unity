@@ -634,9 +634,9 @@ namespace NeftaCustomAdapter
                         {
                             var insights = new Insights(adapterResponseType, adapterResponse);
                             insightRequest._callback(insights);
+                            _insightRequests.RemoveAt(i);
+                            break;
                         }
-                        _insightRequests.RemoveAt(i);
-                        break;
                     }
                 }
             }, null);
