@@ -1,9 +1,12 @@
+using System;
+
 namespace NeftaCustomAdapter
 {
     public class InitConfiguration
     {
-        public bool _skipOptimization;
+        [Obsolete] public bool _skipOptimization;
         public string _nuid;
+        public bool _isSessionOptimized;
 
         public InitConfiguration(NeftaAdapterEvents.InitConfigurationDto dto)
         {
@@ -11,6 +14,7 @@ namespace NeftaCustomAdapter
             {
                 _skipOptimization = dto.skipOptimization;
                 _nuid = dto.nuid;
+                _isSessionOptimized = dto.isSessionOptimized;
             }
         }
     }

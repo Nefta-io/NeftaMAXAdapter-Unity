@@ -6,6 +6,7 @@ namespace AdDemo
 {
     public class AdDemoController : MonoBehaviour
     {
+        private const string _clientId = "5734465296924672";
 #if UNITY_IOS
         private const string _neftaAppId = "5763106043068416";
         
@@ -36,6 +37,13 @@ namespace AdDemo
             Simulator
         }
 
+        private enum TestGroup
+        {
+            Control,
+            Optimized,
+            NeftaDecides
+        }
+
         [SerializeField] private Text _title;
         [SerializeField] private Toggle _consetCheckBox;
         [SerializeField] private GameObject _integrationSelection;
@@ -44,6 +52,7 @@ namespace AdDemo
         [SerializeField] private Button _integrationSimulatorButton;
         [SerializeField] private Button _groupDefaultButton;
         [SerializeField] private Button _groupOptimizedButton;
+        [SerializeField] private Button _indifferentButton;
         
         [SerializeField] private InterstitialUi _interstitialUi;
         [SerializeField] private RewardedUi _rewardedUi;
@@ -66,16 +75,25 @@ namespace AdDemo
             _integrationSimulatorButton.onClick.AddListener(OnSimulatorClick);
             _groupDefaultButton.onClick.AddListener(OnDefaultClick);
             _groupOptimizedButton.onClick.AddListener(OnOptimizedClick);
+            _indifferentButton.onClick.AddListener(OnIndifferentClick);
         }
 
-        private void InitializeNefta()
+        private void InitializeNefta(TestGroup testGroup)
         {
             NeftaAdapterEvents.EnableLogging(true);
-            NeftaAdapterEvents.InitWithAppId(_neftaAppId, (InitConfiguration config) =>
+            NeftaAdapterEvents.InitWithClientId(_clientId, (InitConfiguration config) =>
             {
                 Debug.Log($"[NeftaPluginMAX] Nefta Initialized, nuid: {config._nuid}");
                 _isNeftaReady = true;
-                OnAdLogicReady();
+
+                if (testGroup == TestGroup.NeftaDecides)
+                {
+                    InitializeMAX(config._isSessionOptimized);
+                }
+                else
+                {
+                    OnAdLogicReady();   
+                }
             });
         }
 
@@ -123,34 +141,46 @@ namespace AdDemo
         
         private void OnDefaultClick()
         {
-            Initialize(false);
+            Initialize(TestGroup.Control);
         }
         
         private void OnOptimizedClick()
         {
-            Initialize(true);
+            Initialize(TestGroup.Optimized);
         }
 
-        private void Initialize(bool isOptimized)
+        private void OnIndifferentClick()
         {
-            InitializeNefta();
+            Initialize(TestGroup.NeftaDecides);  
+        }
+
+        private void Initialize(TestGroup testGroup)
+        {
             _integrationSelection.SetActive(false);
             
-            if (_integrationType == IntegrationType.Simulator)
+            InitializeNefta(testGroup);
+            if (testGroup == TestGroup.Control)
             {
-                _isMaxReady = true;
-                
-                _interstitialSimulator.Init(isOptimized);
-                _rewardedSimulator.Init(isOptimized);
+                InitializeMAX(false);       
             }
-            else
+            else if (testGroup == TestGroup.Optimized)
             {
-                InitializeMAX(true);   
+                InitializeMAX(true);      
             }
         }
         
         private void InitializeMAX(bool isOptimized)
         {
+            Debug.Log($"[NeftaPluginMAX] Initializing MAX as {(isOptimized ? "optimized" : "control")}");
+            if (_integrationType == IntegrationType.Simulator)
+            {
+                _isMaxReady = true;
+                OnAdLogicReady();
+                _interstitialSimulator.Init(isOptimized);
+                _rewardedSimulator.Init(isOptimized);
+                return;
+            }
+
             MaxSdk.SetVerboseLogging(true);
             MaxSdk.SetTestDeviceAdvertisingIdentifiers(new string[]
             {

@@ -4,7 +4,7 @@ namespace NeftaCustomAdapter
 {
     public class NeftaSdk
     {
-        private const string IntegrationVersion = "1.3.2";
+        private const string IntegrationVersion = "1.3.3";
         
         private static bool _isInitialized;
         private static bool _isNeftaInitialized;

@@ -30,8 +30,11 @@ namespace NeftaCustomAdapter
         public class InitConfigurationDto
         {
             public bool skipOptimization;
+            public bool isSessionOptimized;
             public string nuid;
             public float[] delays;
+            public int firstResponseTimeoutInterstitialInMs;
+            public int firstResponseTimeoutRewardedInMs;
             public int noDynamicResponseRetryInMs;
             public int noDefaultResponseRetryInMs;
         }
@@ -146,6 +149,8 @@ namespace NeftaCustomAdapter
         private static List<InsightRequest> _insightRequests;
         private static int _insightId;
         private static List<float> _delays;
+        public static int FirstResponseTimeoutInterstitialMs;
+        public static int FirstResponseTimeoutRewardedMs;
         public static int NoDynamicResponseRetryInMs;
         public static int NoDefaultResponseRetryInMs;
 
@@ -605,6 +610,9 @@ namespace NeftaCustomAdapter
                             _delays.Add(delay);
                         }
                     }
+
+                    FirstResponseTimeoutInterstitialMs = initDto.firstResponseTimeoutInterstitialInMs;
+                    FirstResponseTimeoutRewardedMs = initDto.firstResponseTimeoutRewardedInMs;
                     NoDynamicResponseRetryInMs = initDto.noDynamicResponseRetryInMs;
                     NoDefaultResponseRetryInMs = initDto.noDefaultResponseRetryInMs;
                 }

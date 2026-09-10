@@ -32,6 +32,7 @@ namespace AdDemo
         
         private Track _trackA;
         private Track _trackB;
+        private bool _isFirstRequest = true;
         private bool _isFirstResponseReceived;
 
         private InterstitialUi _ui;
@@ -60,6 +61,30 @@ namespace AdDemo
             
             TrackLoad(_trackA, _trackB.State);
             TrackLoad(_trackB, _trackA.State);
+
+            var stopWaitingForFirstResponseAfter = NeftaAdapterEvents.FirstResponseTimeoutInterstitialMs;
+            if (_isFirstRequest && stopWaitingForFirstResponseAfter > 0)
+            {
+                _isFirstRequest = false;
+
+                _ = ForceStartSecondTrack(stopWaitingForFirstResponseAfter);
+            }
+        }
+        
+        private async Task ForceStartSecondTrack(int stopWaitingForFirstResponseAfter)
+        {
+            await Task.Delay(stopWaitingForFirstResponseAfter);
+#if UNITY_EDITOR
+            if (!Application.isPlaying)
+            {
+                return;
+            }
+#endif
+            if (!_isFirstResponseReceived)
+            {
+                _isFirstResponseReceived = true;
+                Load();   
+            }
         }
         
         private void TrackLoad(Track track, State otherState)
@@ -217,21 +242,47 @@ namespace AdDemo
         
         private void OnAdLoadFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
         {
+            Track track = null;
+            if (adUnitId == _trackA.AdUnitId)
+            {
+                track = _trackA;
+            }
+            else if (adUnitId == _trackB.AdUnitId)
+            {
+                track = _trackB;
+            }
+            else
+            {
+                return;
+            }
+            
             NeftaAdapterEvents.OnExternalMediationRequestFailed(adUnitId, errorInfo);
             
             _ui.SetStatus($"Load failed {adUnitId} with: {errorInfo}");
             
-            var track = adUnitId == _trackA.AdUnitId ? _trackA : _trackB;
             RestartAfterFailedLoad(track);
         }
         
         private void OnAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
+            Track track = null;
+            if (adUnitId == _trackA.AdUnitId)
+            {
+                track = _trackA;
+            }
+            else if (adUnitId == _trackB.AdUnitId)
+            {
+                track = _trackB;
+            }
+            else
+            {
+                return;
+            }
+            
             NeftaAdapterEvents.OnExternalMediationRequestLoaded(adInfo);
             
             _ui.SetStatus($"Loaded {adUnitId} at: {adInfo.Revenue}");
             
-            var track = adUnitId == _trackA.AdUnitId ? _trackA : _trackB;
             track.Insight = null;
             track.AdInfo = adInfo;
             track.State = State.Ready;

@@ -39,6 +39,7 @@ namespace NeftaCustomAdapter
         
         protected Track _trackA;
         protected Track _trackB;
+        protected bool _isFirstRequest = true;
         protected bool _isFirstResponseReceived;
         protected bool _isAdRequested;
         internal MaxSdkBase.AdInfo _adInfo;
@@ -96,6 +97,30 @@ namespace NeftaCustomAdapter
         {
             TrackLoad(_trackA, _trackB.State);
             TrackLoad(_trackB, _trackA.State);
+
+            var stopWaitingForFirstResponseAfter = AdType == NeftaAdapterEvents.AdType.Interstitial ? NeftaAdapterEvents.FirstResponseTimeoutInterstitialMs : NeftaAdapterEvents.FirstResponseTimeoutRewardedMs;
+            if (_isFirstRequest && stopWaitingForFirstResponseAfter > 0)
+            {
+                _isFirstRequest = false;
+
+                _ = ForceStartSecondTrack(stopWaitingForFirstResponseAfter);
+            }
+        }
+        
+        private async Task ForceStartSecondTrack(int stopWaitingForFirstResponseAfter)
+        {
+            await Task.Delay(stopWaitingForFirstResponseAfter);
+#if UNITY_EDITOR
+            if (!Application.isPlaying)
+            {
+                return;
+            }
+#endif
+            if (!_isFirstResponseReceived)
+            {
+                _isFirstResponseReceived = true;
+                LoadTracks();   
+            }
         }
         
         private void TrackLoad(Track track, State otherState)
@@ -257,7 +282,20 @@ namespace NeftaCustomAdapter
             
             Log($"Load Failed {adUnitId}: {errorInfo}");
             
-            var track = adUnitId == _trackA.AdUnitId ? _trackA : _trackB;
+            Track track = null;
+            if (adUnitId == _trackA.AdUnitId)
+            {
+                track = _trackA;
+            }
+            else if (adUnitId == _trackB.AdUnitId)
+            {
+                track = _trackB;
+            }
+            else
+            {
+                return;
+            }
+            
             DelayExecutor.CancelDelayedAction(track);
             RestartAfterFailedLoad(track);
         }
@@ -277,7 +315,20 @@ namespace NeftaCustomAdapter
             
             Log($"Loaded {adUnitId} at: {adInfo.Revenue}");
             
-            var track = adUnitId == _trackA.AdUnitId ? _trackA : _trackB;
+            Track track = null;
+            if (adUnitId == _trackA.AdUnitId)
+            {
+                track = _trackA;
+            }
+            else if (adUnitId == _trackB.AdUnitId)
+            {
+                track = _trackB;
+            }
+            else
+            {
+                return;
+            }
+            
             DelayExecutor.CancelDelayedAction(track);
             track.Insight = null;
             track.AdInfo = adInfo;
@@ -315,7 +366,19 @@ namespace NeftaCustomAdapter
 
             Log($"OnAdDisplayFailedEvent {adUnitId}");
             
-            var track = adUnitId == _trackA.AdUnitId ? _trackA : _trackB;
+            Track track = null;
+            if (adUnitId == _trackA.AdUnitId)
+            {
+                track = _trackA;
+            }
+            else if (adUnitId == _trackB.AdUnitId)
+            {
+                track = _trackB;
+            }
+            else
+            {
+                return;
+            }
             track.State = State.Idle;
             
             if (OnAdDisplayFailedEvent != null)
@@ -366,7 +429,19 @@ namespace NeftaCustomAdapter
 
             Log($"OnAdHiddenEvent {adUnitId}");
             
-            var track = adUnitId == _trackA.AdUnitId ? _trackA : _trackB;
+            Track track = null;
+            if (adUnitId == _trackA.AdUnitId)
+            {
+                track = _trackA;
+            }
+            else if (adUnitId == _trackB.AdUnitId)
+            {
+                track = _trackB;
+            }
+            else
+            {
+                return;
+            }
             track.State = State.Idle;
             
             if (OnAdHiddenEvent != null)

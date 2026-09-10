@@ -1,7 +1,6 @@
 // swift-interface-format-version: 1.0
-// swift-compiler-version: Apple Swift version 6.1.2 effective-5.10 (swiftlang-6.1.2.1.2 clang-1700.0.13.5)
-// swift-module-flags: -target x86_64-apple-ios15.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -Onone -enable-experimental-feature DebugDescriptionMacro -enable-bare-slash-regex -module-name NeftaSDK
-// swift-module-flags-ignorable: -no-verify-emitted-module-interface -interface-compiler-version 6.1.2
+// swift-compiler-version: Apple Swift version 5.10 (swiftlang-5.10.0.13 clang-1500.3.9.4)
+// swift-module-flags: -target x86_64-apple-ios12.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -Onone -enable-bare-slash-regex -module-name NeftaSDK
 import Foundation
 @_exported import NeftaSDK
 import Network
@@ -53,16 +52,19 @@ import os
   }
   @_inheritsConvenienceInitializers @objc public class State : ObjectiveC.NSObject {
     @objc public var _nuid: Swift.String
+    @objc public var _isSessionOptimized: Swift.Bool
+    @objc public var _firstResponseTimeoutInterstitialInMs: Swift.Int
+    @objc public var _firstResponseTimeoutRewardedInMs: Swift.Int
     @objc public var _isDebugEnabled: Swift.Bool
     @objc public var _adProviderCountry: Swift.String?
     @objc public var _availableNetworks: [Swift.String]?
     @objc override dynamic public init()
     @objc deinit
   }
-  public typealias OnReadyBlock = (NeftaSDK.InitConfiguration) -> Swift.Void
-  public typealias OnReadyAsStringBlock = (Swift.String) -> Swift.Void
-  public typealias OnInsightsBlock = (NeftaSDK.Insights) -> Swift.Void
-  public typealias OnInsightsAsStringBlock = (Swift.Int, Swift.Int, Swift.String?) -> Swift.Void
+  public typealias OnReadyBlock = ((NeftaSDK.InitConfiguration) -> Swift.Void)
+  public typealias OnReadyAsStringBlock = ((Swift.String) -> Swift.Void)
+  public typealias OnInsightsBlock = ((NeftaSDK.Insights) -> Swift.Void)
+  public typealias OnInsightsAsStringBlock = ((Swift.Int, Swift.Int, Swift.String?) -> Swift.Void)
   @objc public static let Version: Swift.String
   public static var _initUrl: Swift.String
   final public let _info: NeftaSDK.NeftaPlugin.Info
@@ -248,6 +250,9 @@ import os
   @objc public var _nuid: Swift.String
   @objc public var _noDynamicResponseRetryInMs: Swift.Int
   @objc public var _noDefaultResponseRetryInMs: Swift.Int
+  @objc public var _isSessionOptimized: Swift.Bool
+  @objc public var _firstResponseTimeoutInterstitialInMs: Swift.Int
+  @objc public var _firstResponseTimeoutRewardedInMs: Swift.Int
   public init(skipOptimization: Swift.Bool, state: NeftaSDK.NeftaPlugin.State)
   public func GetAdapterResponse() -> Swift.String
   @objc deinit
