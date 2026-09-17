@@ -12,7 +12,6 @@ namespace NeftaCustomAdapter
         {
             if (dto != null)
             {
-                _skipOptimization = dto.skipOptimization;
                 _nuid = dto.nuid;
                 _isSessionOptimized = dto.isSessionOptimized;
             }

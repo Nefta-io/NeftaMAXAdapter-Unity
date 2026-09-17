@@ -21,7 +21,6 @@ namespace Editor.Tests
             NeftaAdapterEvents.UnitTestOverrideOnReady(null);
             NeftaAdapterEvents.InitWithAppId("appId", OnReady);
             yield return WaitOnInitResponse();
-            Assert.IsFalse(_config._skipOptimization);
             Assert.IsNull(_config._nuid);
         }
         
@@ -31,7 +30,6 @@ namespace Editor.Tests
             NeftaAdapterEvents.UnitTestOverrideOnReady("");
             NeftaAdapterEvents.InitWithAppId("appId", OnReady);
             yield return WaitOnInitResponse();
-            Assert.IsFalse(_config._skipOptimization);
             Assert.IsNull(_config._nuid);
         }
         
@@ -41,7 +39,6 @@ namespace Editor.Tests
             NeftaAdapterEvents.UnitTestOverrideOnReady("{");
             NeftaAdapterEvents.InitWithAppId("appId", OnReady);
             yield return WaitOnInitResponse();
-            Assert.IsFalse(_config._skipOptimization);
             Assert.IsNull(_config._nuid);
         }
         
@@ -52,7 +49,6 @@ namespace Editor.Tests
             NeftaAdapterEvents.UnitTestOverrideOnReady($"{{\"nuid\":\"{nuid}\",\"skipOptimization\":true,\"delays\":[17,321,456.7],\"noDynamicResponseRetryInMs\":10123,\"noDefaultResponseRetryInMs\":11654}}");
             NeftaAdapterEvents.InitWithAppId("appId", OnReady);
             yield return WaitOnInitResponse();
-            Assert.IsTrue(_config._skipOptimization);
             Assert.AreEqual(nuid, _config._nuid);
             
             var delaysField = typeof(NeftaAdapterEvents).GetField("_delays", BindingFlags.NonPublic | BindingFlags.Static);
