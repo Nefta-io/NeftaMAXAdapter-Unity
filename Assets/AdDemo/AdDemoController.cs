@@ -81,7 +81,7 @@ namespace AdDemo
         private void InitializeNefta(TestGroup testGroup)
         {
             NeftaAdapterEvents.EnableLogging(true);
-            NeftaAdapterEvents.InitWithClientId(_clientId, (InitConfiguration config) =>
+            NeftaAdapterEvents.InitWithAppId(_neftaAppId, (InitConfiguration config) =>
             {
                 Debug.Log($"[NeftaPluginMAX] Nefta Initialized, nuid: {config._nuid}");
                 _isNeftaReady = true;
