@@ -5,6 +5,5 @@ namespace AdDemo
         public void Init(RewardedUi ui);
         public void Load();
         public void Show();
-        public void OnUpdate(float delta);
     }
 }

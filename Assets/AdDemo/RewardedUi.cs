@@ -36,11 +36,6 @@ namespace AdDemo
             _load.interactable = true;
         }
         
-        private void Update()
-        {
-            _logic.OnUpdate(Time.unscaledDeltaTime);
-        }
-        
         private void OnLoadChanged(bool isOn)
         {
             IsAutoLoad = isOn;

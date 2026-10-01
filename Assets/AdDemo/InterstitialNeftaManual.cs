@@ -166,42 +166,13 @@ namespace AdDemo
             }
             if (!isShown && _trackB.State == State.Ready)
             {
-                if (!TryShow(_trackB))
-                {
-                    Load();
-                }
+                isShown = TryShow(_trackB);
+            }
+            if (!isShown)
+            {
+                Load();
             }
             _ui.SetAvailability(_trackA.State == State.Ready || _trackB.State == State.Ready);
-        }
-
-        public void OnUpdate(float delta)
-        {
-            if (_trackA.State == State.Loading || _trackB.State == State.LoadingWithInsights)
-            {
-                _trackA.LoadingTimeInMs += (int)(delta * 1000);
-                if ((_trackA.State == State.Loading && NeftaAdapterEvents.NoDefaultResponseRetryInMs > 0 &&
-                    _trackA.LoadingTimeInMs >= NeftaAdapterEvents.NoDefaultResponseRetryInMs) ||
-                    (_trackA.State == State.LoadingWithInsights && NeftaAdapterEvents.NoDynamicResponseRetryInMs > 0 &&
-                    _trackA.LoadingTimeInMs >= NeftaAdapterEvents.NoDynamicResponseRetryInMs))
-                {
-                    _ui.SetStatus($"Retrying load after no response on {_trackA.AdUnitId}");
-                    _trackA.State = State.Idle;
-                    Load();
-                }
-            }
-            if (_trackB.State == State.Loading || _trackB.State == State.LoadingWithInsights)
-            {
-                _trackB.LoadingTimeInMs += (int)(delta * 1000);
-                if ((_trackB.State == State.Loading && NeftaAdapterEvents.NoDefaultResponseRetryInMs > 0 &&
-                     _trackB.LoadingTimeInMs >= NeftaAdapterEvents.NoDefaultResponseRetryInMs) ||
-                    (_trackB.State == State.LoadingWithInsights && NeftaAdapterEvents.NoDynamicResponseRetryInMs > 0 &&
-                     _trackA.LoadingTimeInMs >= NeftaAdapterEvents.NoDynamicResponseRetryInMs))
-                {
-                    _ui.SetStatus($"Retrying load after no response on {_trackB.AdUnitId}");
-                    _trackB.State = State.Idle;
-                    Load();
-                }
-            }
         }
 
         private bool TryShow(Track track)
@@ -297,13 +268,29 @@ namespace AdDemo
         {
             _ui.SetStatus("OnAdDisplayFailedEvent");
             
+            if (adUnitId == _trackA.AdUnitId)
+            {
+                _trackA.State = State.Idle;
+            }
+            else if (adUnitId == _trackB.AdUnitId)
+            {
+                _trackB.State = State.Idle;
+            }
             Load();
         }
         
         private void OnAdHiddenEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
             _ui.SetStatus("OnAdHideEvent");
-
+            
+            if (adUnitId == _trackA.AdUnitId)
+            {
+                _trackA.State = State.Idle;
+            }
+            else if (adUnitId == _trackB.AdUnitId)
+            {
+                _trackB.State = State.Idle;
+            }
             Load();
         }
         
