@@ -69,7 +69,6 @@ import os
   public static var _initUrl: Swift.String
   final public let _info: NeftaSDK.NeftaPlugin.Info
   @objc final public let _state: NeftaSDK.NeftaPlugin.State
-  @objc public var Events: NeftaSDK.NeftaEvents
   @objc public static let _extraParamslock: Foundation.NSLock
   @objc public static var _extraParams: Foundation.NSMutableDictionary
   @objc public var OnInsightsAsString: NeftaSDK.NeftaPlugin.OnInsightsAsStringBlock?
@@ -94,128 +93,6 @@ import os
   @objc(GetRetryDelayInSeconds:adUnitId:) public static func GetRetryDelayInSeconds(insight: NeftaSDK.AdInsight?, adUnitId: Swift.String) -> Swift.Float
   public func GetDebugState() -> [Swift.String : Any?]
   @objc public static func SetOverride(url: Swift.String?)
-  @objc deinit
-}
-@_hasMissingDesignatedInitializers @objc public class NeftaEvents : ObjectiveC.NSObject {
-  @objc public enum SessionCategory : Swift.Int {
-    case SessionStart = 0
-    case SessionPause = 1
-    case AccountConnected = 2
-    case AccountUpgraded = 3
-    case LowMemory = 4
-    public var _name: Swift.String {
-      get
-    }
-    public init?(rawValue: Swift.Int)
-    public typealias RawValue = Swift.Int
-    public var rawValue: Swift.Int {
-      get
-    }
-  }
-  @objc public enum ProgressionType : Swift.Int, Swift.Hashable {
-    case Achievement = 0
-    case GameplayUnit = 1
-    case ItemLevel = 2
-    case Unlock = 3
-    case PlayerLevel = 4
-    case Task = 5
-    case Other = 6
-    public init?(rawValue: Swift.Int)
-    public typealias RawValue = Swift.Int
-    public var rawValue: Swift.Int {
-      get
-    }
-  }
-  @objc public enum ProgressionStatus : Swift.Int, Swift.Hashable {
-    case Start = 0
-    case Complete = 1
-    case Fail = 2
-    public init?(rawValue: Swift.Int)
-    public typealias RawValue = Swift.Int
-    public var rawValue: Swift.Int {
-      get
-    }
-  }
-  @objc public enum ProgressionSource : Swift.Int {
-    case Undefined = 0
-    case CoreContent = 1
-    case OptionalContent = 2
-    case Boss = 3
-    case Social = 4
-    case SpecialEvent = 5
-    case Other = 6
-    public var _name: Swift.String? {
-      get
-    }
-    public init?(rawValue: Swift.Int)
-    public typealias RawValue = Swift.Int
-    public var rawValue: Swift.Int {
-      get
-    }
-  }
-  @objc public func AddProgressionEvent(status: NeftaSDK.NeftaEvents.ProgressionStatus, type: NeftaSDK.NeftaEvents.ProgressionType, source: NeftaSDK.NeftaEvents.ProgressionSource)
-  @objc public func AddProgressionEvent(status: NeftaSDK.NeftaEvents.ProgressionStatus, type: NeftaSDK.NeftaEvents.ProgressionType, source: NeftaSDK.NeftaEvents.ProgressionSource, name: Swift.String?, value: Swift.Int64)
-  @objc public func AddProgressionEvent(status: NeftaSDK.NeftaEvents.ProgressionStatus, type: NeftaSDK.NeftaEvents.ProgressionType, source: NeftaSDK.NeftaEvents.ProgressionSource, name: Swift.String?, value: Swift.Int64, customPayload: Swift.String?)
-  @objc public enum ResourceCategory : Swift.Int {
-    case Other = 0
-    case SoftCurrency = 1
-    case PremiumCurrency = 2
-    case Resource = 3
-    case Consumable = 4
-    case CosmeticItem = 5
-    case CoreItem = 6
-    case Chest = 7
-    case Experience = 8
-    public init?(rawValue: Swift.Int)
-    public typealias RawValue = Swift.Int
-    public var rawValue: Swift.Int {
-      get
-    }
-  }
-  @objc public enum ReceiveMethod : Swift.Int {
-    case Undefined = 0
-    case LevelEnd = 1
-    case Reward = 2
-    case Loot = 3
-    case Shop = 4
-    case Iap = 5
-    case Create = 6
-    case Other = 7
-    public var _name: Swift.String? {
-      get
-    }
-    public init?(rawValue: Swift.Int)
-    public typealias RawValue = Swift.Int
-    public var rawValue: Swift.Int {
-      get
-    }
-  }
-  @objc public func AddReceiveEvent(category: NeftaSDK.NeftaEvents.ResourceCategory, method: NeftaSDK.NeftaEvents.ReceiveMethod)
-  @objc public func AddReceiveEvent(category: NeftaSDK.NeftaEvents.ResourceCategory, method: NeftaSDK.NeftaEvents.ReceiveMethod, name: Swift.String?, quantity: Swift.Int64)
-  @objc public func AddReceiveEvent(category: NeftaSDK.NeftaEvents.ResourceCategory, method: NeftaSDK.NeftaEvents.ReceiveMethod, name: Swift.String?, quantity: Swift.Int64, customPayload: Swift.String?)
-  @objc public enum SpendMethod : Swift.Int {
-    case Undefined = 0
-    case Boost = 1
-    case Continuity = 2
-    case Create = 3
-    case Unlock = 4
-    case Upgrade = 5
-    case Shop = 6
-    case Other = 7
-    public var _name: Swift.String? {
-      get
-    }
-    public init?(rawValue: Swift.Int)
-    public typealias RawValue = Swift.Int
-    public var rawValue: Swift.Int {
-      get
-    }
-  }
-  @objc public func AddSpendEvent(category: NeftaSDK.NeftaEvents.ResourceCategory, method: NeftaSDK.NeftaEvents.SpendMethod)
-  @objc public func AddSpendEvent(category: NeftaSDK.NeftaEvents.ResourceCategory, method: NeftaSDK.NeftaEvents.SpendMethod, name: Swift.String?, quantity: Swift.Int64)
-  @objc public func AddSpendEvent(category: NeftaSDK.NeftaEvents.ResourceCategory, method: NeftaSDK.NeftaEvents.SpendMethod, name: Swift.String?, quantity: Swift.Int64, customPayload: Swift.String?)
-  @objc public func AddPurchaseEvent(name: Swift.String, price: Foundation.Decimal, currency: Swift.String)
-  @objc public func AddPurchaseEvent(name: Swift.String, price: Foundation.Decimal, currency: Swift.String, customPayload: Swift.String?)
   @objc deinit
 }
 @_inheritsConvenienceInitializers @objc public class Insights : ObjectiveC.NSObject {
@@ -260,20 +137,3 @@ import os
 extension NeftaSDK.AdInsight.Types : Swift.Equatable {}
 extension NeftaSDK.AdInsight.Types : Swift.Hashable {}
 extension NeftaSDK.AdInsight.Types : Swift.RawRepresentable {}
-extension NeftaSDK.NeftaEvents.SessionCategory : Swift.Equatable {}
-extension NeftaSDK.NeftaEvents.SessionCategory : Swift.Hashable {}
-extension NeftaSDK.NeftaEvents.SessionCategory : Swift.RawRepresentable {}
-extension NeftaSDK.NeftaEvents.ProgressionType : Swift.RawRepresentable {}
-extension NeftaSDK.NeftaEvents.ProgressionStatus : Swift.RawRepresentable {}
-extension NeftaSDK.NeftaEvents.ProgressionSource : Swift.Equatable {}
-extension NeftaSDK.NeftaEvents.ProgressionSource : Swift.Hashable {}
-extension NeftaSDK.NeftaEvents.ProgressionSource : Swift.RawRepresentable {}
-extension NeftaSDK.NeftaEvents.ResourceCategory : Swift.Equatable {}
-extension NeftaSDK.NeftaEvents.ResourceCategory : Swift.Hashable {}
-extension NeftaSDK.NeftaEvents.ResourceCategory : Swift.RawRepresentable {}
-extension NeftaSDK.NeftaEvents.ReceiveMethod : Swift.Equatable {}
-extension NeftaSDK.NeftaEvents.ReceiveMethod : Swift.Hashable {}
-extension NeftaSDK.NeftaEvents.ReceiveMethod : Swift.RawRepresentable {}
-extension NeftaSDK.NeftaEvents.SpendMethod : Swift.Equatable {}
-extension NeftaSDK.NeftaEvents.SpendMethod : Swift.Hashable {}
-extension NeftaSDK.NeftaEvents.SpendMethod : Swift.RawRepresentable {}
