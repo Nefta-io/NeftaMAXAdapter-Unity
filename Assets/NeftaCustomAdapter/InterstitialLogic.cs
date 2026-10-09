@@ -6,13 +6,12 @@ namespace NeftaCustomAdapter
         protected override NeftaAdapterEvents.AdType AdType => NeftaAdapterEvents.AdType.Interstitial;
         protected override int InsightType => Insights.Interstitial;
         
-        public void Initialize(bool isOptimized, string adUnitIdA, string adUnitIdB)
+        public void Initialize(bool isOptimized, string defaultAdUnit, string optimizedAdUnitA, string optimizedAdUnitB=null)
         {
             NeftaSdk.Initialize();
-            NeftaAdapterEvents.SetInterstitialLogic(isOptimized);
             if (isOptimized)
             {
-                InitializeDualTrack(adUnitIdA, adUnitIdB);
+                InitializeDualTrack(defaultAdUnit, optimizedAdUnitA, optimizedAdUnitB);
             }
 
             MaxSdkCallbacks.Interstitial.OnAdLoadedEvent += OnAdLoadedCallback;
@@ -29,10 +28,15 @@ namespace NeftaCustomAdapter
             LoadOrTriggerAlreadyLoaded();
         }
         
-        protected override void LoadInternal(string adUnitId, bool disableAutoRetries, string bidFloor)
+        protected override void LoadAsOptimized(string adUnitId, string bidFloor)
         {
-            MaxSdk.SetInterstitialExtraParameter(adUnitId, "disable_auto_retries", disableAutoRetries ? "true" : "false");
+            MaxSdk.SetInterstitialExtraParameter(adUnitId, "disable_auto_retries", "true");
             MaxSdk.SetInterstitialExtraParameter(adUnitId, "jC7Fp", bidFloor);
+            MaxSdk.LoadInterstitial(adUnitId);
+        }
+
+        protected override void LoadAsDefault(string adUnitId)
+        {
             MaxSdk.LoadInterstitial(adUnitId);
         }
 

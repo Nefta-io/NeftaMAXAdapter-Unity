@@ -21,8 +21,7 @@ extern "C" {
     void NeftaPlugin_SetInterstitialLogic(bool isOptimized);
     void NeftaPlugin_SetRewardedLogic(bool isOptimized);
     void NeftaPlugin_SetHasUserConsent(bool hasUserConsent);
-    void NeftaPlugin_Init(const char *appId, const char *clientId, OnReady onReady, OnInsights onInsights, const char *mediationVersion);
-    void NeftaPlugin_Record(int type, int category, int subCategory, const char *name, long value, const char *customPayload);
+    void NeftaPlugin_Init(const char *appId, const char *clientId, int optimizationType, OnReady onReady, OnInsights onInsights, const char *mediationVersion);
     void NeftaPlugin_OnExternalMediationRequest(int adType, const char *id0, const char *requestedAdUnitId, double requestedFloorPrice, int requestId);
     void NeftaPlugin_OnExternalMediationResponseAsString(const char *provider, const char *id0, const char *id2, double revenue, const char *precision, int status, const char *providerStatus, const char *networkStatus, const char *network, const char *baseString);
     void NeftaPlugin_OnExternalMediationImpressionAsString(bool isClick, const char *provider, const char *data, const char *id0, const char *id2);
@@ -45,22 +44,14 @@ void NeftaPlugin_SetExtraParameter(const char *key, const char *value) {
     [NeftaPlugin SetExtraParameterWithKey: k value: v];
 }
 
-void NeftaPlugin_SetInterstitialLogic(bool isOptimized) {
-    [NeftaPlugin SetInterstitialLogic: isOptimized];
-}
-
-void NeftaPlugin_SetRewardedLogic(bool isOptimized) {
-    [NeftaPlugin SetRewardedLogic: isOptimized];
-}
-
 void NeftaPlugin_SetHasUserConsent(bool hasUserConsent) {
     [NeftaPlugin SetHasUserConsent: hasUserConsent];
 }
 
-void NeftaPlugin_Init(const char *appId, const char *clientId, OnReady onReady, OnInsights onInsights, const char *mediationVersion) {
+void NeftaPlugin_Init(const char *appId, const char *clientId, int optimizationType, OnReady onReady, OnInsights onInsights, const char *mediationVersion) {
 	NSString *a = appId ? [NSString stringWithUTF8String: appId] : nil;
 	NSString *c = clientId ? [NSString stringWithUTF8String: clientId] : nil;
-    _plugin = [NeftaPlugin UnityInitWithAppId: a clientId: c onReadyAsString: ^void(NSString * _Nullable initConfig) {
+    _plugin = [NeftaPlugin UnityInitWithAppId: a clientId: c optimizationType: optimizationType onReadyAsString: ^void(NSString * _Nullable initConfig) {
         const char *iC = initConfig ? [initConfig UTF8String] : NULL;
         onReady(iC);
     } integration: @"unity-applovin-max" mediationVersion: [NSString stringWithUTF8String: mediationVersion]];
@@ -68,12 +59,6 @@ void NeftaPlugin_Init(const char *appId, const char *clientId, OnReady onReady, 
         const char *aR = adapterResponse ? [adapterResponse UTF8String] : NULL;
         onInsights((int)requestId, (int)adapterResponseType, aR);
     };
-}
-
-void NeftaPlugin_Record(int type, int category, int subCategory, const char *name, long value, const char *customPayload) {
-    NSString *n = name ? [NSString stringWithUTF8String: name] : nil;
-    NSString *cp = customPayload ? [NSString stringWithUTF8String: customPayload] : nil;
-    [_plugin RecordWithType: type category: category subCategory: subCategory name: n value: value customPayload: cp];
 }
 
 void NeftaPlugin_OnExternalMediationRequest(int adType, const char *id0, const char *requestedAdUnitId, double requestedFloorPrice, int requestId) {

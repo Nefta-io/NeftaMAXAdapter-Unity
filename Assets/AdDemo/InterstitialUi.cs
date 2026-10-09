@@ -6,11 +6,13 @@ namespace AdDemo
     public class InterstitialUi : MonoBehaviour
     {
 #if UNITY_IOS
-        public const string AdUnitIdA = "78b66d4cd80ca1e7";
-        public const string AdUnitIdB = "c9acf50602329bfe";
+        public const string DefaultAdUnitId = "0u6jgm23ggqso85n";
+        public const string OptimizedAdUnitIdA = "78b66d4cd80ca1e7";
+        public const string OptimizedAdUnitIdB = "c9acf50602329bfe";
 #else // UNITY_ANDROID
-        public const string AdUnitIdA = "850bcc93f949090c";
-        public const string AdUnitIdB = "60bbc7cc56dfa329";
+        public const string DefaultAdUnitId = "wrzl86if1sqfxquc";
+        public const string OptimizedAdUnitIdA = "850bcc93f949090c";
+        public const string OptimizedAdUnitIdB = "60bbc7cc56dfa329";
 #endif
         private IInterstitial _logic;
         
@@ -29,11 +31,6 @@ namespace AdDemo
 
             _logic = logic;
             _logic.Init(this);
-        }
-
-        public void OnAdLogicReady()
-        {
-            _load.interactable = true;
         }
         
         private void OnLoadChanged(bool isOn)

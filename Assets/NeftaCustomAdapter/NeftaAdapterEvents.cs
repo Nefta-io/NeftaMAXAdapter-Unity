@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using System.Threading;
-using Nefta.Core.Events;
 using UnityEngine;
 
 namespace NeftaCustomAdapter
@@ -18,6 +17,13 @@ namespace NeftaCustomAdapter
     {
         public delegate void OnInsightsCallback(Insights insights);
 
+        public enum OptimizationType
+        {
+            Unknown = 0,
+            Optimized = 1,
+            NotOptimized = 2
+        }
+        
         public enum AdType
         {
             Other = 0,
@@ -29,14 +35,13 @@ namespace NeftaCustomAdapter
         [Serializable]
         public class InitConfigurationDto
         {
-            public bool skipOptimization;
             public bool isSessionOptimized;
             public string nuid;
             public float[] delays;
             public int firstResponseTimeoutInterstitialInMs;
             public int firstResponseTimeoutRewardedInMs;
-            public int noDynamicResponseRetryInMs;
-            public int noDefaultResponseRetryInMs;
+            public int globalTrackCooldownInMs;
+            public int backfillTrackDelayInMs;
         }
 
         private const string _mediationProvider = "applovin-max";
@@ -84,22 +89,13 @@ namespace NeftaCustomAdapter
         private static extern void NeftaPlugin_EnableLogging(bool enable);
 
         [DllImport ("__Internal")]
-        private static extern void NeftaPlugin_SetInterstitialLogic(bool isOptimized);
-
-        [DllImport ("__Internal")]
-        private static extern void NeftaPlugin_SetRewardedLogic(bool isOptimized);
-
-        [DllImport ("__Internal")]
         private static extern void NeftaPlugin_SetHasUserConsent(bool hasUserConsent);
 
         [DllImport ("__Internal")]
         private static extern void NeftaPlugin_SetExtraParameter(string key, string value);
 
         [DllImport ("__Internal")]
-        private static extern void NeftaPlugin_Init(string appId, string clientId, OnReadyDelegate onReady, OnInsightsDelegate onInsights, string mediationVersion);
-
-        [DllImport ("__Internal")]
-        private static extern void NeftaPlugin_Record(int type, int category, int subCategory, string nameValue, long value, string customPayload);
+        private static extern void NeftaPlugin_Init(string appId, string clientId, int optimizationType, OnReadyDelegate onReady, OnInsightsDelegate onInsights, string mediationVersion);
 
         [DllImport ("__Internal")]
         private static extern void NeftaPlugin_OnExternalMediationRequest(int adType, string id, string requestedAdUnitId, double requestedFloorPrice, int requestId);
@@ -149,10 +145,10 @@ namespace NeftaCustomAdapter
         private static List<InsightRequest> _insightRequests;
         private static int _insightId;
         private static List<float> _delays;
-        public static int FirstResponseTimeoutInterstitialMs;
-        public static int FirstResponseTimeoutRewardedMs;
-        public static int NoDynamicResponseRetryInMs;
-        public static int NoDefaultResponseRetryInMs;
+        public static float FirstResponseTimeoutInterstitial;
+        public static float FirstResponseTimeoutRewarded;
+        public static float GlobalTrackCooldown;
+        public static float BackFillTrackDelay = -1;
 
         private static SynchronizationContext _mainContext;
         private static Action<InitConfiguration> _onReady;
@@ -173,56 +169,39 @@ namespace NeftaCustomAdapter
 #endif
         }
 
-        public static void InitWithAppId(string appId, Action<InitConfiguration> onReady)
+        public static void InitWithAppId(string appId, OptimizationType optimizationType, Action<InitConfiguration> onReady)
         {
-            Init(appId, null, onReady);
+            Init(appId, null, (int)optimizationType, onReady);
         }
 
-        public static void InitWithClientId(string clientId, Action<InitConfiguration> onReady)
+        public static void InitWithClientId(string clientId, OptimizationType optimizationType, Action<InitConfiguration> onReady)
         {
-            Init(null, clientId, onReady);
+            Init(null, clientId, (int)optimizationType, onReady);
         }
         
-        private static void Init(string appId, string clientId, Action<InitConfiguration> onReady)
+        private static void Init(string appId, string clientId, int optimizationType, Action<InitConfiguration> onReady)
         {
             _mainContext = SynchronizationContext.Current;
             _onReady = onReady;
 #if UNITY_EDITOR
-            _plugin = NeftaPlugin.Init(appId, clientId, "unity-applovin-max", MaxSdk.Version);
+            _plugin = NeftaPlugin.Init(appId, clientId, optimizationType, "unity-applovin-max", MaxSdk.Version);
             _plugin.Listener = new NeftaListener();
 #elif UNITY_IOS
-            NeftaPlugin_Init(appId, clientId, OnReadyBridge, OnInsightsBridge, MaxSdk.Version);
+            NeftaPlugin_Init(appId, clientId, optimizationType, OnReadyBridge, OnInsightsBridge, MaxSdk.Version);
 #elif UNITY_ANDROID
             var unityClass = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
             var unityActivity = unityClass.GetStatic<AndroidJavaObject>("currentActivity");
-            _plugin = NeftaPluginClass.CallStatic<AndroidJavaObject>("UnityInit", unityActivity, appId, clientId, new NeftaListener(), "unity-applovin-max", MaxSdk.Version);
+            _plugin = NeftaPluginClass.CallStatic<AndroidJavaObject>("UnityInit", unityActivity, appId, clientId, optimizationType, new NeftaListener(), "unity-applovin-max", MaxSdk.Version);
 #endif
             _insightRequests = new List<InsightRequest>();
             _delays = new List<float>() { 2 };
         }
-
-        public static void SetInterstitialLogic(bool isOptimized)
-        {
-#if UNITY_EDITOR
-            NeftaPlugin.SetInterstitialLogic(isOptimized);
-#elif UNITY_IOS
-            NeftaPlugin_SetInterstitialLogic(isOptimized);
-#elif UNITY_ANDROID
-            NeftaPluginClass.CallStatic("SetInterstitialLogic", isOptimized);
-#endif
-        }
         
-        public static void SetRewardedLogic(bool isOptimized)
-        {
-#if UNITY_EDITOR
-            NeftaPlugin.SetRewardedLogic(isOptimized);
-#elif UNITY_IOS
-            NeftaPlugin_SetRewardedLogic(isOptimized);
-#elif UNITY_ANDROID
-            NeftaPluginClass.CallStatic("SetRewardedLogic", isOptimized);
-#endif
-        }
-        
+        /// <summary>
+        /// Only relevant when running in GDPR/CCPA region (https://docs.nefta.io/docs/privacy).
+        /// By default, the SDK assumes it has consent, so it doesn't have to get called in other regions.
+        /// </summary>
+        /// <param name="hasUserConsent">Consent status in GDPR region or "do not sell my personal information" state in CCPA region</param>
         public static void SetHasUserConsent(bool hasUserConsent)
         {
 #if UNITY_EDITOR
@@ -231,28 +210,6 @@ namespace NeftaCustomAdapter
             NeftaPlugin_SetHasUserConsent(hasUserConsent);
 #elif UNITY_ANDROID
             NeftaPluginClass.CallStatic("SetHasUserConsent", hasUserConsent);
-#endif
-        }
-
-        public static void Record(GameEvent gameEvent)
-        {
-            var type = gameEvent._eventType;
-            var category = gameEvent._category;
-            var subCategory = gameEvent._subCategory;
-            var name = gameEvent._name;
-            var value = gameEvent._value;
-            var customPayload = gameEvent._customString;
-            Record(type, category, subCategory, name, value, customPayload);
-        }
-
-        internal static void Record(int type, int category, int subCategory, string name, long value, string customPayload)
-        {
-#if UNITY_EDITOR
-            _plugin.Record(type, category, subCategory, name, value, customPayload);
-#elif UNITY_IOS
-            NeftaPlugin_Record(type, category, subCategory, name, value, customPayload);
-#elif UNITY_ANDROID
-            _plugin.Call("Record", type, category, subCategory, name, value, customPayload);
 #endif
         }
         
@@ -611,10 +568,10 @@ namespace NeftaCustomAdapter
                         }
                     }
 
-                    FirstResponseTimeoutInterstitialMs = initDto.firstResponseTimeoutInterstitialInMs;
-                    FirstResponseTimeoutRewardedMs = initDto.firstResponseTimeoutRewardedInMs;
-                    NoDynamicResponseRetryInMs = initDto.noDynamicResponseRetryInMs;
-                    NoDefaultResponseRetryInMs = initDto.noDefaultResponseRetryInMs;
+                    FirstResponseTimeoutInterstitial = initDto.firstResponseTimeoutInterstitialInMs / 1000f;
+                    FirstResponseTimeoutRewarded = initDto.firstResponseTimeoutRewardedInMs / 1000f;
+                    GlobalTrackCooldown = initDto.globalTrackCooldownInMs / 1000f;
+                    BackFillTrackDelay = initDto.backfillTrackDelayInMs / 1000f;
                 }
                 if (_delays.Count == 0)
                 {

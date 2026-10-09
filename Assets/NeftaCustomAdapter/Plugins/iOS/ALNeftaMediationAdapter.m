@@ -17,11 +17,11 @@ NSString * const _mediationProvider = @"applovin-max";
 static NeftaPlugin *_plugin;
 static bool _isSampled;
 
-+ (void)InitWithAppId:(NSString *)appId onReady:(void (^ _Nullable)(InitConfiguration * _Nonnull))onReady {
-    _plugin = [NeftaPlugin NativeInitWithAppId: appId clientId: nil onReady: onReady integration: @"native-applovin-max" mediationVersion: ALSdk.version];
++ (void)InitWithAppId:(NSString *)appId optimizationType:(OptimizationType)optimizationType onReady:(void (^)(InitConfiguration *))onReady {
+    _plugin = [NeftaPlugin NativeInitWithAppId: appId clientId: nil optimizationType: optimizationType onReady: onReady integration: @"native-applovin-max" mediationVersion: ALSdk.version];
 }
-+ (void)InitWithClientId:(NSString *)clientId onReady:(void (^ _Nullable)(InitConfiguration * _Nonnull))onReady {
-    _plugin = [NeftaPlugin NativeInitWithAppId: nil clientId: clientId onReady: onReady integration: @"native-applovin-max" mediationVersion: ALSdk.version];
++ (void)InitWithClientId:(NSString *)clientId optimizationType:(OptimizationType)optimizationType onReady:(void (^)(InitConfiguration *))onReady {
+    _plugin = [NeftaPlugin NativeInitWithAppId: nil clientId: clientId optimizationType: optimizationType onReady: onReady integration: @"native-applovin-max" mediationVersion: ALSdk.version];
 }
 
 + (double)GetRetryDelayInSeconds:(AdInsight * _Nullable)insight adUnitId:(NSString * _Nonnull)adUnitId {

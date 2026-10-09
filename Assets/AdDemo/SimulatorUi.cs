@@ -57,6 +57,8 @@ namespace AdDemo
         [SerializeField] private Text _status;
         
         [Header("Track A")]
+        [SerializeField] private Image _aFill3Renderer;
+        [SerializeField] private Button _aFill3;
         [SerializeField] private Image _aFill2Renderer;
         [SerializeField] private Button _aFill2;
         [SerializeField] private Image _aFill1Renderer;
@@ -68,6 +70,8 @@ namespace AdDemo
         [SerializeField] private Text _aStatus;
         
         [Header("Track B")]
+        [SerializeField] private Image _bFill3Renderer;
+        [SerializeField] private Button _bFill3;
         [SerializeField] private Image _bFill2Renderer;
         [SerializeField] private Button _bFill2;
         [SerializeField] private Image _bFill1Renderer;
@@ -78,7 +82,21 @@ namespace AdDemo
         [SerializeField] private Button _bOther;
         [SerializeField] private Text _bStatus;
         
+        [Header("Track D")]
+        [SerializeField] private Image _cFill3Renderer;
+        [SerializeField] private Button _cFill3;
+        [SerializeField] private Image _cFill2Renderer;
+        [SerializeField] private Button _cFill2;
+        [SerializeField] private Image _cFill1Renderer;
+        [SerializeField] private Button _cFill1;
+        [SerializeField] private Image _cNoFillRenderer;
+        [SerializeField] private Button _cNoFill;
+        [SerializeField] private Image _cOtherRenderer;
+        [SerializeField] private Button _cOther;
+        [SerializeField] private Text _cStatus;
+        
         private bool _isAutoLoad;
+        private int _consecutiveFails;
 
         [NonSerialized] public AdLogic AdLogic;
         
@@ -87,19 +105,25 @@ namespace AdDemo
             if (_isRewarded)
             {
                 AdLogic = new RewardedSimulator(
-                    isOptimized, _aFill2Renderer, _aFill2, _aFill1Renderer, _aFill1, _aNoFillRenderer, _aNoFill,
+                    isOptimized,
+                    _aFill3Renderer, _aFill3, _aFill2Renderer, _aFill2, _aFill1Renderer, _aFill1, _aNoFillRenderer, _aNoFill,
                     _aOtherRenderer, _aOther, _aStatus,
-                    _bFill2Renderer, _bFill2, _bFill1Renderer, _bFill1, _bNoFillRenderer, _bNoFill,
-                    _bOtherRenderer, _bOther, _bStatus);
+                    _bFill3Renderer, _bFill3, _bFill2Renderer, _bFill2, _bFill1Renderer, _bFill1, _bNoFillRenderer, _bNoFill,
+                    _bOtherRenderer, _bOther, _bStatus,
+                    _cFill3Renderer, _cFill3, _cFill2Renderer, _cFill2, _cFill1Renderer, _cFill1, _cNoFillRenderer, _cNoFill,
+                    _cOtherRenderer, _cOther, _cStatus);
                 NeftaSdk.Rewarded = (RewardedLogic)AdLogic;
             }
             else
             {
                 AdLogic = new InterstitialSimulator(
-                    isOptimized, _aFill2Renderer, _aFill2, _aFill1Renderer, _aFill1, _aNoFillRenderer, _aNoFill,
+                    isOptimized,
+                    _aFill3Renderer, _aFill3, _aFill2Renderer, _aFill2, _aFill1Renderer, _aFill1, _aNoFillRenderer, _aNoFill,
                     _aOtherRenderer, _aOther, _aStatus,
-                    _bFill2Renderer, _bFill2, _bFill1Renderer, _bFill1, _bNoFillRenderer, _bNoFill,
-                    _bOtherRenderer, _bOther, _bStatus);
+                    _bFill3Renderer, _bFill3, _bFill2Renderer, _bFill2, _bFill1Renderer, _bFill1, _bNoFillRenderer, _bNoFill,
+                    _bOtherRenderer, _bOther, _bStatus,
+                    _cFill3Renderer, _cFill3, _cFill2Renderer, _cFill2, _cFill1Renderer, _cFill1, _cNoFillRenderer, _cNoFill,
+                    _cOtherRenderer, _cOther, _cStatus);
                 NeftaSdk.Interstitial = (InterstitialLogic)AdLogic;
             }
             AdLogic.OnAdLoadedEvent += OnAdLoadedEvent;
@@ -111,11 +135,6 @@ namespace AdDemo
             _show.onClick.AddListener(OnShowClick);
             gameObject.SetActive(true);
             UpdateShowButton();
-        }
-        
-        public void OnAdLogicReady()
-        {
-            _load.interactable = true;
         }
         
         private void Load()
@@ -195,6 +214,7 @@ namespace AdDemo
         
         private void OnAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
+            _consecutiveFails = 0;
             SetStatus($"Loaded {adUnitId} at: {adInfo.Revenue}");
 
             UpdateShowButton();
@@ -202,6 +222,7 @@ namespace AdDemo
         
         private void OnAdLoadFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
         {
+            _consecutiveFails++;
             SetStatus($"Load failed {adUnitId} with: {errorInfo}");
 
             StartCoroutine(LoadFailedRetry());
@@ -209,7 +230,8 @@ namespace AdDemo
         
         private IEnumerator LoadFailedRetry()
         {
-            yield return new WaitForSeconds(2f);
+            var delays = new float[] { 0, 2, 4, 8, 16, 32, 64 };
+            yield return new WaitForSeconds(delays[Mathf.Min(_consecutiveFails, delays.Length - 1)]);
 
             if (!AdLogic.IsOptimized)
             {

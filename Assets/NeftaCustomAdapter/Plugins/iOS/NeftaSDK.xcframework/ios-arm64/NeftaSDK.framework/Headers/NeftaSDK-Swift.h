@@ -339,13 +339,12 @@ SWIFT_CLASS("_TtC8NeftaSDK5Churn")
 
 SWIFT_CLASS("_TtC8NeftaSDK17InitConfiguration")
 @interface InitConfiguration : NSObject
-@property (nonatomic) BOOL _skipOptimization;
 @property (nonatomic, copy) NSString * _Nonnull _nuid;
-@property (nonatomic) NSInteger _noDynamicResponseRetryInMs;
-@property (nonatomic) NSInteger _noDefaultResponseRetryInMs;
 @property (nonatomic) BOOL _isSessionOptimized;
 @property (nonatomic) NSInteger _firstResponseTimeoutInterstitialInMs;
 @property (nonatomic) NSInteger _firstResponseTimeoutRewardedInMs;
+@property (nonatomic) NSInteger _globalTrackCooldownInMs;
+@property (nonatomic) NSInteger _backfillTrackDelayInMs;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
@@ -375,6 +374,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger Rewarded;)
 @class State;
 @class NSLock;
 @class NSMutableDictionary;
+enum OptimizationType : NSInteger;
 
 SWIFT_CLASS("_TtC8NeftaSDK11NeftaPlugin")
 @interface NeftaPlugin : NSObject
@@ -391,15 +391,17 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NeftaPlugin * _Nullabl
 + (NeftaPlugin * _Nullable)_instance SWIFT_WARN_UNUSED_RESULT;
 + (void)set_instance:(NeftaPlugin * _Nullable)value;
 + (void)EnableLogging:(BOOL)enable;
-+ (NeftaPlugin * _Nonnull)NativeInitWithAppId:(NSString * _Nullable)appId clientId:(NSString * _Nullable)clientId onReady:(void (^ _Nullable)(InitConfiguration * _Nonnull))onReady integration:(NSString * _Nonnull)integration mediationVersion:(NSString * _Nonnull)mediationVersion SWIFT_WARN_UNUSED_RESULT;
-+ (NeftaPlugin * _Nonnull)UnityInitWithAppId:(NSString * _Nullable)appId clientId:(NSString * _Nullable)clientId onReadyAsString:(void (^ _Nullable)(NSString * _Nonnull))onReadyAsString integration:(NSString * _Nonnull)integration mediationVersion:(NSString * _Nonnull)mediationVersion SWIFT_WARN_UNUSED_RESULT;
++ (NeftaPlugin * _Nonnull)NativeInitWithAppId:(NSString * _Nullable)appId clientId:(NSString * _Nullable)clientId optimizationType:(enum OptimizationType)optimizationType onReady:(void (^ _Nullable)(InitConfiguration * _Nonnull))onReady integration:(NSString * _Nonnull)integration mediationVersion:(NSString * _Nonnull)mediationVersion SWIFT_WARN_UNUSED_RESULT;
++ (NeftaPlugin * _Nonnull)UnityInitWithAppId:(NSString * _Nullable)appId clientId:(NSString * _Nullable)clientId optimizationType:(NSInteger)optimizationType onReadyAsString:(void (^ _Nullable)(NSString * _Nonnull))onReadyAsString integration:(NSString * _Nonnull)integration mediationVersion:(NSString * _Nonnull)mediationVersion SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 + (void)SetExtraParameterWithKey:(NSString * _Nonnull)key value:(NSString * _Nonnull)value;
-+ (void)SetInterstitialLogic:(BOOL)isOptimized;
-+ (void)SetRewardedLogic:(BOOL)isOptimized;
+/// Only relevant when running in GDPR/CCPA region (https://docs.nefta.io/docs/privacy).
+/// Once set, the SDK oeprates in the selected mode.
+/// By default, the SDK assumes it has consent, so it doesn’t have to get called in other regions.
+/// \param hasUserConsent Consent status in GDPR region or “do not sell my personal information” state in CCPA region 
+///
 + (void)SetHasUserConsent:(BOOL)hasUserConsent;
-- (void)RecordWithType:(NSInteger)type category:(NSInteger)category subCategory:(NSInteger)subCategory name:(NSString * _Nullable)name value:(int64_t)value customPayload:(NSString * _Nullable)customPayload;
 - (void)GetInsightsBridge:(NSInteger)requestId insights:(NSInteger)insights previousRequestId:(NSInteger)previousRequestId;
 - (void)GetInsights:(NSInteger)insights previousInsight:(AdInsight * _Nullable)previousInsight callback:(void (^ _Nonnull)(Insights * _Nonnull))callback;
 - (NSString * _Nonnull)GetNuidWithPresent:(BOOL)present SWIFT_WARN_UNUSED_RESULT;
@@ -415,15 +417,23 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NeftaPlugin * _Nullabl
 
 SWIFT_CLASS("_TtCC8NeftaSDK11NeftaPlugin5State")
 @interface State : NSObject
-@property (nonatomic, copy) NSString * _Nonnull _nuid;
+@property (nonatomic, copy) NSString * _Nullable _nuid;
 @property (nonatomic) BOOL _isSessionOptimized;
 @property (nonatomic) NSInteger _firstResponseTimeoutInterstitialInMs;
 @property (nonatomic) NSInteger _firstResponseTimeoutRewardedInMs;
 @property (nonatomic) BOOL _isDebugEnabled;
 @property (nonatomic, copy) NSString * _Nullable _adProviderCountry;
 @property (nonatomic, copy) NSArray<NSString *> * _Nullable _availableNetworks;
+@property (nonatomic) NSInteger _globalTrackCooldownInMs;
+@property (nonatomic) NSInteger _backfillTrackDelayInMs;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
+
+typedef SWIFT_ENUM(NSInteger, OptimizationType, open) {
+  OptimizationTypeUnknown = 0,
+  OptimizationTypeOptimized = 1,
+  OptimizationTypeNotOptimized = 2,
+};
 
 #endif
 #if __has_attribute(external_source_symbol)

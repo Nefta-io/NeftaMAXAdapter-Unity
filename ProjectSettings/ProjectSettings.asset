@@ -141,7 +141,7 @@ PlayerSettings:
   loadStoreDebugModeEnabled: 0
   visionOSBundleVersion: 1.0
   tvOSBundleVersion: 1.0
-  bundleVersion: 4.6.18
+  bundleVersion: 4.7.0.412
   preloadedAssets: []
   metroInputSource: 0
   wsaTransparentSwapchain: 0
@@ -169,10 +169,10 @@ PlayerSettings:
   buildNumber:
     Standalone: 0
     VisionOS: 0
-    iPhone: 395
+    iPhone: 412
     tvOS: 0
   overrideDefaultApplicationIdentifier: 1
-  AndroidBundleVersionCode: 400
+  AndroidBundleVersionCode: 415
   AndroidMinSdkVersion: 22
   AndroidTargetSdkVersion: 33
   AndroidPreferredInstallLocation: 1
@@ -285,8 +285,8 @@ PlayerSettings:
     banner: {fileID: 0}
   androidGamepadSupportLevel: 0
   chromeosInputEmulation: 1
-  AndroidMinifyRelease: 1
-  AndroidMinifyDebug: 1
+  AndroidMinifyRelease: 0
+  AndroidMinifyDebug: 0
   AndroidValidateAppBundleSize: 1
   AndroidAppBundleSizeToValidate: 150
   m_BuildTargetIcons:

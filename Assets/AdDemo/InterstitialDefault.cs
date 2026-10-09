@@ -29,16 +29,16 @@ namespace AdDemo
                 return;
             }
             
-            NeftaAdapterEvents.OnExternalMediationRequest(NeftaAdapterEvents.AdType.Interstitial, InterstitialUi.AdUnitIdA);
+            NeftaAdapterEvents.OnExternalMediationRequest(NeftaAdapterEvents.AdType.Interstitial, InterstitialUi.DefaultAdUnitId);
             
-            MaxSdk.LoadInterstitial(InterstitialUi.AdUnitIdA);
+            MaxSdk.LoadInterstitial(InterstitialUi.DefaultAdUnitId);
         }
         
         public void Show()
         {
-            if (MaxSdk.IsInterstitialReady(InterstitialUi.AdUnitIdA))
+            if (MaxSdk.IsInterstitialReady(InterstitialUi.DefaultAdUnitId))
             {
-                MaxSdk.ShowInterstitial(InterstitialUi.AdUnitIdA);
+                MaxSdk.ShowInterstitial(InterstitialUi.DefaultAdUnitId);
             }
             else
             {

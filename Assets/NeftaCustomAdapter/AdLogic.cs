@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -11,36 +10,39 @@ namespace NeftaCustomAdapter
         protected enum State
         {
             Idle,
-            LoadingWithInsights,
             Loading,
             Ready,
-            Shown
+            Shown,
+            Delay
         }
                 
         protected class Track
         {
             public readonly string AdUnitId;
+            public readonly bool IsOptimized;
             public State State;
             public AdInsight Insight;
             public MaxSdkBase.AdInfo AdInfo;
             public bool IsAdLoadCallbackAvailable;
 
-            public Track(string adUnitId)
+            public Track(string adUnitId, bool isOptimized)
             {
                 AdUnitId = adUnitId;
+                IsOptimized = isOptimized;
             }
         }
         
         protected abstract string LogTag { get; }
         protected abstract NeftaAdapterEvents.AdType AdType { get; }
         protected abstract int InsightType { get; }
-        protected abstract void LoadInternal(string adUnitId, bool disableAutoRetries, string bidFloor);
+        protected abstract void LoadAsOptimized(string adUnitId, string bidFloor);
+        protected abstract void LoadAsDefault(string adUnitId);
         protected abstract bool TryShow(Track adRequest, string placement, string customData);
         
-        protected Track _trackA;
-        protected Track _trackB;
+        protected Track[] _tracks;
         protected bool _isFirstRequest = true;
-        protected bool _isFirstResponseReceived;
+        protected bool _isFirstOptimizedResponseReceived;
+        protected int _isGlobalCooldown;
         protected bool _isAdRequested;
         internal MaxSdkBase.AdInfo _adInfo;
         
@@ -56,10 +58,16 @@ namespace NeftaCustomAdapter
         
         public bool IsOptimized { get; protected set; }
 
-        protected void InitializeDualTrack(string adUnitIdA, string adUnitIdB)
+        protected void InitializeDualTrack(string defaultAdUnit, string optimizedAdUnitA, string optimizedAdUnitB)
         {
-            _trackA = new Track(adUnitIdA);
-            _trackB = new Track(adUnitIdB);
+            if (optimizedAdUnitB == null)
+            {
+                _tracks = new []{ new Track(defaultAdUnit, false), new Track(optimizedAdUnitA, true)};
+            }
+            else
+            {
+                _tracks = new []{ new Track(defaultAdUnit, false), new Track(optimizedAdUnitA, true),  new Track(optimizedAdUnitB, true)};
+            }
 
             IsOptimized = true;
         }
@@ -70,157 +78,105 @@ namespace NeftaCustomAdapter
         /// </summary>
         public void LoadOrTriggerAlreadyLoaded()
         {
-            if (_trackA.State == State.Ready && _trackA.IsAdLoadCallbackAvailable)
+            if (_isFirstRequest)
             {
-                _trackA.IsAdLoadCallbackAvailable = false;
-                if (OnAdLoadedEvent != null)
-                {
-                    OnAdLoadedEvent(_trackA.AdUnitId, _trackA.AdInfo);
-                    return;
-                }
-            }
-            if (_trackB.State == State.Ready && _trackB.IsAdLoadCallbackAvailable)
-            {
-                _trackB.IsAdLoadCallbackAvailable = false;
-                if (OnAdLoadedEvent != null)
-                {
-                    OnAdLoadedEvent(_trackB.AdUnitId, _trackB.AdInfo);
-                    return;
-                }
-            }
+                _isAdRequested = true;
+                
+                Load(_tracks[1]);
             
-            _isAdRequested = true;
-            LoadTracks();
-        }
-        
-        protected void LoadTracks()
-        {
-            TrackLoad(_trackA, _trackB.State);
-            TrackLoad(_trackB, _trackA.State);
-
-            var stopWaitingForFirstResponseAfter = AdType == NeftaAdapterEvents.AdType.Interstitial ? NeftaAdapterEvents.FirstResponseTimeoutInterstitialMs : NeftaAdapterEvents.FirstResponseTimeoutRewardedMs;
-            if (_isFirstRequest && stopWaitingForFirstResponseAfter > 0)
-            {
+                var stopWaitingForFirstResponseAfter = AdType == NeftaAdapterEvents.AdType.Interstitial ? NeftaAdapterEvents.FirstResponseTimeoutInterstitial : NeftaAdapterEvents.FirstResponseTimeoutRewarded;
+                if (_tracks.Length > 2 && stopWaitingForFirstResponseAfter > 0)
+                {
+                    _ = ForceStartSecondTrack(stopWaitingForFirstResponseAfter);
+                }
+ 
+                var backFillTrackDelay = NeftaAdapterEvents.BackFillTrackDelay;
+                if (backFillTrackDelay == 0)
+                {
+                    Load(_tracks[0]);
+                }
+                else if (backFillTrackDelay > 0)
+                {
+                    _= WaitDelay(_tracks[0], backFillTrackDelay);
+                }
+                
                 _isFirstRequest = false;
-
-                _ = ForceStartSecondTrack(stopWaitingForFirstResponseAfter);
-            }
-        }
-        
-        private async Task ForceStartSecondTrack(int stopWaitingForFirstResponseAfter)
-        {
-            await Task.Delay(stopWaitingForFirstResponseAfter);
-#if UNITY_EDITOR
-            if (!Application.isPlaying)
-            {
                 return;
             }
-#endif
-            if (!_isFirstResponseReceived)
-            {
-                _isFirstResponseReceived = true;
-                LoadTracks();   
-            }
-        }
-        
-        private void TrackLoad(Track track, State otherState)
-        {
-            if (track.State == State.Idle)
-            {
-                if (otherState == State.LoadingWithInsights || otherState == State.Shown)
-                {
-                    if (_isFirstResponseReceived)
-                    {
-                        LoadDefault(track);
-                    }
-                }
-                else
-                {
-                    GetInsightsAndLoad(track); 
-                }
-            }
-        }
-        
-        protected void GetInsightsAndLoad(Track track)
-        {
-            track.State = State.LoadingWithInsights;
             
-            NeftaAdapterEvents.GetInsights(InsightType, track.Insight, (Insights insights) =>
+            Track trackWithLoadCallbackAvailable = null;
+            foreach (var track in _tracks)
             {
-                Log($"Load with Insights: {insights}");
-                if (insights.Insight != null)
+                if (track.State == State.Ready && track.IsAdLoadCallbackAvailable)
                 {
-                    track.Insight = insights.Insight;
-                    NeftaAdapterEvents.OnExternalMediationRequest(AdType, track.AdUnitId, track.Insight);
-                    var bidFloor = "";
-                    if (track.Insight._floorPrice >= 0)
+                    if (trackWithLoadCallbackAvailable == null || track.AdInfo.Revenue > trackWithLoadCallbackAvailable.AdInfo.Revenue)
                     {
-                        bidFloor = track.Insight._floorPrice.ToString(CultureInfo.InvariantCulture);
+                        trackWithLoadCallbackAvailable = track;
                     }
-                    Log($"Loading {track.AdUnitId} as Optimized with floor: {bidFloor}");
-                    
-                    LoadInternal(track.AdUnitId, true, bidFloor);
-                    OnAdRequestedEvent?.Invoke(track.AdUnitId);
+                }
+            }
 
-                    if (NeftaAdapterEvents.NoDynamicResponseRetryInMs > 0)
-                    {
-                        DelayExecutor.ExecuteAfterDelay(track, RetryOnNoResponse, NeftaAdapterEvents.NoDynamicResponseRetryInMs * 0.001f);
-                    }
-                }
-                else
-                {
-                    RestartAfterFailedLoad(track);
-                }
-            });
+            if (trackWithLoadCallbackAvailable != null)
+            {
+                trackWithLoadCallbackAvailable.IsAdLoadCallbackAvailable = false;
+                OnAdLoadedEvent(trackWithLoadCallbackAvailable.AdUnitId, trackWithLoadCallbackAvailable.AdInfo);
+            }
+            else
+            {
+                _isAdRequested = true;
+            }
         }
         
-        protected void LoadDefault(Track track)
+        protected void Load(Track track)
         {
             track.State = State.Loading;
-            NeftaAdapterEvents.OnExternalMediationRequest(AdType, track.AdUnitId);
-            Log($"Loading {track.AdUnitId} as Default");
-            
-            LoadInternal(track.AdUnitId, false, "");
-            OnAdRequestedEvent?.Invoke(track.AdUnitId);
-            
-            if (IsOptimized && NeftaAdapterEvents.NoDefaultResponseRetryInMs > 0)
+
+            if (track.IsOptimized)
             {
-                DelayExecutor.ExecuteAfterDelay(track, RetryOnNoResponse, NeftaAdapterEvents.NoDefaultResponseRetryInMs * 0.001f);
+                NeftaAdapterEvents.GetInsights(InsightType, track.Insight, (Insights insights) =>
+                {
+                    Log($"Load with Insights: {insights}");
+                    if (insights.Insight != null)
+                    {
+                        track.Insight = insights.Insight;
+                        NeftaAdapterEvents.OnExternalMediationRequest(AdType, track.AdUnitId, track.Insight);
+                        var bidFloor = "";
+                        if (track.Insight._floorPrice >= 0)
+                        {
+                            bidFloor = track.Insight._floorPrice.ToString(CultureInfo.InvariantCulture);
+                        }
+                        Log($"Loading {track.AdUnitId} as Optimized with floor: {bidFloor}");
+                        
+                        LoadAsOptimized(track.AdUnitId, bidFloor);
+                        OnAdRequestedEvent?.Invoke(track.AdUnitId);
+                    }
+                    else
+                    {
+                        _ = RetryOptimizedWithDelay(track);
+                    }
+                });
             }
-        }
-        
-        private void RetryOnNoResponse(Track track)
-        {
-            Log($"Retrying load on {track.AdUnitId}");
-            track.State = State.Idle;
-            LoadTracks();
-        }
-        
-        private void RestartAfterFailedLoad(Track track)
-        {
-            _ = RetryLoadWithDelay(track);
-            
-            _isFirstResponseReceived = true;
-            LoadTracks();
-        }
-        
-        private async Task RetryLoadWithDelay(Track track)
-        {
-            var delay = NeftaAdapterEvents.GetRetryDelayInSeconds(track.Insight, track.AdUnitId);
-            await Task.Delay((int)(delay * 1000));
-#if UNITY_EDITOR
-            if (!Application.isPlaying)
+            else
             {
-                return;
+                NeftaAdapterEvents.OnExternalMediationRequest(AdType, track.AdUnitId);
+                
+                Log($"Loading {track.AdUnitId} as Default");
+                LoadAsDefault(track.AdUnitId);
+            
+                OnAdRequestedEvent?.Invoke(track.AdUnitId);
             }
-#endif
-            track.State = State.Idle;
-            LoadTracks();
         }
         
         public bool IsAdReady()
         {
-            return _trackA.State == State.Ready || _trackB.State == State.Ready;
+            foreach (var track in _tracks)
+            {
+                if (track.State == State.Ready)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public MaxSdkBase.AdInfo GetAdReady()
@@ -229,42 +185,20 @@ namespace NeftaCustomAdapter
             {
                 return _adInfo;
             }
-
-            if (_trackA.State == State.Ready)
-            {
-                if (_trackB.State == State.Ready && _trackB.AdInfo.Revenue > _trackA.AdInfo.Revenue)
-                {
-                    return _trackB.AdInfo;
-                }
-                return _trackA.AdInfo;
-            }
-            if (_trackB.State == State.Ready)
-            {
-                return _trackB.AdInfo;
-            }
-            return null;
+            return GetReadyTrack()?.AdInfo;
         }
         
         public void ShowAd(string placement, string customData)
         {
             var isShown = false;
-            if (_trackA.State == State.Ready)
+            var readyTrack = GetReadyTrack();
+            if (readyTrack != null)
             {
-                if (_trackB.State == State.Ready && _trackB.AdInfo.Revenue > _trackA.AdInfo.Revenue)
-                {
-                    isShown = TryShow(_trackB, placement, customData);
-                }
-                if (!isShown)
-                {
-                    isShown = TryShow(_trackA, placement, customData);
-                }
+                isShown = TryShow(readyTrack, placement, customData);
             }
-            if (!isShown && _trackB.State == State.Ready)
+            if (!isShown)
             {
-                if (!TryShow(_trackB, placement, customData))
-                {
-                    LoadTracks();
-                }
+                ContinueLoading();
             }
         }
         
@@ -281,23 +215,87 @@ namespace NeftaCustomAdapter
             }
             
             Log($"Load Failed {adUnitId}: {errorInfo}");
+
+            foreach (var track in _tracks)
+            {
+                if (track.AdUnitId == adUnitId)
+                {
+                    if (track.AdUnitId == adUnitId)
+                    {
+                        _ = WaitDelay(track, NeftaAdapterEvents.GetRetryDelayInSeconds(track.Insight, track.AdUnitId));
+                        if (track.IsOptimized)
+                        {
+                            _ = ContinueOptimized();
+                        }
+                        return;
+                    }
+                }
+            }
+        }
+        
+        private async Task ContinueOptimized()
+        {
+            _isFirstOptimizedResponseReceived = true;
+            if (_tracks[0].State == State.Idle)
+            {
+                Load(_tracks[0]);
+            }
             
-            Track track = null;
-            if (adUnitId == _trackA.AdUnitId)
-            {
-                track = _trackA;
-            }
-            else if (adUnitId == _trackB.AdUnitId)
-            {
-                track = _trackB;
-            }
-            else
+            _isGlobalCooldown++;
+            await Task.Delay((int)(NeftaAdapterEvents.GlobalTrackCooldown * 1000));
+#if UNITY_EDITOR
+            if (!Application.isPlaying)
             {
                 return;
             }
-            
-            DelayExecutor.CancelDelayedAction(track);
-            RestartAfterFailedLoad(track);
+#endif
+            _isGlobalCooldown--;
+            if (_isGlobalCooldown <= 0)
+            {
+                _isGlobalCooldown = 0;
+                ContinueLoading();
+            }
+        }
+
+        private void ContinueLoading()
+        {
+            if (_tracks[0].State == State.Idle)
+            {
+                Load(_tracks[0]);
+            }
+            if (_isGlobalCooldown > 0)
+            {
+                return;
+            }
+            for (var i = 1; i < _tracks.Length; i++)
+            {
+                if (_tracks[i].State == State.Loading)
+                {
+                    return;
+                }
+            }
+            for (var i = 1; i < _tracks.Length; i++)
+            {
+                if (_tracks[i].State == State.Idle)
+                {
+                    Load(_tracks[i]);
+                    return;
+                }
+            }  
+        }
+        
+        private async Task WaitDelay(Track track, float delay)
+        {
+            track.State = State.Delay;
+            await Task.Delay((int)(delay * 1000));
+#if UNITY_EDITOR
+            if (!Application.isPlaying)
+            {
+                return;
+            }
+#endif
+            track.State = State.Idle;
+            ContinueLoading();
         }
         
         protected void OnAdLoadedCallback(string adUnitId, MaxSdkBase.AdInfo adInfo)
@@ -314,42 +312,36 @@ namespace NeftaCustomAdapter
             }
             
             Log($"Loaded {adUnitId} at: {adInfo.Revenue}");
-            
-            Track track = null;
-            if (adUnitId == _trackA.AdUnitId)
+
+            foreach (var track in _tracks)
             {
-                track = _trackA;
-            }
-            else if (adUnitId == _trackB.AdUnitId)
-            {
-                track = _trackB;
-            }
-            else
-            {
-                return;
-            }
-            
-            DelayExecutor.CancelDelayedAction(track);
-            track.Insight = null;
-            track.AdInfo = adInfo;
-            track.State = State.Ready;
-            _isFirstResponseReceived = true;
-            
-            if (_isAdRequested)
-            {
-                _isAdRequested = false;
-                
-                if (OnAdLoadedEvent != null)
+                if (track.AdUnitId == adUnitId)
                 {
-                    OnAdLoadedEvent(adUnitId, adInfo);   
+                    track.Insight = null;
+                    track.AdInfo = adInfo;
+                    track.State = State.Ready;
+            
+                    if (_isAdRequested)
+                    {
+                        _isAdRequested = false;
+                
+                        if (OnAdLoadedEvent != null)
+                        {
+                            OnAdLoadedEvent(adUnitId, adInfo);   
+                        }
+                    }
+                    else
+                    {
+                        track.IsAdLoadCallbackAvailable = true;
+                    }
+
+                    if (track.IsOptimized)
+                    {
+                        _ = ContinueOptimized();
+                    }
+                    return;
                 }
             }
-            else
-            {
-                track.IsAdLoadCallbackAvailable = true;
-            }
-            
-            LoadTracks();
         }
         
         protected void OnAdDisplayFailedCallback(string adUnitId, MaxSdkBase.ErrorInfo errorInfo, MaxSdkBase.AdInfo adInfo)
@@ -366,27 +358,21 @@ namespace NeftaCustomAdapter
 
             Log($"OnAdDisplayFailedEvent {adUnitId}");
             
-            Track track = null;
-            if (adUnitId == _trackA.AdUnitId)
+            foreach (var track in _tracks)
             {
-                track = _trackA;
-            }
-            else if (adUnitId == _trackB.AdUnitId)
-            {
-                track = _trackB;
-            }
-            else
-            {
-                return;
-            }
-            track.State = State.Idle;
+                if (track.AdUnitId == adUnitId)
+                {
+                    track.State = State.Idle;
             
-            if (OnAdDisplayFailedEvent != null)
-            {
-                OnAdDisplayFailedEvent(adUnitId, errorInfo, adInfo);
+                    if (OnAdDisplayFailedEvent != null)
+                    {
+                        OnAdDisplayFailedEvent(adUnitId, errorInfo, adInfo);
+                    }
+
+                    ContinueLoading();
+                    return;
+                }
             }
-            
-            LoadTracks();
         }
         
         protected void OnAdDisplayedCallback(string adUnitId, MaxSdkBase.AdInfo adInfo)
@@ -429,27 +415,71 @@ namespace NeftaCustomAdapter
 
             Log($"OnAdHiddenEvent {adUnitId}");
             
-            Track track = null;
-            if (adUnitId == _trackA.AdUnitId)
+            foreach (var track in _tracks)
             {
-                track = _trackA;
+                if (track.AdUnitId == adUnitId)
+                {
+                    track.State = State.Idle;
+            
+                    if (OnAdHiddenEvent != null)
+                    {
+                        OnAdHiddenEvent(adUnitId, adInfo);
+                    }
+
+                    ContinueLoading();
+                    return;
+                }
             }
-            else if (adUnitId == _trackB.AdUnitId)
-            {
-                track = _trackB;
-            }
-            else
+        }
+        
+        private async Task RetryOptimizedWithDelay(Track track)
+        {
+            var delay = NeftaAdapterEvents.GetRetryDelayInSeconds(track.Insight, track.AdUnitId);
+            await Task.Delay((int)(delay * 1000));
+#if UNITY_EDITOR
+            if (!Application.isPlaying)
             {
                 return;
             }
+#endif
             track.State = State.Idle;
-            
-            if (OnAdHiddenEvent != null)
+            ContinueLoading();
+        }
+        
+        protected Track GetReadyTrack()
+        {
+            Track bestTrack = null;
+            foreach (var t in _tracks)
             {
-                OnAdHiddenEvent(adUnitId, adInfo);
+                if (t.State == State.Ready && (bestTrack == null || t.AdInfo.Revenue > bestTrack.AdInfo.Revenue))
+                {
+                    bestTrack = t;
+                }
             }
-            
-            LoadTracks();
+            return bestTrack;
+        }
+        
+        private async Task ForceStartSecondTrack(float stopWaitingForFirstResponseAfter)
+        {
+            await Task.Delay((int)(stopWaitingForFirstResponseAfter * 1000));
+#if UNITY_EDITOR
+            if (!Application.isPlaying)
+            {
+                return;
+            }
+#endif
+            if (!_isFirstOptimizedResponseReceived)
+            {
+                _isFirstOptimizedResponseReceived = true;
+                if (_tracks.Length > 2 && _tracks[2].State == State.Idle)
+                {
+                    Load(_tracks[2]);
+                }
+                if (NeftaAdapterEvents.BackFillTrackDelay < 0 && _tracks[0].State == State.Idle)
+                {
+                    Load(_tracks[0]);
+                }
+            }
         }
         
         protected void Log(string log)
@@ -457,69 +487,6 @@ namespace NeftaCustomAdapter
             if (NeftaAdapterEvents.IsLoggingEnabled)
             {
                 Debug.Log($"{LogTag}: {log}");
-            }
-        }
-        
-        protected class DelayExecutor : MonoBehaviour
-        {
-            private class DelayedAction
-            {
-                public Track _track;
-                public Action<Track> _action;
-                public float _delay;
-
-                public DelayedAction(Track track, Action<Track> action, float delay)
-                {
-                    _track = track;
-                    _action = action;
-                    _delay = delay;
-                }
-            }
-
-            private static DelayExecutor _instance;
-            private readonly List<DelayedAction> _actions = new List<DelayedAction>();
-
-            private void Update()
-            {
-                for (var i = _actions.Count - 1; i >= 0; i--)
-                {
-                    var delayedAction = _actions[i];
-                    delayedAction._delay -= Mathf.Min(Time.unscaledDeltaTime, 0.1f);
-                    if (delayedAction._delay <= 0f)
-                    {
-                        _actions.RemoveAt(i);
-                        delayedAction._action(delayedAction._track);
-                    }
-                }
-            }
-
-            public static void ExecuteAfterDelay(Track track, Action<Track> action, float delay)
-            {
-                if (_instance == null)
-                {
-                    var executor = new GameObject("NeftaSdkExecutor")
-                    {
-                        hideFlags = HideFlags.HideAndDontSave
-                    };
-                    DontDestroyOnLoad(executor);
-                    _instance = executor.AddComponent<DelayExecutor>();
-                }
-                _instance._actions.Add(new DelayedAction(track, action, delay));
-            }
-
-            public static void CancelDelayedAction(Track track)
-            {
-                if (_instance != null)
-                {
-                    for (var i = _instance._actions.Count - 1; i >= 0; i--)
-                    {
-                        if (_instance._actions[i]._track == track)
-                        {
-                            _instance._actions.RemoveAt(i);
-                            return;
-                        }
-                    }
-                }
             }
         }
     }

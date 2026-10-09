@@ -19,7 +19,7 @@ namespace Editor.Tests
         public IEnumerator TestInitNull()
         {
             NeftaAdapterEvents.UnitTestOverrideOnReady(null);
-            NeftaAdapterEvents.InitWithAppId("appId", OnReady);
+            NeftaAdapterEvents.InitWithAppId("appId", NeftaAdapterEvents.OptimizationType.Optimized, OnReady);
             yield return WaitOnInitResponse();
             Assert.IsNull(_config._nuid);
         }
@@ -28,7 +28,7 @@ namespace Editor.Tests
         public IEnumerator TestInitEmpty()
         {
             NeftaAdapterEvents.UnitTestOverrideOnReady("");
-            NeftaAdapterEvents.InitWithAppId("appId", OnReady);
+            NeftaAdapterEvents.InitWithAppId("appId", NeftaAdapterEvents.OptimizationType.Optimized, OnReady);
             yield return WaitOnInitResponse();
             Assert.IsNull(_config._nuid);
         }
@@ -37,7 +37,7 @@ namespace Editor.Tests
         public IEnumerator TestInitMalformed()
         {
             NeftaAdapterEvents.UnitTestOverrideOnReady("{");
-            NeftaAdapterEvents.InitWithAppId("appId", OnReady);
+            NeftaAdapterEvents.InitWithAppId("appId", NeftaAdapterEvents.OptimizationType.Optimized, OnReady);
             yield return WaitOnInitResponse();
             Assert.IsNull(_config._nuid);
         }
@@ -47,7 +47,7 @@ namespace Editor.Tests
         {
             var nuid = "abc";
             NeftaAdapterEvents.UnitTestOverrideOnReady($"{{\"nuid\":\"{nuid}\",\"skipOptimization\":true,\"delays\":[17,321,456.7],\"noDynamicResponseRetryInMs\":10123,\"noDefaultResponseRetryInMs\":11654}}");
-            NeftaAdapterEvents.InitWithAppId("appId", OnReady);
+            NeftaAdapterEvents.InitWithAppId("appId", NeftaAdapterEvents.OptimizationType.Optimized, OnReady);
             yield return WaitOnInitResponse();
             Assert.AreEqual(nuid, _config._nuid);
             
@@ -57,16 +57,13 @@ namespace Editor.Tests
             Assert.AreEqual(17, delays[0], 17);
             Assert.AreEqual(321, delays[1]);
             Assert.AreEqual(456.7, delays[2], 0.0001);
-            
-            Assert.AreEqual(10123, NeftaAdapterEvents.NoDynamicResponseRetryInMs);
-            Assert.AreEqual(11654, NeftaAdapterEvents.NoDefaultResponseRetryInMs);
         }
         
         [UnityTest]
         public IEnumerator TestInsight()
         {
             NeftaAdapterEvents.UnitTestOverrideOnReady("{\"nuid\":\"abc\",\"skipOptimization\":false,\"delays\":[]}");
-            NeftaAdapterEvents.InitWithAppId("appId", OnReady);
+            NeftaAdapterEvents.InitWithAppId("appId", NeftaAdapterEvents.OptimizationType.Optimized, OnReady);
             yield return WaitOnInitResponse();
             
             yield return WaitForInsight(Insights.Interstitial, "{\"ad_opportunity_id\":13,\"auction_id\":14,\"floor_price\":4.2,\"delay\":6.9,\"insight_context\":{\"corrected_mean\":\"0\"}}");
@@ -85,7 +82,7 @@ namespace Editor.Tests
         {
             var delays = new[] { 3f, 7f, 11f, 11f };
             NeftaAdapterEvents.UnitTestOverrideOnReady("{\"nuid\":\"abc\",\"skipOptimization\":false,\"delays\":[3,7,11]}");
-            NeftaAdapterEvents.InitWithAppId("appId", OnReady);
+            NeftaAdapterEvents.InitWithAppId("appId", NeftaAdapterEvents.OptimizationType.Optimized, OnReady);
             yield return WaitOnInitResponse();
 
             for (var i = 0; i < 4; i++)

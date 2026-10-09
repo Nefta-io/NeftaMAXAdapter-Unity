@@ -51,13 +51,15 @@ import os
     @objc deinit
   }
   @_inheritsConvenienceInitializers @objc public class State : ObjectiveC.NSObject {
-    @objc public var _nuid: Swift.String
+    @objc public var _nuid: Swift.String?
     @objc public var _isSessionOptimized: Swift.Bool
     @objc public var _firstResponseTimeoutInterstitialInMs: Swift.Int
     @objc public var _firstResponseTimeoutRewardedInMs: Swift.Int
     @objc public var _isDebugEnabled: Swift.Bool
     @objc public var _adProviderCountry: Swift.String?
     @objc public var _availableNetworks: [Swift.String]?
+    @objc public var _globalTrackCooldownInMs: Swift.Int
+    @objc public var _backfillTrackDelayInMs: Swift.Int
     @objc override dynamic public init()
     @objc deinit
   }
@@ -66,6 +68,16 @@ import os
   public typealias OnInsightsBlock = ((NeftaSDK.Insights) -> Swift.Void)
   public typealias OnInsightsAsStringBlock = ((Swift.Int, Swift.Int, Swift.String?) -> Swift.Void)
   @objc public static let Version: Swift.String
+  @objc public enum OptimizationType : Swift.Int {
+    case Unknown = 0
+    case Optimized = 1
+    case NotOptimized = 2
+    public init?(rawValue: Swift.Int)
+    public typealias RawValue = Swift.Int
+    public var rawValue: Swift.Int {
+      get
+    }
+  }
   public static var _initUrl: Swift.String
   final public let _info: NeftaSDK.NeftaPlugin.Info
   @objc final public let _state: NeftaSDK.NeftaPlugin.State
@@ -74,14 +86,11 @@ import os
   @objc public var OnInsightsAsString: NeftaSDK.NeftaPlugin.OnInsightsAsStringBlock?
   @objc public static var _instance: NeftaSDK.NeftaPlugin?
   @objc(EnableLogging:) public static func EnableLogging(enable: Swift.Bool)
-  @objc public static func NativeInit(appId: Swift.String?, clientId: Swift.String?, onReady: NeftaSDK.NeftaPlugin.OnReadyBlock?, integration: Swift.String, mediationVersion: Swift.String) -> NeftaSDK.NeftaPlugin
-  @objc public static func UnityInit(appId: Swift.String?, clientId: Swift.String?, onReadyAsString: NeftaSDK.NeftaPlugin.OnReadyAsStringBlock?, integration: Swift.String, mediationVersion: Swift.String) -> NeftaSDK.NeftaPlugin
+  @objc public static func NativeInit(appId: Swift.String?, clientId: Swift.String?, optimizationType: NeftaSDK.NeftaPlugin.OptimizationType, onReady: NeftaSDK.NeftaPlugin.OnReadyBlock?, integration: Swift.String, mediationVersion: Swift.String) -> NeftaSDK.NeftaPlugin
+  @objc public static func UnityInit(appId: Swift.String?, clientId: Swift.String?, optimizationType: Swift.Int, onReadyAsString: NeftaSDK.NeftaPlugin.OnReadyAsStringBlock?, integration: Swift.String, mediationVersion: Swift.String) -> NeftaSDK.NeftaPlugin
   @objc public static func SetExtraParameter(key: Swift.String, value: Swift.String)
   public static func SetDebugTime(offset: Swift.Int)
-  @objc(SetInterstitialLogic:) public static func SetInterstitialLogic(isOptimized: Swift.Bool)
-  @objc(SetRewardedLogic:) public static func SetRewardedLogic(isOptimized: Swift.Bool)
   @objc(SetHasUserConsent:) public static func SetHasUserConsent(hasUserConsent: Swift.Bool)
-  @objc public func Record(type: Swift.Int, category: Swift.Int, subCategory: Swift.Int, name: Swift.String?, value: Swift.Int64, customPayload: Swift.String?)
   @objc(GetInsightsBridge:insights:previousRequestId:) public func GetInsightsBridge(requestId: Swift.Int, insights: Swift.Int, previousRequestId: Swift.Int)
   @objc(GetInsights:previousInsight:callback:) public func GetInsights(_ insights: Swift.Int, previousInsight: NeftaSDK.AdInsight?, callback: @escaping NeftaSDK.NeftaPlugin.OnInsightsBlock)
   @objc public func GetNuid(present: Swift.Bool) -> Swift.String
@@ -123,17 +132,19 @@ import os
   @objc deinit
 }
 @objc public class InitConfiguration : ObjectiveC.NSObject {
-  @objc public var _skipOptimization: Swift.Bool
   @objc public var _nuid: Swift.String
-  @objc public var _noDynamicResponseRetryInMs: Swift.Int
-  @objc public var _noDefaultResponseRetryInMs: Swift.Int
   @objc public var _isSessionOptimized: Swift.Bool
   @objc public var _firstResponseTimeoutInterstitialInMs: Swift.Int
   @objc public var _firstResponseTimeoutRewardedInMs: Swift.Int
-  public init(skipOptimization: Swift.Bool, state: NeftaSDK.NeftaPlugin.State)
+  @objc public var _globalTrackCooldownInMs: Swift.Int
+  @objc public var _backfillTrackDelayInMs: Swift.Int
+  public init(state: NeftaSDK.NeftaPlugin.State)
   public func GetAdapterResponse() -> Swift.String
   @objc deinit
 }
 extension NeftaSDK.AdInsight.Types : Swift.Equatable {}
 extension NeftaSDK.AdInsight.Types : Swift.Hashable {}
 extension NeftaSDK.AdInsight.Types : Swift.RawRepresentable {}
+extension NeftaSDK.NeftaPlugin.OptimizationType : Swift.Equatable {}
+extension NeftaSDK.NeftaPlugin.OptimizationType : Swift.Hashable {}
+extension NeftaSDK.NeftaPlugin.OptimizationType : Swift.RawRepresentable {}

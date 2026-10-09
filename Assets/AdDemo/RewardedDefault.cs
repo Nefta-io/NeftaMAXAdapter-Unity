@@ -30,16 +30,16 @@ namespace AdDemo
                 return;
             }
             
-            NeftaAdapterEvents.OnExternalMediationRequest(NeftaAdapterEvents.AdType.Rewarded, RewardedUi.AdUnitIdA);
+            NeftaAdapterEvents.OnExternalMediationRequest(NeftaAdapterEvents.AdType.Rewarded, RewardedUi.DefaultAdUnitId);
 
-            MaxSdk.LoadRewardedAd(RewardedUi.AdUnitIdA);
+            MaxSdk.LoadRewardedAd(RewardedUi.DefaultAdUnitId);
         }
         
         public void Show()
         {
-            if (MaxSdk.IsRewardedAdReady(RewardedUi.AdUnitIdA))
+            if (MaxSdk.IsRewardedAdReady(RewardedUi.DefaultAdUnitId))
             {
-                MaxSdk.ShowRewardedAd(RewardedUi.AdUnitIdA);
+                MaxSdk.ShowRewardedAd(RewardedUi.DefaultAdUnitId);
             }
             else
             {

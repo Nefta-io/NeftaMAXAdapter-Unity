@@ -12,7 +12,7 @@ namespace AdDemo
         
         public InterstitialNeftaWrapper(bool isOptimized)
         {
-            NeftaSdk.Interstitial.Initialize(isOptimized, InterstitialUi.AdUnitIdA, InterstitialUi.AdUnitIdB);   
+            NeftaSdk.Interstitial.Initialize(isOptimized, InterstitialUi.DefaultAdUnitId, InterstitialUi.OptimizedAdUnitIdA, InterstitialUi.OptimizedAdUnitIdB);   
         }
         
         public void Init(InterstitialUi ui)
@@ -32,23 +32,21 @@ namespace AdDemo
                 return;
             }
             
-            NeftaSdk.LoadInterstitial(InterstitialUi.AdUnitIdA);
+            NeftaSdk.LoadInterstitial(InterstitialUi.DefaultAdUnitId);
         }
         
         public void Show()
         {
-            if (NeftaSdk.IsInterstitialReady(InterstitialUi.AdUnitIdA))
+            if (NeftaSdk.IsInterstitialReady(InterstitialUi.DefaultAdUnitId))
             {
-                NeftaSdk.ShowInterstitial(InterstitialUi.AdUnitIdA);
+                NeftaSdk.ShowInterstitial(InterstitialUi.DefaultAdUnitId);
             }
             else
             {
                 Load();
             }
-            _ui.SetAvailability(NeftaSdk.IsInterstitialReady(InterstitialUi.AdUnitIdA));
+            _ui.SetAvailability(NeftaSdk.IsInterstitialReady(InterstitialUi.DefaultAdUnitId));
         }
-        
-        public void OnUpdate(float delta) {}
         
         private void OnAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {

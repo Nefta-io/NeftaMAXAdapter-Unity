@@ -10,13 +10,12 @@ namespace NeftaCustomAdapter
         
         public Action<string, MaxSdkBase.Reward, MaxSdkBase.AdInfo> OnAdReceivedRewardEvent;
         
-        public void Initialize(bool isOptimized, string adUnitIdA, string adUnitIdB)
+        public void Initialize(bool isOptimized, string defaultAdUnit, string optimizedAdUnitA, string optimizedAdUnitB)
         {
             NeftaSdk.Initialize();
-            NeftaAdapterEvents.SetRewardedLogic(isOptimized);
             if (isOptimized)
             {
-                InitializeDualTrack(adUnitIdA, adUnitIdB);
+                InitializeDualTrack(defaultAdUnit, optimizedAdUnitA, optimizedAdUnitB);
             }
             
             MaxSdkCallbacks.Rewarded.OnAdLoadedEvent += OnAdLoadedCallback;
@@ -34,10 +33,15 @@ namespace NeftaCustomAdapter
             LoadOrTriggerAlreadyLoaded();
         }
 
-        protected override void LoadInternal(string adUnitId, bool disableAutoRetries, string bidFloor)
+        protected override void LoadAsOptimized(string adUnitId, string bidFloor)
         {
-            MaxSdk.SetRewardedAdExtraParameter(adUnitId, "disable_auto_retries", disableAutoRetries ? "true" : "false");
+            MaxSdk.SetRewardedAdExtraParameter(adUnitId, "disable_auto_retries", "true");
             MaxSdk.SetRewardedAdExtraParameter(adUnitId, "jC7Fp", bidFloor);
+            MaxSdk.LoadRewardedAd(adUnitId);
+        }
+
+        protected override void LoadAsDefault(string adUnitId)
+        {
             MaxSdk.LoadRewardedAd(adUnitId);
         }
 
@@ -59,7 +63,7 @@ namespace NeftaCustomAdapter
             track.State = State.Idle;
             return false;
         }
-        
+
         protected void OnAdReceivedRewardCallback(string adUnitId, MaxSdkBase.Reward reward, MaxSdkBase.AdInfo adInfo)
         {
             if (OnAdReceivedRewardEvent != null)

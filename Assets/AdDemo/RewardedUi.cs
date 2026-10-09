@@ -6,11 +6,13 @@ namespace AdDemo
     public class RewardedUi : MonoBehaviour
     {
 #if UNITY_IOS
-        public const string AdUnitIdA = "7c6097e4101586b0";
-        public const string AdUnitIdB = "08304643cb16df3b";
+        public const string DefaultAdUnitId = "a4b93fe91b278c75";
+        public const string OptimizedAdUnitIdA = "7c6097e4101586b0";
+        public const string OptimizedAdUnitIdB = "08304643cb16df3b";
 #else // UNITY_ANDROID
-        public const string AdUnitIdA = "c164298ebdd0c008";
-        public const string AdUnitIdB = "3082ee9199cf59f0";
+        public const string DefaultAdUnitId = "72458470d47ee781";
+        public const string OptimizedAdUnitIdA = "c164298ebdd0c008";
+        public const string OptimizedAdUnitIdB = "3082ee9199cf59f0";
 #endif
         private IRewarded _logic;
         
@@ -29,11 +31,6 @@ namespace AdDemo
 
             _logic = logic;
             _logic.Init(this);
-        }
-        
-        public void OnAdLogicReady()
-        {
-            _load.interactable = true;
         }
         
         private void OnLoadChanged(bool isOn)

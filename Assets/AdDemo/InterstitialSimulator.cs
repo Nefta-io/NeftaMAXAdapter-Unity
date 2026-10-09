@@ -14,108 +14,109 @@ namespace AdDemo
         
         protected override string LogTag => "SimInterstitial";
 
-        private readonly Image _rendererFill2A;
-        private readonly Button _fill2A;
-        private readonly Image _rendererFill1A;
-        private readonly Button _fill1A;
-        private readonly Image _rendererNoFillA;
-        private readonly Button _noFillA;
-        private readonly Image _rendererOtherA;
-        private readonly Button _otherA;
-        private readonly Text _statusA;
-        private readonly Image _rendererFill2B;
-        private readonly Button _fill2B;
-        private readonly Image _rendererFill1B;
-        private readonly Button _fill1B;
-        private readonly Image _rendererNoFillB;
-        private readonly Button _noFillB;
-        private readonly Image _rendererOtherB;
-        private readonly Button _otherB;
-        private readonly Text _statusB;
-        
-        private double _simAFloor = -1;
-        private MaxSdkBase.AdInfo _simAAdInfo;
-        private double _simBFloor = -1;
-        private MaxSdkBase.AdInfo _simBAdInfo; 
+        private readonly Image[] _rendererFill3;
+        private readonly Button[] _fill3;
+        private readonly Image[] _rendererFill2;
+        private readonly Button[] _fill2;
+        private readonly Image[] _rendererFill1;
+        private readonly Button[] _fill1;
+        private readonly Image[] _rendererNoFill;
+        private readonly Button[] _noFill;
+        private readonly Image[] _rendererOther;
+        private readonly Button[] _other;
+        private readonly Text[] _status;
 
-        public InterstitialSimulator(bool isOptimized, Image rendererFill2A, Button fill2A,
+        private double[] _simFloors = new double[] { -1f, -1f, -1f };
+        private MaxSdkBase.AdInfo[] _simAdInfos = new MaxSdkBase.AdInfo[3];
+
+        public InterstitialSimulator(bool isOptimized,
+            Image rendererFill3A, Button fill3A,
+            Image rendererFill2A, Button fill2A,
             Image rendererFill1A, Button fill1A,
             Image rendererNoFillA, Button noFillA,
             Image rendererOtherA, Button otherA, Text statusA,
+            Image rendererFill3B, Button fill3B,
             Image rendererFill2B, Button fill2B,
             Image rendererFill1B, Button fill1B,
             Image rendererNoFillB, Button noFillB,
-            Image rendererOtherB, Button otherB, Text statusB)
+            Image rendererOtherB, Button otherB, Text statusB,
+            Image rendererFill3C, Button fill3C,
+            Image rendererFill2C, Button fill2C,
+            Image rendererFill1C, Button fill1C,
+            Image rendererNoFillC, Button noFillC,
+            Image rendererOtherC, Button otherC, Text statusC)
         {
-            _rendererFill2A = rendererFill2A;
-            _fill2A = fill2A;
-            _rendererFill1A = rendererFill1A;
-            _fill1A = fill1A;
-            _rendererNoFillA = rendererNoFillA;
-            _noFillA = noFillA;
-            _rendererOtherA = rendererOtherA;
-            _otherA = otherA;
-            _statusA = statusA;
+            _rendererFill3 = new[] { rendererFill3C, rendererFill3A, rendererFill3B };
+            _fill3 = new[] { fill3C, fill3A, fill3B };
             
-            _rendererFill2B = rendererFill2B;
-            _fill2B = fill2B;
-            _rendererFill1B = rendererFill1B;
-            _fill1B = fill1B;
-            _rendererNoFillB = rendererNoFillB;
-            _noFillB = noFillB;
-            _rendererOtherB = rendererOtherB;
-            _otherB = otherB;
-            _statusB = statusB;
+            _rendererFill2 = new[] { rendererFill2C, rendererFill2A, rendererFill2B };
+            _fill2 = new[] { fill2C, fill2A, fill2B };
             
-            ToggleTrackA(false);
-            fill2A.onClick.AddListener(() => { SimOnAdLoadedEvent(_trackA, true); });
-            fill1A.onClick.AddListener(() => { SimOnAdLoadedEvent(_trackA, false); });
-            noFillA.onClick.AddListener(() => { SimOnAdFailedEvent(_trackA, 2); });
-            otherA.onClick.AddListener(() => { SimOnAdFailedEvent(_trackA, 0); });
-        
-            ToggleTrackB(false);
-            fill2B.onClick.AddListener(() => { SimOnAdLoadedEvent(_trackB, true); });
-            fill1B.onClick.AddListener(() => { SimOnAdLoadedEvent(_trackB, false); });
-            noFillB.onClick.AddListener(() => { SimOnAdFailedEvent(_trackB, 2); });
-            otherB.onClick.AddListener(() => { SimOnAdFailedEvent(_trackB, 0); });
+            _rendererFill1 = new[] { rendererFill1C, rendererFill1A, rendererFill1B };
+            _fill1 = new[] { fill1C, fill1A, fill1B };
             
-            _trackA = new Track("Interstitial A");
-            _trackB = new Track("Interstitial B");
+            _rendererNoFill = new[] { rendererNoFillC, rendererNoFillA, rendererNoFillB };
+            _noFill = new[] { noFillC, noFillA, noFillB };
+            
+            _rendererOther = new[] { rendererOtherC, rendererOtherA, rendererOtherB };
+            _other = new[] { otherC, otherA, otherB };
+            
+            _status = new[] { statusC, statusA, statusB };
+
+            _tracks = new Track[3];
+            for (var t = 0; t < 3; t++)
+            {
+                var ti = t;
+                ToggleTrack(t, false);
+                _fill3[t].onClick.AddListener(() => { SimOnAdLoadedEvent(ti, _tracks[ti], 3); });
+                _fill2[t].onClick.AddListener(() => { SimOnAdLoadedEvent(ti, _tracks[ti], 2); });
+                _fill1[t].onClick.AddListener(() => { SimOnAdLoadedEvent(ti, _tracks[ti], 1); });
+                _noFill[t].onClick.AddListener(() => { SimOnAdFailedEvent(_tracks[ti], 2); });
+                _other[t].onClick.AddListener(() => { SimOnAdFailedEvent(_tracks[ti], 0); });                
+            }
+            
+            _tracks[0] = new Track("Interstitial D", false);
+            _tracks[1] = new Track("Interstitial A", true);
+            _tracks[2] = new Track("Interstitial B", true);
             NeftaSdk.Initialize();
             IsOptimized = isOptimized;
-            NeftaAdapterEvents.SetInterstitialLogic(IsOptimized);
         }
         
         public void UnoptimizedLoad()
         {
-            if (_trackA.State == State.Idle)
+            if (_tracks[0].State == State.Idle)
             {
-                NeftaAdapterEvents.OnExternalMediationRequest(AdType, _trackA.AdUnitId);
-                SimLoad(_trackA.AdUnitId);
+                NeftaAdapterEvents.OnExternalMediationRequest(AdType, _tracks[0].AdUnitId);
+                SimLoad(_tracks[0].AdUnitId);
             }
         }
 
-        protected override void LoadInternal(string adUnitId, bool disableAutoRetries, string bidFloor)
+        protected override void LoadAsOptimized(string adUnitId, string bidFloor)
         {
-            if (adUnitId == _trackA.AdUnitId)
+            for (var t = 0; t < _tracks.Length; t++)
             {
-                _simAFloor = string.IsNullOrEmpty(bidFloor) ? -1 : double.Parse(bidFloor, CultureInfo.InvariantCulture);
+                if (adUnitId == _tracks[t].AdUnitId)
+                {
+                    _simFloors[t] = string.IsNullOrEmpty(bidFloor) ? -1 : double.Parse(bidFloor, CultureInfo.InvariantCulture);
+                    break;
+                }
             }
-            else
-            {
-                _simBFloor = string.IsNullOrEmpty(bidFloor) ? -1 : double.Parse(bidFloor, CultureInfo.InvariantCulture);
-            }
+            SimLoad(adUnitId);
+        }
+        
+        protected override void LoadAsDefault(string adUnitId)
+        {
             SimLoad(adUnitId);
         }
 
         public bool UnoptimizedShow()
         {
-            return TryShow(_trackA, null, null);
+            return TryShow(_tracks[0], null, null);
         }
 
         public void ResetTrack()
         {
-            _trackA.State = State.Idle;
+            _tracks[0].State = State.Idle;
         }
 
         protected override bool TryShow(Track track, string placement, string customData)
@@ -124,35 +125,23 @@ namespace AdDemo
             track.AdInfo = null;
             track.State = State.Shown;
             
-            if (track.AdUnitId == _trackA.AdUnitId)
+            for (var t = 0; t < _tracks.Length; t++)
             {
-                ToggleTrackA(true);
-                ToggleTrackA(false);
-                
-                if (_simAAdInfo == null)
+                if (_tracks[t] == track)
                 {
-                    track.State = State.Idle;
-                    _statusA.text = "Failed to show A";
-                    return false;
-                }
-                _statusA.text = "Showing A";
-                adInfo = _simAAdInfo;
-                _simAAdInfo = null;
-            }
-            else
-            {
-                ToggleTrackB(true);
-                ToggleTrackB(false);
+                    ToggleTrack(t, true);
+                    ToggleTrack(t, false);
                 
-                if (_simBAdInfo == null)
-                {
-                    track.State = State.Idle;
-                    _statusB.text = "Failed to show B";
-                    return false;
+                    if (_simAdInfos[t] == null)
+                    {
+                        track.State = State.Idle;
+                        _status[t].text = $"Failed to show {track.AdUnitId}";
+                        return false;
+                    }
+                    _status[t].text = $"Showing {track.AdUnitId}";
+                    adInfo = _simAdInfos[t];
+                    _simAdInfos[t] = null;
                 }
-                _statusB.text = "Showing B";
-                adInfo = _simBAdInfo;
-                _simBAdInfo = null;
             }
             
             track.State = State.Shown;
@@ -176,155 +165,98 @@ namespace AdDemo
         
         private void SimLoad(string adUnitId)
         {
-            if (adUnitId == _trackA.AdUnitId)
+            for (var t = 0; t < _tracks.Length; t++)
             {
-                var isDynamic = _simAFloor >= 0;
-                _trackA.State = isDynamic ? State.LoadingWithInsights : State.Loading;
-                ToggleTrackA(true);
-                _statusA.text = $"{adUnitId} loading " + (isDynamic ? "as Optimized": "as Default");
-            }
-            else
-            {
-                var isDynamic = _simBFloor >= 0;
-                _trackB.State = isDynamic ? State.LoadingWithInsights : State.Loading;
-                ToggleTrackB(true);
-                _statusB.text = $"{adUnitId} loading " + (isDynamic ? "as Optimized": "as Default");
+                if (_tracks[t].AdUnitId == adUnitId)
+                {
+                    var isDynamic = _simFloors[t] >= 0;
+                    _tracks[t].State = State.Loading;
+                    ToggleTrack(t, true);
+                    _status[t].text = $"{adUnitId} loading " + (isDynamic ? "as Optimized": "as Default");
+                }
             }
         }
         
-        private void ToggleTrackA(bool isOn)
+        private void ToggleTrack(int i, bool isOn)
         {
-            _fill2A.interactable = isOn;
-            _fill1A.interactable = isOn;
-            _noFillA.interactable = isOn;
-            _otherA.interactable = isOn;
+            _fill3[i].interactable = isOn;
+            _fill2[i].interactable = isOn;
+            _fill1[i].interactable = isOn;
+            _noFill[i].interactable = isOn;
+            _other[i].interactable = isOn;
             if (isOn)
             {
-                _rendererFill2A.color = DefaultColor;
-                _rendererFill1A.color = DefaultColor;
-                _rendererNoFillA.color = DefaultColor;
-                _rendererOtherA.color = DefaultColor;
+                _rendererFill3[i].color = DefaultColor;
+                _rendererFill2[i].color = DefaultColor;
+                _rendererFill1[i].color = DefaultColor;
+                _rendererNoFill[i].color = DefaultColor;
+                _rendererOther[i].color = DefaultColor;
             }
         }
+        
+        private void SimOnAdLoadedEvent(int t, Track track, int r)
+        {
+            var revenue = r == 3 ? 0.003 : r == 2 ? 0.002 : 0.001;
+            if (_simAdInfos[t] != null)
+            {
+                _simAdInfos[t] = null;
 
-        private void ToggleTrackB(bool isOn)
-        {
-            _fill2B.interactable = isOn;
-            _fill1B.interactable = isOn;
-            _noFillB.interactable = isOn;
-            _otherB.interactable = isOn;
-            if (isOn)
-            {
-                _rendererFill2B.color = DefaultColor;
-                _rendererFill1B.color = DefaultColor;
-                _rendererNoFillB.color = DefaultColor;
-                _rendererOtherB.color = DefaultColor;
-            }
-        }
-        
-        private void SimOnAdLoadedEvent(Track track, bool high)
-        {
-            var revenue = high ? 0.002 : 0.001;
-            if (track == _trackA && _simAAdInfo != null)
-            {
-                _simAAdInfo = null;
-                if (high)
-                {
-                    _rendererFill2A.color = DefaultColor;
-                    _fill2A.interactable = false;
-                }
-                else
-                {
-                    _rendererFill1A.color = DefaultColor;
-                    _fill1A.interactable = false;
-                }
-                return;
-            }
-            if (track == _trackB && _simBAdInfo != null)
-            {
-                _simBAdInfo = null;
-                if (high)
-                {
-                    _rendererFill2B.color = DefaultColor;
-                    _fill2B.interactable = false;
-                }
-                else
-                {
-                    _rendererFill1B.color = DefaultColor;
-                    _fill1B.interactable = false;
-                }
+                _rendererFill3[t].color = DefaultColor;
+                _fill3[t].interactable = false;
+                
+                _rendererFill2[t].color = DefaultColor;
+                _fill2[t].interactable = false;
+
+                _rendererFill1[t].color = DefaultColor;
+                _fill1[t].interactable = false;
+
                 return;
             }
 
             track.State = State.Ready;
             var adInfo = SimulatorUi.GetAdInfo(track.AdUnitId, "INTER", revenue);
-            if (track == _trackA)
+
+            _simAdInfos[t] = adInfo;
+            ToggleTrack(t, false);
+            if (r == 3)
             {
-                _simAAdInfo = adInfo;
-                ToggleTrackA(false);
-                if (high)
-                {
-                    _rendererFill2A.color = FillColor;
-                    _fill2A.interactable = true;
-                }
-                else
-                {
-                    _rendererFill1A.color = FillColor;
-                    _fill1A.interactable = true;
-                }
-                _simAFloor = -1;
-                _statusA.text = $"{track.AdUnitId} loaded {revenue}";
+                _rendererFill3[t].color = FillColor;
+                _fill3[t].interactable = true;
+            }
+            else if (r == 2)
+            {
+                _rendererFill2[t].color = FillColor;
+                _fill2[t].interactable = true;
             }
             else
             {
-                _simBAdInfo = adInfo;
-                ToggleTrackB(false);
-                if (high)
-                {
-                    _rendererFill2B.color = FillColor;
-                    _fill2B.interactable = true;
-                }
-                else
-                {
-                    _rendererFill1B.color = FillColor;
-                    _fill1B.interactable = true;
-                }
-                _simBFloor = -1;
-                _statusB.text = $"{track.AdUnitId} loaded {revenue}";
+                _rendererFill1[t].color = FillColor;
+                _fill1[t].interactable = true;
             }
+            _simFloors[t] = -1;
+            _status[t].text = $"{track.AdUnitId} loaded {revenue}";
             
             OnAdLoadedCallback(track.AdUnitId, adInfo);
         }
         
         private void SimOnAdFailedEvent(Track track, int status)
         {
-            if (track == _trackA)
+            for (var t = 0; t < _tracks.Length; t++)
             {
-                if (status == 2)
+                if (_tracks[t] == track)
                 {
-                    _rendererNoFillA.color = NoFillColor;
+                    if (status == 2)
+                    {
+                        _rendererNoFill[t].color = NoFillColor;
+                    }
+                    else
+                    {
+                        _rendererOther[t].color = NoFillColor;
+                    }
+                    _simFloors[t] = -1;
+                    _status[t].text = $"{track.AdUnitId} failed";
+                    ToggleTrack(t, false);
                 }
-                else
-                {
-                    _rendererOtherA.color = NoFillColor;
-                }
-                _simAFloor = -1;
-                _statusA.text = $"{track.AdUnitId} failed";
-                ToggleTrackA(false);
-            }
-            else
-            {
-                if (status == 2)
-                {
-                    _rendererNoFillB.color = NoFillColor;
-                }
-                else
-                {
-                    _rendererOtherB.color = NoFillColor;
-                }
-                _simBFloor = -1;
-                _statusB.text = $"{track.AdUnitId} failed";
-                ToggleTrackB(false);
             }
             
             OnAdFailedCallback(track.AdUnitId,
@@ -342,10 +274,10 @@ namespace AdDemo
             public enum State
             {
                 Idle,
-                LoadingWithInsights,
                 Loading,
                 Ready,
-                Shown
+                Shown,
+                Delay
             }
 
             private Track _track;
@@ -359,9 +291,9 @@ namespace AdDemo
             public AdInsight GetInsight => _track.Insight;
         }
         
-        public TrackStatus GetTrack(bool a)
+        public TrackStatus GetTrack(int t)
         {
-            return a ? new TrackStatus(_trackA) : new TrackStatus(_trackB);
+            return new TrackStatus(_tracks[t]);
         }
     }
 }

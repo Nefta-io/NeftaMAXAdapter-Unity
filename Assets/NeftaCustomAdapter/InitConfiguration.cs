@@ -1,10 +1,7 @@
-using System;
-
 namespace NeftaCustomAdapter
 {
     public class InitConfiguration
     {
-        [Obsolete] public bool _skipOptimization;
         public string _nuid;
         public bool _isSessionOptimized;
 

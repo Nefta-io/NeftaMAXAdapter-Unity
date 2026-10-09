@@ -12,7 +12,7 @@ namespace AdDemo
 
         public RewardedNeftaWrapper(bool isOptimized)
         {
-            NeftaSdk.Rewarded.Initialize(isOptimized, RewardedUi.AdUnitIdA, RewardedUi.AdUnitIdB);   
+            NeftaSdk.Rewarded.Initialize(isOptimized, RewardedUi.DefaultAdUnitId, RewardedUi.OptimizedAdUnitIdA, RewardedUi.OptimizedAdUnitIdB);   
         }
         
         public void Init(RewardedUi ui)
@@ -33,23 +33,21 @@ namespace AdDemo
                 return;
             }
             
-            NeftaSdk.LoadRewardedAd(RewardedUi.AdUnitIdA);
+            NeftaSdk.LoadRewardedAd(RewardedUi.DefaultAdUnitId);
         }
         
         public void Show()
         {
-            if (NeftaSdk.IsRewardedAdReady(RewardedUi.AdUnitIdA))
+            if (NeftaSdk.IsRewardedAdReady(RewardedUi.DefaultAdUnitId))
             {
-                NeftaSdk.ShowRewardedAd(RewardedUi.AdUnitIdA);
+                NeftaSdk.ShowRewardedAd(RewardedUi.DefaultAdUnitId);
             }
             else
             {
                 Load();
             }
-            _ui.SetAvailability(NeftaSdk.IsRewardedAdReady(RewardedUi.AdUnitIdA));
+            _ui.SetAvailability(NeftaSdk.IsRewardedAdReady(RewardedUi.DefaultAdUnitId));
         }
-        
-        public void OnUpdate(float delta) {}
         
         private void OnAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
