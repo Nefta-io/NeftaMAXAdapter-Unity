@@ -6,6 +6,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 #import <WebKit/WebKit.h>
 #import <NeftaSDK/NeftaSDK-Swift.h>
 #import <ALNeftaMediationAdapter.h>
@@ -32,7 +33,54 @@ extern "C" {
 }
 #endif
 
+extern bool _didResignActive;
+
 NeftaPlugin *_plugin;
+
+@interface NeftaPendingCallback : NSObject
+@property (nonatomic, assign) int type;
+@property (nonatomic, copy) NSString *data;
+@property (nonatomic, assign) int requestId;
+@property (nonatomic, assign) int responseType;
+@end
+@implementation NeftaPendingCallback
+@end
+
+static OnReady _onReady;
+static OnInsights _onInsights;
+static NSMutableArray<NeftaPendingCallback *> *_pendingCallbacks;
+static NSLock *_callbackLock;
+static dispatch_queue_t _callbackQueue;
+static id _resumeObserver;
+
+static void NeftaAdapter_Flush(void) {
+    dispatch_async(_callbackQueue, ^{
+        while (!_didResignActive) {
+            [_callbackLock lock];
+            if (_pendingCallbacks.count == 0) {
+                [_callbackLock unlock];
+                return;
+            }
+            NeftaPendingCallback *callback = _pendingCallbacks.firstObject;
+            [_pendingCallbacks removeObjectAtIndex:0];
+            [_callbackLock unlock];
+
+            if (_didResignActive) {
+                [_callbackLock lock];
+                [_pendingCallbacks insertObject:callback atIndex:0];
+                [_callbackLock unlock];
+                return;
+            }
+
+            const char *d = callback.data != nil ? callback.data.UTF8String : NULL;
+            if (callback.type == 0) {
+                _onReady(d);
+            } else if (callback.type == 1) {
+                _onInsights(callback.requestId, callback.responseType, d);
+            }
+        }
+    });
+}
 
 void NeftaPlugin_EnableLogging(bool enable) {
     [NeftaPlugin EnableLogging: enable];
@@ -49,15 +97,48 @@ void NeftaPlugin_SetHasUserConsent(bool hasUserConsent) {
 }
 
 void NeftaPlugin_Init(const char *appId, const char *clientId, int optimizationType, OnReady onReady, OnInsights onInsights, const char *mediationVersion) {
+    _onReady = onReady;
+    _onInsights = onInsights;
+
+    _pendingCallbacks = [NSMutableArray array];
+    _callbackLock = [NSLock new];
+    _callbackQueue = dispatch_queue_create("com.nefta.unity-callbacks", DISPATCH_QUEUE_SERIAL);
+    _resumeObserver = [[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationDidBecomeActiveNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
+        (void)note;
+        NeftaAdapter_Flush();
+    }];
+
 	NSString *a = appId ? [NSString stringWithUTF8String: appId] : nil;
 	NSString *c = clientId ? [NSString stringWithUTF8String: clientId] : nil;
     _plugin = [NeftaPlugin UnityInitWithAppId: a clientId: c optimizationType: optimizationType onReadyAsString: ^void(NSString * _Nullable initConfig) {
-        const char *iC = initConfig ? [initConfig UTF8String] : NULL;
-        onReady(iC);
+        if (_didResignActive) {
+            NeftaPendingCallback *cb = [NeftaPendingCallback new];
+            cb.type = 0;
+            cb.data = initConfig;
+            [_callbackLock lock];
+            [_pendingCallbacks addObject: cb];
+            [_callbackLock unlock];
+            NeftaAdapter_Flush();
+        } else {
+            const char *i = initConfig != nil ? initConfig.UTF8String : NULL;
+            _onReady(i);
+        }
     } integration: @"unity-applovin-max" mediationVersion: [NSString stringWithUTF8String: mediationVersion]];
     _plugin.OnInsightsAsString = ^void(NSInteger requestId, NSInteger adapterResponseType, NSString * _Nullable adapterResponse) {
-        const char *aR = adapterResponse ? [adapterResponse UTF8String] : NULL;
-        onInsights((int)requestId, (int)adapterResponseType, aR);
+        if (_didResignActive) {
+            NeftaPendingCallback *cb = [NeftaPendingCallback new];
+            cb.type = 1;
+            cb.requestId = (int)requestId;
+            cb.responseType = (int)adapterResponseType;
+            cb.data = adapterResponse;
+            [_callbackLock lock];
+            [_pendingCallbacks addObject: cb];
+            [_callbackLock unlock];
+            NeftaAdapter_Flush();
+        } else {
+            const char *aR = adapterResponse != nil ? adapterResponse.UTF8String : NULL;
+            _onInsights(requestId, adapterResponseType, aR);
+        }
     };
 }
 
