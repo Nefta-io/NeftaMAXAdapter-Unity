@@ -72,7 +72,6 @@ namespace Editor.Tests
             Assert.AreEqual(_insight.Insight, _insight._interstitial);
             Assert.AreEqual(13, _insight.Insight._adOpportunityId);
             Assert.AreEqual(14, _insight.Insight._auctionId);
-            Assert.AreEqual(null, _insight.Insight._adUnit, null);
             Assert.AreEqual(4.2, _insight._interstitial._floorPrice, 0.0001);
             Assert.AreEqual(6.9, _insight._interstitial._delay, 0.0001);
         }
@@ -92,8 +91,6 @@ namespace Editor.Tests
             
                 Assert.IsTrue(_insight._rewarded != null);
                 Assert.AreEqual(delay, _insight._rewarded._floorPrice, 0.0001);
-                
-                Assert.AreEqual(delay, NeftaAdapterEvents.GetRetryDelayInSeconds(_insight.Insight, _insight.Insight._adUnit), 0.0001);
             }
         }
 

@@ -17,6 +17,12 @@ NSString * const _mediationProvider = @"applovin-max";
 static NeftaPlugin *_plugin;
 static bool _isSampled;
 
+/// The method to initialize the SDK.
+/// The callback is guaranteed to arrive with maximum delay of 5s.
+///  - Parameters:
+///     - appId: Platform specific app_id from Nefta dashboard
+///     - optimizationType: Ad strategy for this app lifecycle
+///     - onReady: callback with SDK initial configuration, after which the SDK can be used
 + (void)InitWithAppId:(NSString *)appId optimizationType:(OptimizationType)optimizationType onReady:(void (^)(InitConfiguration *))onReady {
     _plugin = [NeftaPlugin NativeInitWithAppId: appId clientId: nil optimizationType: optimizationType onReady: onReady integration: @"native-applovin-max" mediationVersion: ALSdk.version];
 }

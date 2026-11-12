@@ -24,7 +24,7 @@ namespace Editor.Tests.PlayTests
         private const string InitJson =
             "{\"nuid\":\"playtest\",\"isSessionOptimized\":true,\"delays\":[0.15]," +
             "\"firstResponseTimeoutInterstitialInMs\":0,\"firstResponseTimeoutRewardedInMs\":0," +
-            "\"globalTrackCooldownInMs\":50,\"backfillTrackDelayInMs\":-1000}";
+            "\"globalTrackCooldownInMs\":50,\"backfillInterstitialDelayInMs\":-1,\"backfillRewardedDelayInMs\":-1}";
 
         private InterstitialTestLogic _interstitial;
         private RewardedTestLogic _rewarded;
@@ -440,7 +440,7 @@ namespace Editor.Tests.PlayTests
             NeftaAdapterEvents.FirstResponseTimeoutInterstitial = firstResponseTimeout;
             NeftaAdapterEvents.FirstResponseTimeoutRewarded = firstResponseTimeout;
             NeftaAdapterEvents.GlobalTrackCooldown = cooldown;
-            NeftaAdapterEvents.BackFillTrackDelay = backfillDelay;
+            NeftaAdapterEvents.BackfillInterstitialDelay = backfillDelay;
 
             var delaysField = typeof(NeftaAdapterEvents).GetField("_delays", BindingFlags.NonPublic | BindingFlags.Static);
             Assert.IsNotNull(delaysField);

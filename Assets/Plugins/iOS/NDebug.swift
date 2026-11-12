@@ -155,7 +155,7 @@ public class AdViewController : UIViewController {
             }
         }
         _delayedTask = task
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0, execute: task)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: task)
     }
     
     public override func viewWillDisappear(_ animated: Bool) {
@@ -467,7 +467,7 @@ public class AdViewController : UIViewController {
     }
     
     private func SendState(connection: NWConnection, to: String) {
-        var state = ""
+        /*var state = ""
         if let neftaInstance = NeftaPlugin._instance {
             do {
                 let jsonData = try JSONSerialization.data(withJSONObject: neftaInstance.GetDebugState(), options: [])
@@ -476,7 +476,7 @@ public class AdViewController : UIViewController {
                 
             }
         }
-        SendUdp(connection: connection, to: to, message: "state|ios|\(_localPort)|\(_bundleId!)|\(self._version!)|\(_lastLogTime)|\(state)")
+        SendUdp(connection: connection, to: to, message: "state|ios|\(_localPort)|\(_bundleId!)|\(self._version!)|\(_lastLogTime)|\(state)")*/
     }
     
     func GetBroadcastAddress() -> String? {

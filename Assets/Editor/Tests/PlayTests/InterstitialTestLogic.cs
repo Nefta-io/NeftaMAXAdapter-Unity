@@ -48,7 +48,7 @@ namespace Editor.Tests.PlayTests
 
             _started = false;
             MaxSdkCallbacks.Interstitial.OnAdLoadedEvent -= OnAdLoadedCallback;
-            MaxSdkCallbacks.Interstitial.OnAdLoadFailedEvent -= OnAdFailedCallback;
+            MaxSdkCallbacks.Interstitial.OnAdLoadFailedEvent -= OnAdLoadFailedCallback;
             MaxSdkCallbacks.Interstitial.OnAdDisplayFailedEvent -= OnAdDisplayFailedCallback;
             MaxSdkCallbacks.Interstitial.OnAdDisplayedEvent -= OnAdDisplayedCallback;
             MaxSdkCallbacks.Interstitial.OnAdClickedEvent -= OnAdClickedCallback;
@@ -66,7 +66,7 @@ namespace Editor.Tests.PlayTests
             LoadRequests.Add(new LoadRequest(adUnitId, false, null));
         }
 
-        protected override bool TryShow(Track track, string placement, string customData)
+        public override bool TryShow(Track track, string placement, string customData, bool triggerRewardOnHiide)
         {
             var hadAd = track.AdInfo != null;
             track.AdInfo = null;
@@ -114,7 +114,7 @@ namespace Editor.Tests.PlayTests
 
         public void InvokeNoFill(string adUnitId)
         {
-            OnAdFailedCallback(adUnitId, new MaxSdkBase.ErrorInfo(new Dictionary<string, object>
+            OnAdLoadFailedCallback(adUnitId, new MaxSdkBase.ErrorInfo(new Dictionary<string, object>
             {
                 { "errorCode", 204 },
                 { "errorMessage", "no fill" },

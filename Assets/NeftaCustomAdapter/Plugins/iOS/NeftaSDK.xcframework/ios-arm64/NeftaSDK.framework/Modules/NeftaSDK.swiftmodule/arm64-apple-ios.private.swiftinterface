@@ -1,6 +1,7 @@
 // swift-interface-format-version: 1.0
 // swift-compiler-version: Apple Swift version 5.10 (swiftlang-5.10.0.13 clang-1500.3.9.4)
 // swift-module-flags: -target arm64-apple-ios12.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -enable-bare-slash-regex -module-name NeftaSDK
+import AdSupport
 import Foundation
 @_exported import NeftaSDK
 import Network
@@ -59,7 +60,9 @@ import os
     @objc public var _adProviderCountry: Swift.String?
     @objc public var _availableNetworks: [Swift.String]?
     @objc public var _globalTrackCooldownInMs: Swift.Int
-    @objc public var _backfillTrackDelayInMs: Swift.Int
+    @objc public var _backfillInterstitialDelayInMs: Swift.Int
+    @objc public var _backfillRewardedDelayInMs: Swift.Int
+    @objc public var _enableAdSwitching: Swift.Bool
     @objc override dynamic public init()
     @objc deinit
   }
@@ -72,6 +75,16 @@ import os
     case Unknown = 0
     case Optimized = 1
     case NotOptimized = 2
+    public init?(rawValue: Swift.Int)
+    public typealias RawValue = Swift.Int
+    public var rawValue: Swift.Int {
+      get
+    }
+  }
+  @objc public enum Mmp : Swift.Int {
+    case Adjust = 0
+    case AppsFlyer = 1
+    case Other = 2
     public init?(rawValue: Swift.Int)
     public typealias RawValue = Swift.Int
     public var rawValue: Swift.Int {
@@ -100,7 +113,10 @@ import os
   @objc public static func OnExternalMediationImpression(_ isClick: Swift.Bool, provider: Swift.String, data: Foundation.NSMutableDictionary?, id: Swift.String?, id2: Swift.String?)
   @objc public static func OnExternalMediationImpressionAsString(_ isClick: Swift.Bool, provider: Swift.String, data: Swift.String, id: Swift.String?, id2: Swift.String?)
   @objc(GetRetryDelayInSeconds:adUnitId:) public static func GetRetryDelayInSeconds(insight: NeftaSDK.AdInsight?, adUnitId: Swift.String) -> Swift.Float
-  public func GetDebugState() -> [Swift.String : Any?]
+  @objc public static func OnAttributionChangedBridge(mmp: Swift.Int, mmpId: Swift.String?, network: Swift.String?, campaign: Swift.String?, costType: Swift.String?, cost: Swift.Double, costCurrency: Swift.String?)
+  @objc public static func OnAttributionChanged(mmp: NeftaSDK.NeftaPlugin.Mmp, mmpId: Swift.String?, network: Swift.String?, campaign: Swift.String?, costType: Swift.String?, cost: Swift.Double, costCurrency: Swift.String?)
+  @objc public static func OnPurchase(productId: Swift.String, revenue: Swift.Double, currency: Swift.String)
+  @objc public static func ReportBridge(message: Swift.String)
   @objc public static func SetOverride(url: Swift.String?)
   @objc deinit
 }
@@ -115,6 +131,7 @@ import os
   @objc public var _interstitial: NeftaSDK.AdInsight?
   @objc public var _rewarded: NeftaSDK.AdInsight?
   @objc public var _insight: NeftaSDK.AdInsight?
+  @objc public var _insightB: NeftaSDK.AdInsight?
   @objc override dynamic public var description: Swift.String {
     @objc get
   }
@@ -137,7 +154,9 @@ import os
   @objc public var _firstResponseTimeoutInterstitialInMs: Swift.Int
   @objc public var _firstResponseTimeoutRewardedInMs: Swift.Int
   @objc public var _globalTrackCooldownInMs: Swift.Int
-  @objc public var _backfillTrackDelayInMs: Swift.Int
+  @objc public var _backfillInterstitialDelayInMs: Swift.Int
+  @objc public var _backfillRewardedDelayInMs: Swift.Int
+  @objc public var _enableAdSwitching: Swift.Bool
   public init(state: NeftaSDK.NeftaPlugin.State)
   public func GetAdapterResponse() -> Swift.String
   @objc deinit
@@ -148,3 +167,6 @@ extension NeftaSDK.AdInsight.Types : Swift.RawRepresentable {}
 extension NeftaSDK.NeftaPlugin.OptimizationType : Swift.Equatable {}
 extension NeftaSDK.NeftaPlugin.OptimizationType : Swift.Hashable {}
 extension NeftaSDK.NeftaPlugin.OptimizationType : Swift.RawRepresentable {}
+extension NeftaSDK.NeftaPlugin.Mmp : Swift.Equatable {}
+extension NeftaSDK.NeftaPlugin.Mmp : Swift.Hashable {}
+extension NeftaSDK.NeftaPlugin.Mmp : Swift.RawRepresentable {}

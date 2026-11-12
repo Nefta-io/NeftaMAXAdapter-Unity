@@ -19,6 +19,10 @@ namespace AdDemo
         {
             _ui = ui;
             
+            NeftaSdk.Rewarded.OnAdAvailabilityChanged += OnAdAvailabilityChanged;
+            /* This callback should be listened to when an ad becomes available to watch
+               as rewarded (or null when it becomes not available). Since interstitial ads
+               are also eligible to show in rewarded placement. */
             NeftaSdk.Rewarded.OnAdLoadedEvent += OnAdLoadedEvent;
             NeftaSdk.Rewarded.OnAdLoadFailedEvent += OnAdLoadFailedEvent;
             NeftaSdk.Rewarded.OnAdDisplayFailedEvent += OnAdDisplayFailedEvent;
@@ -46,7 +50,11 @@ namespace AdDemo
             {
                 Load();
             }
-            _ui.SetAvailability(NeftaSdk.IsRewardedAdReady(RewardedUi.DefaultAdUnitId));
+        }
+        
+        private void OnAdAvailabilityChanged(MaxSdkBase.AdInfo adInfo)
+        {
+            _ui.SetAvailability(adInfo != null);
         }
         
         private void OnAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
@@ -54,8 +62,6 @@ namespace AdDemo
             _ui.SetStatus($"Loaded {adUnitId} at: {adInfo.Revenue}");
             
             _consecutiveAdFails = 0;
-            
-            _ui.SetAvailability(true);
         }
         
         private void OnAdLoadFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
@@ -96,6 +102,7 @@ namespace AdDemo
         private void OnAdReceivedRewardEvent(string adUnitId, MaxSdkBase.Reward reward, MaxSdkBase.AdInfo adInfo)
         {
             _ui.SetStatus("OnAdReceivedRewardEvent");
+            AdDemoController.ShowReward(adUnitId);
         }
     }
 }

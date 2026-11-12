@@ -27,8 +27,11 @@ extern "C" {
     void NeftaPlugin_OnExternalMediationResponseAsString(const char *provider, const char *id0, const char *id2, double revenue, const char *precision, int status, const char *providerStatus, const char *networkStatus, const char *network, const char *baseString);
     void NeftaPlugin_OnExternalMediationImpressionAsString(bool isClick, const char *provider, const char *data, const char *id0, const char *id2);
     const char * NeftaPlugin_GetNuid(bool present);
+    void NeftaPlugin_OnAttributionChangedBridge(int mmp, const char *mmpId, const char *network, const char *campaign, const char *costType, double cost, const char *costCurrency);
+    void NeftaPlugin_OnPurchase(const char *productId, double revenue, const char *currency);
     void NeftaPlugin_GetInsights(int requestId, int insights, int previousRequestId);
     void NeftaPlugin_SetOverride(const char *root);
+    void NeftaPlugin_ReportBridge(const char *message);
 #ifdef __cplusplus
 }
 #endif
@@ -175,10 +178,29 @@ const char * NeftaPlugin_GetNuid(bool present) {
     return returnString;
 }
 
+void NeftaPlugin_OnAttributionChangedBridge(int mmp, const char *mmpId, const char *network, const char *campaign, const char *costType, double cost, const char *costCurrency) {
+    NSString *m = mmpId ? [NSString stringWithUTF8String: mmpId] : nil;
+    NSString *n = network ? [NSString stringWithUTF8String: network] : nil;
+    NSString *c = campaign ? [NSString stringWithUTF8String: campaign] : nil;
+    NSString *ct = costType ? [NSString stringWithUTF8String: costType] : nil;
+    NSString *cc = costCurrency ? [NSString stringWithUTF8String: costCurrency] : nil;
+    [NeftaPlugin OnAttributionChangedBridgeWithMmp: mmp mmpId: m network: n campaign: c costType: ct cost: cost costCurrency: cc];
+}
+
+void NeftaPlugin_OnPurchase(const char *productId, double revenue, const char *currency) {
+    NSString *p = productId ? [NSString stringWithUTF8String: productId] : nil;
+    NSString *c = currency ? [NSString stringWithUTF8String: currency] : nil;
+   [NeftaPlugin OnPurchaseWithProductId: p revenue: revenue currency: c];
+}
+
 void NeftaPlugin_GetInsights(int requestId, int insights, int previousRequestId) {
     [ALNeftaMediationAdapter GetInsightsBridge: requestId insights: insights previousRequestId: previousRequestId];
 }
 
 void NeftaPlugin_SetOverride(const char *root) {
     [NeftaPlugin SetOverrideWithUrl: [NSString stringWithUTF8String: root]];
+}
+
+void NeftaPlugin_ReportBridge(const char *message) {
+    [NeftaPlugin ReportBridgeWithMessage: [NSString stringWithUTF8String: message]];
 }

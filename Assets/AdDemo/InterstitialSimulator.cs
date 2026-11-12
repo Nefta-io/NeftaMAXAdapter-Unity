@@ -10,6 +10,7 @@ namespace AdDemo
     {
         private readonly Color DefaultColor = new Color(0.6509804f, 0.1490196f, 0.7490196f, 1f);
         private readonly Color FillColor = Color.green;
+        private readonly Color InvalidColor = new Color(0f, 0.686274f, 0.172549f, 1f);
         private readonly Color NoFillColor = Color.red;
         
         protected override string LogTag => "SimInterstitial";
@@ -109,17 +110,21 @@ namespace AdDemo
             SimLoad(adUnitId);
         }
 
-        public bool UnoptimizedShow()
+        public void UnoptimizedShow()
         {
-            return TryShow(_tracks[0], null, null);
+            TryShow(_tracks[0], null, null, false);
+            if (OnAdAvailabilityChanged != null)
+            {
+                OnAdAvailabilityChanged(null);
+            }
         }
-
+        
         public void ResetTrack()
         {
             _tracks[0].State = State.Idle;
         }
 
-        protected override bool TryShow(Track track, string placement, string customData)
+        public override bool TryShow(Track track, string placement, string customData, bool triggerRewardOnHIde)
         {
             MaxSdkBase.AdInfo adInfo = null;
             track.AdInfo = null;
@@ -141,6 +146,10 @@ namespace AdDemo
                     _status[t].text = $"Showing {track.AdUnitId}";
                     adInfo = _simAdInfos[t];
                     _simAdInfos[t] = null;
+                    if (triggerRewardOnHIde)
+                    {
+                        track.IsInterstitialAsRewarded = true;
+                    }
                 }
             }
             
@@ -158,8 +167,7 @@ namespace AdDemo
                 {
                     track.State = State.Idle;
                     OnAdHiddenCallback(track.AdUnitId, adInfo);
-                });
-            
+                });  
             return true;
         }
         
@@ -201,13 +209,13 @@ namespace AdDemo
             {
                 _simAdInfos[t] = null;
 
-                _rendererFill3[t].color = DefaultColor;
+                _rendererFill3[t].color = r == 3 ? InvalidColor : DefaultColor;
                 _fill3[t].interactable = false;
                 
-                _rendererFill2[t].color = DefaultColor;
+                _rendererFill2[t].color = r == 2 ? InvalidColor : DefaultColor;
                 _fill2[t].interactable = false;
 
-                _rendererFill1[t].color = DefaultColor;
+                _rendererFill1[t].color = r == 1 ? InvalidColor : DefaultColor;
                 _fill1[t].interactable = false;
 
                 return;
@@ -259,7 +267,7 @@ namespace AdDemo
                 }
             }
             
-            OnAdFailedCallback(track.AdUnitId,
+            OnAdLoadFailedCallback(track.AdUnitId,
                 new MaxSdkBase.ErrorInfo(new Dictionary<string, object>()
                 {
                     { "errorCode", status == 2 ? 204 : -1 },

@@ -36,7 +36,7 @@ namespace NeftaCustomAdapter
                 }
                 catch (Exception e)
                 {
-                    Debug.LogWarning("[NeftaPlugin] ParsingInsight: " + e.Message);
+                    NeftaAdapterEvents.ReportBridge("ParsingInsight: " + e.Message);
                 }
             }
             else if (adapterResponseType == Banner)
@@ -52,7 +52,7 @@ namespace NeftaCustomAdapter
                 }
                 catch (Exception e)
                 {
-                    Debug.LogWarning("[NeftaPlugin] ParsingInsight: " + e.Message);
+                    NeftaAdapterEvents.ReportBridge("ParsingInsight: " + e.Message);
                 }
             }
             else if (adapterResponseType == Interstitial)
@@ -68,7 +68,7 @@ namespace NeftaCustomAdapter
                 }
                 catch (Exception e)
                 {
-                    Debug.LogWarning("[NeftaPlugin] ParsingInsight: " + e.Message);
+                    NeftaAdapterEvents.ReportBridge("ParsingInsight: " + e.Message);
                 }
             }
             else if (adapterResponseType == Rewarded)
@@ -84,7 +84,7 @@ namespace NeftaCustomAdapter
                 }
                 catch (Exception e)
                 {
-                    Debug.LogWarning("[NeftaPlugin] ParsingInsight: " + e.Message);
+                    NeftaAdapterEvents.ReportBridge("ParsingInsight: " + e.Message);
                 }
             }
         }
@@ -129,20 +129,25 @@ namespace NeftaCustomAdapter
         public int _auctionId;
         public NeftaAdapterEvents.AdType _type;
         public double _floorPrice;
-        public string _adUnit;
         public float _delay;
+        public AdInsight _insightB;
         
         public AdInsight(NeftaAdapterEvents.AdType type, AdConfigurationDto dto)
         {
             _type = type;
+            _insightB = null;
             if (dto != null)
             {
                 _requestId = dto.request_id;
                 _adOpportunityId = dto.ad_opportunity_id;
                 _auctionId = dto.auction_id;
                 _floorPrice = dto.floor_price;
-                _adUnit = dto.ad_unit;
                 _delay = dto.delay;
+                
+                if (dto.b != null && dto.b.request_id > 0)
+                {
+                    _insightB = new AdInsight(type, dto.b);
+                }
             }
             else
             {
@@ -151,9 +156,24 @@ namespace NeftaCustomAdapter
             }
         }
 
+        private AdInsight(NeftaAdapterEvents.AdType type, InsightDto dto)
+        {
+            _type = type;
+            _requestId = dto.request_id;
+            _adOpportunityId = dto.ad_opportunity_id;
+            _auctionId = dto.auction_id;
+            _floorPrice = dto.floor_price;
+            _delay = dto.delay;
+        }
+
         public override string ToString()
         {
-            return $"AdInsight[type: {_type}, recommendedAdUnit: {_adUnit}, floorPrice: {_floorPrice}, delay: {_delay}, adOpportunityId: {_adOpportunityId} auctionId: {_auctionId}]";
+            string insightB = null;
+            if (_insightB != null)
+            {
+                insightB = ", insightB: "+ _insightB;
+            }
+            return $"AdInsight[type: {_type}, floorPrice: {_floorPrice}, delay: {_delay}, adOpportunityId: {_adOpportunityId} auctionId: {_auctionId}{insightB}]";
         }
     }
 }

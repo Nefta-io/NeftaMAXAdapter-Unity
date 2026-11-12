@@ -19,6 +19,7 @@ namespace AdDemo
         {
             _ui = ui;
             
+            NeftaSdk.Interstitial.OnAdAvailabilityChanged += OnAdAvailabilityChanged;
             NeftaSdk.Interstitial.OnAdLoadedEvent += OnAdLoadedEvent;
             NeftaSdk.Interstitial.OnAdLoadFailedEvent += OnAdLoadFailedEvent;
             NeftaSdk.Interstitial.OnAdDisplayFailedEvent += OnAdDisplayFailedEvent;
@@ -45,7 +46,11 @@ namespace AdDemo
             {
                 Load();
             }
-            _ui.SetAvailability(NeftaSdk.IsInterstitialReady(InterstitialUi.DefaultAdUnitId));
+        }
+
+        private void OnAdAvailabilityChanged(MaxSdkBase.AdInfo adInfo)
+        {
+            _ui.SetAvailability(adInfo != null);
         }
         
         private void OnAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
@@ -53,8 +58,6 @@ namespace AdDemo
             _ui.SetStatus($"Loaded {adUnitId} at: {adInfo.Revenue}");
             
             _consecutiveAdFails = 0;
-
-            _ui.SetAvailability(true);
         }
         
         private void OnAdLoadFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)

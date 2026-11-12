@@ -34,7 +34,7 @@ namespace Editor.Tests.PlayTests
 
             _started = false;
             MaxSdkCallbacks.Rewarded.OnAdLoadedEvent -= OnAdLoadedCallback;
-            MaxSdkCallbacks.Rewarded.OnAdLoadFailedEvent -= OnAdFailedCallback;
+            MaxSdkCallbacks.Rewarded.OnAdLoadFailedEvent -= OnAdLoadFailedCallback;
             MaxSdkCallbacks.Rewarded.OnAdDisplayFailedEvent -= OnAdDisplayFailedCallback;
             MaxSdkCallbacks.Rewarded.OnAdDisplayedEvent -= OnAdDisplayedCallback;
             MaxSdkCallbacks.Rewarded.OnAdClickedEvent -= OnAdClickedCallback;
@@ -53,7 +53,7 @@ namespace Editor.Tests.PlayTests
             LoadRequests.Add(new LoadRequest(adUnitId, false, null));
         }
 
-        protected override bool TryShow(Track track, string placement, string customData)
+        public override bool TryShow(Track track, string placement, string customData, bool triggerRewardOnHide)
         {
             var hadAd = track.AdInfo != null;
             track.AdInfo = null;

@@ -47,8 +47,6 @@ namespace AdDemo
             }
             _ui.SetAvailability(false);
         }
-
-        public void OnUpdate(float delta) {}
         
          private void OnAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
@@ -101,6 +99,7 @@ namespace AdDemo
         private void OnAdReceivedRewardEvent(string adUnitId, MaxSdkBase.Reward reward, MaxSdkBase.AdInfo adInfo)
         {
             _ui.SetStatus("OnAdReceivedRewardEvent");
+            AdDemoController.ShowReward(adUnitId);
         }
         
         private void OnAdRevenuePaidEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)

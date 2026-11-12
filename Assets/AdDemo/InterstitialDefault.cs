@@ -47,8 +47,6 @@ namespace AdDemo
             _ui.SetAvailability(false);
         }
         
-        public void OnUpdate(float delta) {}
-        
         private void OnAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
             NeftaAdapterEvents.OnExternalMediationRequestLoaded(adInfo);

@@ -23,7 +23,7 @@ namespace NeftaCustomAdapter
             Optimized = 1,
             NotOptimized = 2
         }
-        
+
         public enum AdType
         {
             Other = 0,
@@ -31,7 +31,14 @@ namespace NeftaCustomAdapter
             Interstitial = 2,
             Rewarded = 3
         }
-        
+
+        public enum Mmp
+        {
+            Adjust = 0,
+            AppsFlyer = 1,
+            Other = 2
+        }
+
         [Serializable]
         public class InitConfigurationDto
         {
@@ -41,7 +48,9 @@ namespace NeftaCustomAdapter
             public int firstResponseTimeoutInterstitialInMs;
             public int firstResponseTimeoutRewardedInMs;
             public int globalTrackCooldownInMs;
-            public int backfillTrackDelayInMs;
+            public int backfillInterstitialDelayInMs;
+            public int backfillRewardedDelayInMs;
+            public bool enableAdSwitching;
         }
 
         private const string _mediationProvider = "applovin-max";
@@ -66,7 +75,7 @@ namespace NeftaCustomAdapter
         {
             NeftaPlugin.OverrideOnReady(initConfig);
         }
-        
+
         public static void UnitTestOverrideOnInsight(int requestId, int responseType, string insightResponse)
         {
             NeftaPlugin.OverrideOnInsight(requestId, responseType, insightResponse);
@@ -110,10 +119,19 @@ namespace NeftaCustomAdapter
         private static extern string NeftaPlugin_GetNuid(bool present);
         
         [DllImport ("__Internal")]
+        private static extern void NeftaPlugin_OnAttributionChangedBridge(int mmp, string mmpId, string network, string campaign, string costType, double cost, string costCurrency);
+
+        [DllImport ("__Internal")]
+        private static extern void NeftaPlugin_OnPurchase(string productId, double revenue, string currency);
+
+        [DllImport ("__Internal")]
         private static extern void NeftaPlugin_GetInsights(int requestId, int insights, int previousRequestId);
         
         [DllImport ("__Internal")]
         private static extern void NeftaPlugin_SetOverride(string root);
+        
+        [DllImport ("__Internal")]
+        private static extern void NeftaPlugin_ReportBridge(string message);
 #elif UNITY_ANDROID
         private static AndroidJavaClass _neftaPluginClass;
         private static AndroidJavaClass NeftaPluginClass {
@@ -148,7 +166,9 @@ namespace NeftaCustomAdapter
         public static float FirstResponseTimeoutInterstitial;
         public static float FirstResponseTimeoutRewarded;
         public static float GlobalTrackCooldown;
-        public static float BackFillTrackDelay = -1;
+        public static float BackfillInterstitialDelay = -1;
+        public static float BackfillRewardedDelay = -1;
+        public static bool IsSwapInterToRewarded;
 
         private static SynchronizationContext _mainContext;
         private static Action<InitConfiguration> _onReady;
@@ -169,6 +189,13 @@ namespace NeftaCustomAdapter
 #endif
         }
 
+        /// <summary>
+        /// The method to initialize the SDK.
+        /// The callback is guaranteed to arrive with maximum delay of 5s.
+        /// </summary>
+        /// <param name="appId">Platform specific app_id from Nefta dashboard</param>
+        /// <param name="optimizationType">Ad strategy for this app lifecycle</param>
+        /// <param name="onReady">callback with SDK initial configuration, after which the SDK can be used</param>
         public static void InitWithAppId(string appId, OptimizationType optimizationType, Action<InitConfiguration> onReady)
         {
             Init(appId, null, (int)optimizationType, onReady);
@@ -196,7 +223,7 @@ namespace NeftaCustomAdapter
             _insightRequests = new List<InsightRequest>();
             _delays = new List<float>() { 2 };
         }
-        
+
         /// <summary>
         /// Only relevant when running in GDPR/CCPA region (https://docs.nefta.io/docs/privacy).
         /// By default, the SDK assumes it has consent, so it doesn't have to get called in other regions.
@@ -212,8 +239,8 @@ namespace NeftaCustomAdapter
             NeftaPluginClass.CallStatic("SetHasUserConsent", hasUserConsent);
 #endif
         }
-        
-        public static void OnExternalMediationRequest(AdType adType, string requestedAdUnitId, AdInsight usedInsight, double customBidFloor=-1)
+
+        public static void OnExternalMediationRequest(AdType adType, string requestedAdUnitId, AdInsight usedInsight, double customBidFloor = -1)
         {
             var requestId = -1;
             if (usedInsight != null)
@@ -224,10 +251,11 @@ namespace NeftaCustomAdapter
                     customBidFloor = usedInsight._floorPrice;
                 }
             }
+
             OnExternalMediationRequest(_mediationProvider, adType, requestedAdUnitId, requestedAdUnitId, customBidFloor, requestId);
         }
-        
-        public static void OnExternalMediationRequest(AdType adType, string requestedAdUnitId, double requestedFloorPrice=-1)
+
+        public static void OnExternalMediationRequest(AdType adType, string requestedAdUnitId, double requestedFloorPrice = -1)
         {
             OnExternalMediationRequest(_mediationProvider, adType, requestedAdUnitId, requestedAdUnitId, requestedFloorPrice, -1);
         }
@@ -248,6 +276,7 @@ namespace NeftaCustomAdapter
                 sb.Append(',');
                 SerializeWaterfall(sb, adInfo.WaterfallInfo);
             }
+
             sb.Append('}');
             OnExternalMediationResponse(_mediationProvider, adInfo.AdUnitIdentifier, null, adInfo.Revenue, adInfo.RevenuePrecision, 1, null, null, adInfo.NetworkName, sb.ToString());
         }
@@ -271,9 +300,10 @@ namespace NeftaCustomAdapter
                 sb.Append("}");
                 baseString = sb.ToString();
             }
+
             OnExternalMediationResponse(_mediationProvider, adUnitId, null, -1, null, errorInfo.Code == MaxSdkBase.ErrorCode.NoFill ? 2 : 0, providerStatus, networkStatus, null, baseString);
         }
-        
+
         private static void OnExternalMediationRequest(string provider, AdType adType, string id, string requestedAdUnitId, double requestedFloorPrice, int requestId)
         {
 #if UNITY_EDITOR
@@ -300,7 +330,7 @@ namespace NeftaCustomAdapter
                 else
                 {
                     ConsecutiveAdFails[id] = 1;
-                }   
+                }
             }
 #if UNITY_EDITOR
             _plugin.OnExternalMediationResponseAsString(provider, id, id2, revenue, precision, status, providerStatus, networkStatus, network, baseString);
@@ -311,26 +341,30 @@ namespace NeftaCustomAdapter
 #endif
         }
 
-        public static void OnExternalMediationImpression(string adUnitId, MaxSdkBase.AdInfo adInfo)
+        public static void OnExternalMediationImpression(string adUnitId, MaxSdkBase.AdInfo adInfo, bool interAsRewarded=false)
         {
-            OnMAXImpression(false, adUnitId, adInfo);
+            OnMAXImpression(false, adUnitId, adInfo, interAsRewarded);
         }
 
-        public static void OnExternalMediationClick(string adUnitId, MaxSdkBase.AdInfo adInfo)
+        public static void OnExternalMediationClick(string adUnitId, MaxSdkBase.AdInfo adInfo, bool interAsRewarded=false)
         {
-            OnMAXImpression(true, adUnitId, adInfo);
+            OnMAXImpression(true, adUnitId, adInfo, interAsRewarded);
         }
 
-        private static void OnMAXImpression(bool isClick, string adUnitId, MaxSdkBase.AdInfo adInfo)
+        private static void OnMAXImpression(bool isClick, string adUnitId, MaxSdkBase.AdInfo adInfo, bool interAsRewarded)
         {
             if (adInfo == null)
             {
                 return;
             }
-            
+
             var sb = new StringBuilder();
             sb.Append("{\"ad_unit_id\":\"");
             sb.Append(adUnitId);
+            if (interAsRewarded)
+            {
+                sb.Append("\",\"placement_ad_type\":\"rewarded");
+            }
             sb.Append("\",\"placement_name\":\"");
             sb.Append(JavaScriptStringEncode(adInfo.Placement));
             sb.Append("\",\"request_latency\":");
@@ -352,6 +386,7 @@ namespace NeftaCustomAdapter
                 sb.Append(',');
                 SerializeWaterfall(sb, adInfo.WaterfallInfo);
             }
+
             sb.Append("}");
 
             var data = sb.ToString();
@@ -384,8 +419,9 @@ namespace NeftaCustomAdapter
                     string networkName = null;
                     if (response.MediatedNetwork != null)
                     {
-                        networkName = response.MediatedNetwork.Name;   
+                        networkName = response.MediatedNetwork.Name;
                     }
+
                     if (String.IsNullOrEmpty(networkName) && response.Credentials != null &&
                         response.Credentials.TryGetValue("network_name", out var name))
                     {
@@ -394,6 +430,7 @@ namespace NeftaCustomAdapter
                             networkName = nameString;
                         }
                     }
+
                     if (string.IsNullOrEmpty(networkName) && response.MediatedNetwork != null)
                     {
                         networkName = response.MediatedNetwork.AdapterClassName;
@@ -406,13 +443,18 @@ namespace NeftaCustomAdapter
                         sb.Append(networkName);
                         sb2.Append(networkName);
                     }
+
                     sb2.Append("\",\"ad_load_state\":\"");
                     var loadState = "FAILED_TO_LOAD";
-                    if (response.AdLoadState == MaxSdkBase.MaxAdLoadState.AdLoadNotAttempted) {
+                    if (response.AdLoadState == MaxSdkBase.MaxAdLoadState.AdLoadNotAttempted)
+                    {
                         loadState = "AD_LOAD_NOT_ATTEMPTED";
-                    } else if (response.AdLoadState == MaxSdkBase.MaxAdLoadState.AdLoaded) {
+                    }
+                    else if (response.AdLoadState == MaxSdkBase.MaxAdLoadState.AdLoaded)
+                    {
                         loadState = "AD_LOADED";
                     }
+
                     sb2.Append(loadState);
                     sb2.Append("\",\"is_bidding\":");
                     sb2.Append(response.IsBidding ? "true" : "false");
@@ -424,11 +466,13 @@ namespace NeftaCustomAdapter
                         sb2.Append(",\"error\":{\"code\":");
                         sb2.Append((int)error.Code);
                         sb2.Append(",\"name\":\"");
-                        sb2.Append(JavaScriptStringEncode(error.Message));   
+                        sb2.Append(JavaScriptStringEncode(error.Message));
                         sb2.Append("\"}");
                     }
+
                     sb2.Append("}");
                 }
+
                 sb.Append("\"]");
             }
             else
@@ -437,7 +481,7 @@ namespace NeftaCustomAdapter
             }
 
             sb.Append(",\"waterfall_test_name\":\"");
-            sb.Append(JavaScriptStringEncode(waterfallInfo.TestName));   
+            sb.Append(JavaScriptStringEncode(waterfallInfo.TestName));
             if (sb2 != null)
             {
                 sb.Append("\",\"waterfall_responses\":[");
@@ -460,7 +504,7 @@ namespace NeftaCustomAdapter
             _plugin.CallStatic("OnExternalMediationImpressionAsString", isClick, provider, data, id, id2);
 #endif
         }
-        
+
         public static void GetInsights(int insights, AdInsight previousInsight, OnInsightsCallback callback)
         {
             var id = 0;
@@ -469,6 +513,7 @@ namespace NeftaCustomAdapter
             {
                 previousRequestId = previousInsight._requestId;
             }
+
             lock (_insightRequests)
             {
                 id = _insightId;
@@ -476,7 +521,7 @@ namespace NeftaCustomAdapter
                 _insightRequests.Add(request);
                 _insightId++;
             }
-            
+
 #if UNITY_EDITOR
             _plugin.GetInsights(id, insights, previousRequestId);
 #elif UNITY_IOS
@@ -485,29 +530,37 @@ namespace NeftaCustomAdapter
             NeftaAdapterClass.CallStatic("GetInsightsBridge", id, insights, previousRequestId);
 #endif
         }
-        
+
         public static float GetRetryDelayInSeconds(AdInsight insight, string adUnitId)
         {
             var consecutiveFails = 1;
-            if (insight != null) {
-                if (insight._delay > 0) {
+            if (insight != null)
+            {
+                if (insight._delay > 0)
+                {
                     return insight._delay;
                 }
+
                 consecutiveFails = insight._auctionId;
             }
             else
             {
                 ConsecutiveAdFails.TryGetValue(adUnitId, out consecutiveFails);
             }
+
             var delayIndex = consecutiveFails - 1;
-            if (delayIndex < 0) {
+            if (delayIndex < 0)
+            {
                 delayIndex = 0;
-            } else if (delayIndex >= _delays.Count) {
-                delayIndex = _delays.Count -1;
             }
+            else if (delayIndex >= _delays.Count)
+            {
+                delayIndex = _delays.Count - 1;
+            }
+
             return _delays[delayIndex];
         }
-        
+
         public static string GetNuid(bool present)
         {
             string nuid = null;
@@ -520,7 +573,7 @@ namespace NeftaCustomAdapter
 #endif
             return nuid;
         }
-        
+
         public static void SetExtraParameter(string key, string value)
         {
 #if UNITY_EDITOR
@@ -531,7 +584,29 @@ namespace NeftaCustomAdapter
             NeftaPluginClass.CallStatic("SetExtraParameter", key, value);
 #endif
         }
+
+        public static void OnAttributionChanged(Mmp mmp, string mmpId, string network, string campaign, string costType, double cost, string costCurrency)
+        {
+#if UNITY_EDITOR
+            NeftaPlugin.OnAttributionChangedBridge((int)mmp, mmpId, network, campaign, costType, cost, costCurrency);
+#elif UNITY_IOS
+            NeftaPlugin_OnAttributionChangedBridge((int)mmp, mmpId, network, campaign, costType, cost, costCurrency);
+#elif UNITY_ANDROID
+             NeftaPluginClass.CallStatic("OnAttributionChangedBridge", (int)mmp, mmpId, network, campaign, costType, cost, costCurrency);
+#endif
+        }
         
+        public static void OnPurchase(string productId, double revenue, string currency)
+        {
+#if UNITY_EDITOR
+            NeftaPlugin.OnPurchase(productId, revenue, currency);
+#elif UNITY_IOS
+            NeftaPlugin_OnPurchase(productId, revenue, currency);
+#elif UNITY_ANDROID
+            NeftaPluginClass.CallStatic("OnPurchase", productId, revenue, currency);
+#endif 
+        }
+
         public static void SetOverride(string root) 
         {
 #if UNITY_EDITOR
@@ -540,6 +615,17 @@ namespace NeftaCustomAdapter
             NeftaPlugin_SetOverride(root);
 #elif UNITY_ANDROID
             NeftaPluginClass.CallStatic("SetOverride", root);
+#endif
+        }
+        
+        internal static void ReportBridge(string message) 
+        {
+#if UNITY_EDITOR
+            NeftaPlugin.ReportBridge(message);
+#elif UNITY_IOS
+            NeftaPlugin_ReportBridge(message);
+#elif UNITY_ANDROID
+            NeftaPluginClass.CallStatic("ReportBridge", message);
 #endif
         }
         
@@ -554,7 +640,7 @@ namespace NeftaCustomAdapter
                 }
                 catch (Exception e)
                 {
-                    Debug.LogWarning("[NeftaPlugin] IOnReady error: " + e.Message);
+                    ReportBridge("IOnReady error: " + e.Message);
                 }
                 
                 _delays.Clear();
@@ -567,11 +653,13 @@ namespace NeftaCustomAdapter
                             _delays.Add(delay);
                         }
                     }
-
+                    
                     FirstResponseTimeoutInterstitial = initDto.firstResponseTimeoutInterstitialInMs / 1000f;
                     FirstResponseTimeoutRewarded = initDto.firstResponseTimeoutRewardedInMs / 1000f;
                     GlobalTrackCooldown = initDto.globalTrackCooldownInMs / 1000f;
-                    BackFillTrackDelay = initDto.backfillTrackDelayInMs / 1000f;
+                    BackfillInterstitialDelay = initDto.backfillInterstitialDelayInMs / 1000f;
+                    BackfillRewardedDelay = initDto.backfillRewardedDelayInMs / 1000f;
+                    IsSwapInterToRewarded = initDto.enableAdSwitching;
                 }
                 if (_delays.Count == 0)
                 {

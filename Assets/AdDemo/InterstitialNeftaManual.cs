@@ -7,7 +7,7 @@ namespace AdDemo
 {
     public class InterstitialNeftaManual : IInterstitial
     {
-        private enum State
+        public enum State
         {
             Idle,
             Loading,
@@ -16,13 +16,14 @@ namespace AdDemo
             Delay
         }
                 
-        private class Track
+        public class Track
         {
             public readonly string AdUnitId;
             public readonly bool IsOptimized;
             public State State;
             public AdInsight Insight;
             public MaxSdkBase.AdInfo AdInfo;
+            public bool IsInterstitialAsRewarded;
 
             public Track(string adUnitId, bool isOptimized)
             {
@@ -37,6 +38,8 @@ namespace AdDemo
         private int _isGlobalCooldown;
 
         private InterstitialUi _ui;
+        
+        public RewardedNeftaManual RewardedLogic;
         
         public void Init(InterstitialUi ui)
         {
@@ -69,7 +72,7 @@ namespace AdDemo
                     _ = ForceStartSecondTrack(stopWaitingForFirstResponseAfter);
                 }
             
-                var backFillTrackDelay = NeftaAdapterEvents.BackFillTrackDelay;
+                var backFillTrackDelay = NeftaAdapterEvents.BackfillInterstitialDelay;
                 if (backFillTrackDelay == 0)
                 {
                     Load(_tracks[0]);
@@ -98,19 +101,12 @@ namespace AdDemo
                     _ui.SetStatus($"Load with Insights: {insights}");
                     if (insights.Insight != null)
                     {
-                        track.Insight = insights.Insight;
-                        MaxSdk.SetInterstitialExtraParameter(track.AdUnitId, "disable_auto_retries", "true");
-                        var bidFloor = "";
-                        if (track.Insight._floorPrice >= 0)
-                        {
-                            bidFloor = track.Insight._floorPrice.ToString(CultureInfo.InvariantCulture);
+                        LoadOptimizedTrack(track, insights.Insight);
+                        
+                        if (track == _tracks[1] && _tracks.Length > 2 && _tracks[2].State == State.Idle && insights.Insight._insightB != null) {
+                            _tracks[2].State = State.Loading;
+                            LoadOptimizedTrack(_tracks[2], insights.Insight._insightB);
                         }
-                        MaxSdk.SetInterstitialExtraParameter(track.AdUnitId, "jC7Fp", bidFloor);
-                    
-                        NeftaAdapterEvents.OnExternalMediationRequest(NeftaAdapterEvents.AdType.Interstitial, track.AdUnitId, track.Insight);
-                    
-                        _ui.SetStatus($"Loading {track.AdUnitId} as Optimized with floor: {bidFloor}");
-                        MaxSdk.LoadInterstitial(track.AdUnitId);
                     }
                     else
                     {
@@ -126,29 +122,63 @@ namespace AdDemo
                 MaxSdk.LoadInterstitial(track.AdUnitId);
             }
         }
-        
+
+        private void LoadOptimizedTrack(Track track, AdInsight insight)
+        {
+            track.Insight = insight;
+            MaxSdk.SetInterstitialExtraParameter(track.AdUnitId, "disable_auto_retries", "true");
+            var bidFloor = "";
+            if (track.Insight._floorPrice >= 0)
+            {
+                bidFloor = track.Insight._floorPrice.ToString(CultureInfo.InvariantCulture);
+            }
+            MaxSdk.SetInterstitialExtraParameter(track.AdUnitId, "jC7Fp", bidFloor);
+                    
+            NeftaAdapterEvents.OnExternalMediationRequest(NeftaAdapterEvents.AdType.Interstitial, track.AdUnitId, track.Insight);
+                    
+            _ui.SetStatus($"Loading {track.AdUnitId} as Optimized with floor: {bidFloor}");
+            MaxSdk.LoadInterstitial(track.AdUnitId);
+        }
+
         public void Show()
         {
             var isShown = false;
             var readyTrack = GetReadyTrack();
-            if (readyTrack != null)
+            while (readyTrack != null)
             {
-                isShown = TryShow(readyTrack);
+                if (TryShow(readyTrack, false))
+                {
+                    isShown = true;
+                    readyTrack = null;
+                }
+                else
+                {
+                    readyTrack = GetReadyTrack();
+                }
+            }
+            readyTrack = GetReadyTrack();
+            var isAvailable = readyTrack != null;
+            _ui.SetAvailability(isAvailable);
+            if (NeftaAdapterEvents.IsSwapInterToRewarded && RewardedLogic != null)
+            {
+                RewardedLogic.OnInterstitialAvailabilityChanged(isAvailable);
             }
             if (!isShown)
             {
-                ContinueLoading();
+                ContinueLoading();   
             }
-            readyTrack = GetReadyTrack();
-            _ui.SetAvailability(readyTrack != null);
         }
 
-        private bool TryShow(Track track)
+        public bool TryShow(Track track, bool triggerRewardOnHide)
         {
             track.AdInfo = null;
             if (MaxSdk.IsInterstitialReady(track.AdUnitId))
             {
                 track.State = State.Shown;
+                if (triggerRewardOnHide)
+                {
+                    track.IsInterstitialAsRewarded = true;
+                }
                 _ui.SetStatus($"Showing {track.AdUnitId}");
                 MaxSdk.ShowInterstitial(track.AdUnitId);
                 return true;
@@ -171,7 +201,7 @@ namespace AdDemo
             ContinueLoading();
         }
 
-        private Track GetReadyTrack()
+        public Track GetReadyTrack()
         {
             Track bestTrack = null;
             foreach (var t in _tracks)
@@ -228,7 +258,7 @@ namespace AdDemo
             }
         }
 
-        private void ContinueLoading()
+        public void ContinueLoading()
         {
             if (!_ui.IsAutoLoad)
             {
@@ -258,6 +288,11 @@ namespace AdDemo
                     return;
                 }
             }
+        }
+
+        public void UpdateAdAvailability(bool isAvailable)
+        {
+            _ui.SetAvailability(isAvailable);
         }
         
         private async Task WaitDelay(Track track, float delay)
@@ -289,10 +324,13 @@ namespace AdDemo
                     track.State = State.Ready;
                     
                     _ui.SetAvailability(true);
+                    if (NeftaAdapterEvents.IsSwapInterToRewarded && RewardedLogic != null)
+                    {
+                        RewardedLogic.OnInterstitialAvailabilityChanged(true);
+                    }
 
                     if (track.IsOptimized)
                     {
-                        _isFirstOptimizedResponseReceived = true;
                         _ = ContinueOptimized();
                     }
                     return;
@@ -309,6 +347,7 @@ namespace AdDemo
                 if (track.AdUnitId == adUnitId)
                 {
                     track.State = State.Idle;
+                    track.IsInterstitialAsRewarded = false;
                     ContinueLoading();
                     return;
                 }
@@ -324,6 +363,20 @@ namespace AdDemo
                 if (track.AdUnitId == adUnitId)
                 {
                     track.State = State.Idle;
+                    
+                    if (track.IsInterstitialAsRewarded)
+                    {
+                        if (RewardedLogic != null)
+                        {
+                            RewardedLogic.OnAdReceivedRewardEvent(adUnitId, new MaxSdkBase.Reward()
+                            {
+                                Amount = 1,
+                                Label = "Interstitial reward"
+                            }, adInfo);
+                        }
+                        track.IsInterstitialAsRewarded = false;
+                    }
+                    
                     ContinueLoading();
                     return;
                 }
@@ -332,7 +385,16 @@ namespace AdDemo
         
         private void OnAdRevenuePaidEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
-            NeftaAdapterEvents.OnExternalMediationImpression(adUnitId, adInfo);
+            var interAsRewarded = false;
+            foreach (var track in _tracks)
+            {
+                if (track.AdUnitId == adUnitId)
+                {
+                    interAsRewarded = track.IsInterstitialAsRewarded;
+                    break;
+                }
+            }
+            NeftaAdapterEvents.OnExternalMediationImpression(adUnitId, adInfo, interAsRewarded);
             
             Debug.Log($"OnAdRevenuePaidEvent: {adInfo.Revenue}");
         }
@@ -340,7 +402,16 @@ namespace AdDemo
 
         private void OnAdClickedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
-            NeftaAdapterEvents.OnExternalMediationClick(adUnitId, adInfo);
+            var interAsRewarded = false;
+            foreach (var track in _tracks)
+            {
+                if (track.AdUnitId == adUnitId)
+                {
+                    interAsRewarded = track.IsInterstitialAsRewarded;
+                    break;
+                }
+            }
+            NeftaAdapterEvents.OnExternalMediationClick(adUnitId, adInfo, interAsRewarded);
             
             Debug.Log("OnAdClickedEvent");
         }
@@ -361,7 +432,7 @@ namespace AdDemo
                 {
                     Load(_tracks[2]);
                 }
-                if (NeftaAdapterEvents.BackFillTrackDelay < 0 && _tracks[0].State == State.Idle)
+                if (NeftaAdapterEvents.BackfillInterstitialDelay < 0 && _tracks[0].State == State.Idle)
                 {
                     Load(_tracks[0]);
                 }

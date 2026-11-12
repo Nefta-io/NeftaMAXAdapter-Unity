@@ -6,7 +6,7 @@ namespace NeftaCustomAdapter
         protected override NeftaAdapterEvents.AdType AdType => NeftaAdapterEvents.AdType.Interstitial;
         protected override int InsightType => Insights.Interstitial;
         
-        public void Initialize(bool isOptimized, string defaultAdUnit, string optimizedAdUnitA, string optimizedAdUnitB=null)
+        public void Initialize(bool isOptimized, string defaultAdUnit, string optimizedAdUnitA, string optimizedAdUnitB)
         {
             NeftaSdk.Initialize();
             if (isOptimized)
@@ -15,7 +15,7 @@ namespace NeftaCustomAdapter
             }
 
             MaxSdkCallbacks.Interstitial.OnAdLoadedEvent += OnAdLoadedCallback;
-            MaxSdkCallbacks.Interstitial.OnAdLoadFailedEvent += OnAdFailedCallback;
+            MaxSdkCallbacks.Interstitial.OnAdLoadFailedEvent += OnAdLoadFailedCallback;
             MaxSdkCallbacks.Interstitial.OnAdDisplayFailedEvent += OnAdDisplayFailedCallback;
             MaxSdkCallbacks.Interstitial.OnAdDisplayedEvent += OnAdDisplayedCallback;
             MaxSdkCallbacks.Interstitial.OnAdClickedEvent += OnAdClickedCallback;
@@ -40,23 +40,41 @@ namespace NeftaCustomAdapter
             MaxSdk.LoadInterstitial(adUnitId);
         }
 
-        public bool IsInterstitialReady()
-        {
-            return IsAdReady();
-        }
-
-        protected override bool TryShow(Track track, string placement, string customData)
+        public override bool TryShow(Track track, string placement, string customData, bool triggerRewardOnHide)
         {
             track.AdInfo = null;
             if (MaxSdk.IsInterstitialReady(track.AdUnitId))
             {
                 track.State = State.Shown;
+                if (triggerRewardOnHide)
+                {
+                    track.IsInterstitialAsRewarded = true;
+                }
                 Log($"Showing {track.AdUnitId}");
                 MaxSdk.ShowInterstitial(track.AdUnitId, placement, customData);
                 return true;
             }
             track.State = State.Idle;
             return false;
+        }
+
+        public override void RefreshAvailability()
+        {
+            base.RefreshAvailability();
+
+            if (NeftaSdk.Rewarded.IsOptimized && NeftaAdapterEvents.IsSwapInterToRewarded)
+            {
+                if (NeftaSdk.Rewarded.OnAdAvailabilityChanged != null)
+                {
+                    var bestTrack = NeftaSdk.Rewarded.GetReadyTrack();
+                    var interstitialTrack = GetReadyTrack();
+                    if (interstitialTrack != null && (bestTrack == null || interstitialTrack.AdInfo.Revenue > bestTrack.AdInfo.Revenue))
+                    {
+                        bestTrack = interstitialTrack;
+                    }
+                    NeftaSdk.Rewarded.OnAdAvailabilityChanged(bestTrack?.AdInfo);
+                }
+            }
         }
     }
 }

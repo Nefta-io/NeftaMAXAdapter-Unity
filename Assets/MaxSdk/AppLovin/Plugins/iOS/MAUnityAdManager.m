@@ -21,7 +21,7 @@ extern "C" {
     UIWindow* UnityGetMainWindow(void);
     
     // life cycle management
-    int UnityIsPaused(void);
+    //int UnityIsPaused(void);
     void UnityPause(int pause);
     
     void max_unity_dispatch_on_main_thread(dispatch_block_t block)

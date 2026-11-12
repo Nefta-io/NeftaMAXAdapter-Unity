@@ -113,6 +113,7 @@ namespace AdDemo
                     _cFill3Renderer, _cFill3, _cFill2Renderer, _cFill2, _cFill1Renderer, _cFill1, _cNoFillRenderer, _cNoFill,
                     _cOtherRenderer, _cOther, _cStatus);
                 NeftaSdk.Rewarded = (RewardedLogic)AdLogic;
+                ((RewardedLogic)AdLogic).OnAdReceivedRewardEvent += OnAdReceivedRewardEvent;
             }
             else
             {
@@ -126,15 +127,18 @@ namespace AdDemo
                     _cOtherRenderer, _cOther, _cStatus);
                 NeftaSdk.Interstitial = (InterstitialLogic)AdLogic;
             }
+            AdLogic.OnAdAvailabilityChanged += OnAdAvailabilityChanged;
             AdLogic.OnAdLoadedEvent += OnAdLoadedEvent;
             AdLogic.OnAdLoadFailedEvent += OnAdLoadFailedEvent;
             AdLogic.OnAdDisplayFailedEvent += OnAdDisplayFailedEvent;
             AdLogic.OnAdHiddenEvent += OnAdHiddenEvent;
+            AdLogic.OnAdClickedEvent += OnAdClickEvent;
+            AdLogic.OnAdRevenuePaidEvent += OnAdRevenuePaidEvent;
             
             _load.onValueChanged.AddListener(OnLoadChanged);
             _show.onClick.AddListener(OnShowClick);
             gameObject.SetActive(true);
-            UpdateShowButton();
+            _show.interactable = false;
         }
         
         private void Load()
@@ -154,11 +158,11 @@ namespace AdDemo
 
             if (_isRewarded)
             {
-                NeftaSdk.LoadRewardedAd("rewarded1");
+                NeftaSdk.LoadRewardedAd("Rewarded D");
             }
             else
             {
-                NeftaSdk.LoadInterstitial("inter1");
+                NeftaSdk.LoadInterstitial("Interstitial D");
             }
         }
         
@@ -183,15 +187,14 @@ namespace AdDemo
                 {
                     ((InterstitialSimulator)AdLogic).UnoptimizedShow();
                 }
-                UpdateShowButton();
                 return;
             }
             
             if (_isRewarded)
             {
-                if (NeftaSdk.IsRewardedAdReady("rewarded1"))
+                if (NeftaSdk.IsRewardedAdReady("Rewarded D"))
                 {
-                    NeftaSdk.ShowRewardedAd("rewarded1");   
+                    NeftaSdk.ShowRewardedAd("Rewarded D");   
                 }
                 else
                 {
@@ -200,24 +203,28 @@ namespace AdDemo
             }
             else
             {
-                if (NeftaSdk.IsInterstitialReady("interstitial1"))
+                if (NeftaSdk.IsInterstitialReady("Interstitial D"))
                 {
-                    NeftaSdk.ShowInterstitial("interstitial1");
+                    NeftaSdk.ShowInterstitial("Interstitial D");
                 }
                 else
                 {
                     Load();
                 }
             }
-            UpdateShowButton();
+        }
+
+        private void OnAdAvailabilityChanged(MaxSdkBase.AdInfo adInfo)
+        {
+            var type = _isRewarded ? "R" : "I";
+            SetStatus($"OnAdAvailabilityChanged {type}: {adInfo?.AdUnitIdentifier}");
+            _show.interactable = adInfo != null;
         }
         
         private void OnAdLoadedEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
             _consecutiveFails = 0;
             SetStatus($"Loaded {adUnitId} at: {adInfo.Revenue}");
-
-            UpdateShowButton();
         }
         
         private void OnAdLoadFailedEvent(string adUnitId, MaxSdkBase.ErrorInfo errorInfo)
@@ -260,7 +267,7 @@ namespace AdDemo
             }
         }
         
-        private void OnRevenuePaidEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
+        private void OnAdRevenuePaidEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
         {
             SetStatus($"OnRevenuePaidEvent {adInfo.Revenue}");
         }
@@ -268,6 +275,7 @@ namespace AdDemo
         private void OnAdReceivedRewardEvent(string adUnitId, MaxSdkBase.Reward reward, MaxSdkBase.AdInfo adInfo)
         {
             SetStatus("OnAdReceivedRewardEvent");
+            AdDemoController.ShowReward(adUnitId);
         }
         
         private void OnAdClickEvent(string adUnitId, MaxSdkBase.AdInfo adInfo)
@@ -283,11 +291,6 @@ namespace AdDemo
             {
                 Load();
             }
-        }
-
-        private void UpdateShowButton()
-        {
-            _show.interactable = AdLogic.IsAdReady();  
         }
         
         private void SetStatus(string status)
@@ -321,6 +324,10 @@ namespace AdDemo
             await Task.Delay(100);
             OnClick();
             OnClose();
+            if (OnReward != null)
+            {
+                OnReward();
+            }
         }
         
         private static Action OnShow;

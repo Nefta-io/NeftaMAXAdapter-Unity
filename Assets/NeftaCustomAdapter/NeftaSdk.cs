@@ -4,7 +4,7 @@ namespace NeftaCustomAdapter
 {
     public class NeftaSdk
     {
-        private const string IntegrationVersion = "2.0.0";
+        private const string IntegrationVersion = "2.1.0";
         
         private static bool _isInitialized;
         private static bool _isNeftaInitialized;
@@ -52,10 +52,14 @@ namespace NeftaCustomAdapter
                 if (!isReady && Interstitial._adInfo != null && Interstitial._adInfo.AdUnitIdentifier == adUnitId)
                 {
                     Interstitial._adInfo = null;
+                    if (Interstitial.OnAdAvailabilityChanged != null)
+                    {
+                        Interstitial.OnAdAvailabilityChanged(null);
+                    }
                 }
                 return isReady;
             }
-            return Interstitial.IsInterstitialReady();
+            return Interstitial.IsAdReady();
         }
         
         // Returns tracked adInfo to be shown
@@ -72,6 +76,11 @@ namespace NeftaCustomAdapter
             {
                 Interstitial._adInfo = null;
                 MaxSdk.ShowInterstitial(adUnitId, placement, customData);
+
+                if (Interstitial.OnAdAvailabilityChanged != null)
+                {
+                    Interstitial.OnAdAvailabilityChanged(null);
+                }
             }
             else
             {
@@ -108,10 +117,19 @@ namespace NeftaCustomAdapter
                 if (!isReady && Rewarded._adInfo != null && Rewarded._adInfo.AdUnitIdentifier == adUnitId)
                 {
                     Rewarded._adInfo = null;
+                    if (Rewarded.OnAdAvailabilityChanged != null)
+                    {
+                        Rewarded.OnAdAvailabilityChanged(null);
+                    }
                 }
                 return isReady;
             }
-            return Rewarded.IsRewardedAdReady();
+            var isAdReady = Rewarded.IsAdReady();
+            if (!isAdReady && Rewarded.IsOptimized && NeftaAdapterEvents.IsSwapInterToRewarded)
+            {
+                isAdReady = Interstitial.IsAdReady();
+            }
+            return isAdReady;
         }
 
         // Returns tracked adInfo to be shown
@@ -119,7 +137,16 @@ namespace NeftaCustomAdapter
         // It can happen that ad invalidates on native, so if you need exact status call IRewardedAdReady(GetRewardedAdReady()?.AdUnitIdentifier)
         public static MaxSdkBase.AdInfo GetRewardedAdReady()
         {
-            return Rewarded.GetAdReady();
+            var readyAd = Rewarded.GetAdReady();
+            if (Rewarded.IsOptimized && NeftaAdapterEvents.IsSwapInterToRewarded)
+            {
+                var interstitialAd = Interstitial.GetAdReady();
+                if (interstitialAd != null && (readyAd == null || interstitialAd.Revenue > readyAd.Revenue))
+                {
+                    readyAd = interstitialAd;
+                }
+            }
+            return readyAd;
         }
 
         public static void ShowRewardedAd(string adUnitId=null, string placement=null, string customData=null)
@@ -128,10 +155,15 @@ namespace NeftaCustomAdapter
             {
                 Rewarded._adInfo = null;
                 MaxSdk.ShowRewardedAd(adUnitId,  placement, customData);
+                
+                if (Rewarded.OnAdAvailabilityChanged != null)
+                {
+                    Rewarded.OnAdAvailabilityChanged(null);
+                }
             }
             else
             {
-                Rewarded.ShowAd(placement, customData);   
+                Rewarded.ShowAd(placement, customData);
             }
         }
 

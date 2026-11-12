@@ -344,7 +344,9 @@ SWIFT_CLASS("_TtC8NeftaSDK17InitConfiguration")
 @property (nonatomic) NSInteger _firstResponseTimeoutInterstitialInMs;
 @property (nonatomic) NSInteger _firstResponseTimeoutRewardedInMs;
 @property (nonatomic) NSInteger _globalTrackCooldownInMs;
-@property (nonatomic) NSInteger _backfillTrackDelayInMs;
+@property (nonatomic) NSInteger _backfillInterstitialDelayInMs;
+@property (nonatomic) NSInteger _backfillRewardedDelayInMs;
+@property (nonatomic) BOOL _enableAdSwitching;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
@@ -367,6 +369,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger Rewarded;)
 @property (nonatomic, strong) AdInsight * _Nullable _interstitial;
 @property (nonatomic, strong) AdInsight * _Nullable _rewarded;
 @property (nonatomic, strong) AdInsight * _Nullable _insight;
+@property (nonatomic, strong) AdInsight * _Nullable _insightB;
 @property (nonatomic, readonly, copy) NSString * _Nonnull description;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
@@ -375,6 +378,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger Rewarded;)
 @class NSLock;
 @class NSMutableDictionary;
 enum OptimizationType : NSInteger;
+enum Mmp : NSInteger;
 
 SWIFT_CLASS("_TtC8NeftaSDK11NeftaPlugin")
 @interface NeftaPlugin : NSObject
@@ -411,6 +415,10 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NeftaPlugin * _Nullabl
 + (void)OnExternalMediationImpression:(BOOL)isClick provider:(NSString * _Nonnull)provider data:(NSMutableDictionary * _Nullable)data id:(NSString * _Nullable)id id2:(NSString * _Nullable)id2;
 + (void)OnExternalMediationImpressionAsString:(BOOL)isClick provider:(NSString * _Nonnull)provider data:(NSString * _Nonnull)data id:(NSString * _Nullable)id id2:(NSString * _Nullable)id2;
 + (float)GetRetryDelayInSeconds:(AdInsight * _Nullable)insight adUnitId:(NSString * _Nonnull)adUnitId SWIFT_WARN_UNUSED_RESULT;
++ (void)OnAttributionChangedBridgeWithMmp:(NSInteger)mmp mmpId:(NSString * _Nullable)mmpId network:(NSString * _Nullable)network campaign:(NSString * _Nullable)campaign costType:(NSString * _Nullable)costType cost:(double)cost costCurrency:(NSString * _Nullable)costCurrency;
++ (void)OnAttributionChangedWithMmp:(enum Mmp)mmp mmpId:(NSString * _Nullable)mmpId network:(NSString * _Nullable)network campaign:(NSString * _Nullable)campaign costType:(NSString * _Nullable)costType cost:(double)cost costCurrency:(NSString * _Nullable)costCurrency;
++ (void)OnPurchaseWithProductId:(NSString * _Nonnull)productId revenue:(double)revenue currency:(NSString * _Nonnull)currency;
++ (void)ReportBridgeWithMessage:(NSString * _Nonnull)message;
 + (void)SetOverrideWithUrl:(NSString * _Nullable)url;
 @end
 
@@ -425,7 +433,9 @@ SWIFT_CLASS("_TtCC8NeftaSDK11NeftaPlugin5State")
 @property (nonatomic, copy) NSString * _Nullable _adProviderCountry;
 @property (nonatomic, copy) NSArray<NSString *> * _Nullable _availableNetworks;
 @property (nonatomic) NSInteger _globalTrackCooldownInMs;
-@property (nonatomic) NSInteger _backfillTrackDelayInMs;
+@property (nonatomic) NSInteger _backfillInterstitialDelayInMs;
+@property (nonatomic) NSInteger _backfillRewardedDelayInMs;
+@property (nonatomic) BOOL _enableAdSwitching;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
@@ -433,6 +443,12 @@ typedef SWIFT_ENUM(NSInteger, OptimizationType, open) {
   OptimizationTypeUnknown = 0,
   OptimizationTypeOptimized = 1,
   OptimizationTypeNotOptimized = 2,
+};
+
+typedef SWIFT_ENUM(NSInteger, Mmp, open) {
+  MmpAdjust = 0,
+  MmpAppsFlyer = 1,
+  MmpOther = 2,
 };
 
 #endif
@@ -789,7 +805,9 @@ SWIFT_CLASS("_TtC8NeftaSDK17InitConfiguration")
 @property (nonatomic) NSInteger _firstResponseTimeoutInterstitialInMs;
 @property (nonatomic) NSInteger _firstResponseTimeoutRewardedInMs;
 @property (nonatomic) NSInteger _globalTrackCooldownInMs;
-@property (nonatomic) NSInteger _backfillTrackDelayInMs;
+@property (nonatomic) NSInteger _backfillInterstitialDelayInMs;
+@property (nonatomic) NSInteger _backfillRewardedDelayInMs;
+@property (nonatomic) BOOL _enableAdSwitching;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
@@ -812,6 +830,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger Rewarded;)
 @property (nonatomic, strong) AdInsight * _Nullable _interstitial;
 @property (nonatomic, strong) AdInsight * _Nullable _rewarded;
 @property (nonatomic, strong) AdInsight * _Nullable _insight;
+@property (nonatomic, strong) AdInsight * _Nullable _insightB;
 @property (nonatomic, readonly, copy) NSString * _Nonnull description;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
@@ -820,6 +839,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger Rewarded;)
 @class NSLock;
 @class NSMutableDictionary;
 enum OptimizationType : NSInteger;
+enum Mmp : NSInteger;
 
 SWIFT_CLASS("_TtC8NeftaSDK11NeftaPlugin")
 @interface NeftaPlugin : NSObject
@@ -856,6 +876,10 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NeftaPlugin * _Nullabl
 + (void)OnExternalMediationImpression:(BOOL)isClick provider:(NSString * _Nonnull)provider data:(NSMutableDictionary * _Nullable)data id:(NSString * _Nullable)id id2:(NSString * _Nullable)id2;
 + (void)OnExternalMediationImpressionAsString:(BOOL)isClick provider:(NSString * _Nonnull)provider data:(NSString * _Nonnull)data id:(NSString * _Nullable)id id2:(NSString * _Nullable)id2;
 + (float)GetRetryDelayInSeconds:(AdInsight * _Nullable)insight adUnitId:(NSString * _Nonnull)adUnitId SWIFT_WARN_UNUSED_RESULT;
++ (void)OnAttributionChangedBridgeWithMmp:(NSInteger)mmp mmpId:(NSString * _Nullable)mmpId network:(NSString * _Nullable)network campaign:(NSString * _Nullable)campaign costType:(NSString * _Nullable)costType cost:(double)cost costCurrency:(NSString * _Nullable)costCurrency;
++ (void)OnAttributionChangedWithMmp:(enum Mmp)mmp mmpId:(NSString * _Nullable)mmpId network:(NSString * _Nullable)network campaign:(NSString * _Nullable)campaign costType:(NSString * _Nullable)costType cost:(double)cost costCurrency:(NSString * _Nullable)costCurrency;
++ (void)OnPurchaseWithProductId:(NSString * _Nonnull)productId revenue:(double)revenue currency:(NSString * _Nonnull)currency;
++ (void)ReportBridgeWithMessage:(NSString * _Nonnull)message;
 + (void)SetOverrideWithUrl:(NSString * _Nullable)url;
 @end
 
@@ -870,7 +894,9 @@ SWIFT_CLASS("_TtCC8NeftaSDK11NeftaPlugin5State")
 @property (nonatomic, copy) NSString * _Nullable _adProviderCountry;
 @property (nonatomic, copy) NSArray<NSString *> * _Nullable _availableNetworks;
 @property (nonatomic) NSInteger _globalTrackCooldownInMs;
-@property (nonatomic) NSInteger _backfillTrackDelayInMs;
+@property (nonatomic) NSInteger _backfillInterstitialDelayInMs;
+@property (nonatomic) NSInteger _backfillRewardedDelayInMs;
+@property (nonatomic) BOOL _enableAdSwitching;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
@@ -878,6 +904,12 @@ typedef SWIFT_ENUM(NSInteger, OptimizationType, open) {
   OptimizationTypeUnknown = 0,
   OptimizationTypeOptimized = 1,
   OptimizationTypeNotOptimized = 2,
+};
+
+typedef SWIFT_ENUM(NSInteger, Mmp, open) {
+  MmpAdjust = 0,
+  MmpAppsFlyer = 1,
+  MmpOther = 2,
 };
 
 #endif
