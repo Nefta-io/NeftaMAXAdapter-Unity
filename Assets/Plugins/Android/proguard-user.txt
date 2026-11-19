@@ -1,2 +1,0 @@
--keep public class com.nefta.sdk.NeftaPlugin { *; }
--keep public interface com.nefta.sdk.AdapterCallback { *; }
