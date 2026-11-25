@@ -23,6 +23,7 @@ namespace NeftaCustomAdapter
         public string ad_unit;
         public float delay;
         public InsightDto b;
+        public InsightDto c;
     }
     
     [Serializable]

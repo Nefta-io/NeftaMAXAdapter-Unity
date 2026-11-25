@@ -407,22 +407,6 @@ public class AdViewController : UIViewController {
                         NeftaPlugin.OnExternalMediationImpression(isClick, provider: provider, data: nil, id: id0, id2: id2)
                         self.SendUdp(connection: connection, to: sourceName, message: "return|add_external_mediation_impression")
                     }
-                case "get_insights":
-                    let insights = Int(segments[4])!
-                    let callbackIndex = Int(segments[5])!
-                    
-                    NeftaPlugin._instance!.GetInsights(insights, previousInsight: nil, callback: { insights in
-                        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
-                        if let ii = insights._interstitial {
-                            self.SendUdp(connection: connection, to: "master", message: "log|\(timestamp)|DS:Insights:\(ii._type),\(ii._adOpportunityId),\(ii._auctionId),\(ii._requestId),\(ii._adUnit ?? ""),\(ii._floorPrice),\(ii._delay)`")
-                        }
-                        if let ir = insights._rewarded {
-                            self.SendUdp(connection: connection, to: "master", message: "log|\(timestamp)|DS:Insights\(ir._type),\(ir._adOpportunityId),\(ir._auctionId),\(ir._requestId),\(ir._adUnit ?? ""),\(ir._floorPrice),\(ir._delay)")
-                        }
-                    })
-                    
-                    self.SendUdp(connection: connection, to: sourceName, message: "return|get_insights|\(insights)|\(callbackIndex)")
-                    break
                 case "set_override":
                     let app_id = segments[4]
                     var rest_url: String? = segments[5]

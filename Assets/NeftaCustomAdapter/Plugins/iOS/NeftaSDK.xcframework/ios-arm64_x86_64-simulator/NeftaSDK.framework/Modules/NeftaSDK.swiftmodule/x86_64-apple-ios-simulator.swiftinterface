@@ -31,10 +31,11 @@ import os
   @objc public var _adOpportunityId: Swift.Int
   @objc public var _auctionId: Swift.Int
   @objc final public let _type: NeftaSDK.AdInsight.Types
+  @objc final public let _trackId: Swift.String
   @objc public var _floorPrice: Swift.Double
   @objc public var _adUnit: Swift.String?
   @objc public var _delay: Swift.Float
-  public init(type: NeftaSDK.AdInsight.Types, sessionId: Swift.Int, adOpportunityId: Swift.Int)
+  public init(type: NeftaSDK.AdInsight.Types, sessionId: Swift.Int, adOpportunityId: Swift.Int, trackId: Swift.Int)
   public func Parse(config: [Swift.String : Any]) -> NeftaSDK.AdInsight
   public func OnNewAuction()
   @objc override dynamic public var description: Swift.String {
@@ -104,8 +105,8 @@ import os
   @objc public static func SetExtraParameter(key: Swift.String, value: Swift.String)
   public static func SetDebugTime(offset: Swift.Int)
   @objc(SetHasUserConsent:) public static func SetHasUserConsent(hasUserConsent: Swift.Bool)
-  @objc(GetInsightsBridge:insights:previousRequestId:) public func GetInsightsBridge(requestId: Swift.Int, insights: Swift.Int, previousRequestId: Swift.Int)
-  @objc(GetInsights:previousInsight:callback:) public func GetInsights(_ insights: Swift.Int, previousInsight: NeftaSDK.AdInsight?, callback: @escaping NeftaSDK.NeftaPlugin.OnInsightsBlock)
+  @objc(GetInsightsBridge:insights:index:previousRequestId:) public func GetInsightsBridge(requestId: Swift.Int, insights: Swift.Int, index: Swift.Int, previousRequestId: Swift.Int)
+  @objc(GetInsights:index:previousInsight:callback:) public func GetInsights(_ insights: Swift.Int, index: Swift.Int, previousInsight: NeftaSDK.AdInsight?, callback: @escaping NeftaSDK.NeftaPlugin.OnInsightsBlock)
   @objc public func GetNuid(present: Swift.Bool) -> Swift.String
   @objc public static func OnExternalMediationRequest(_ provider: Swift.String, adType: Swift.Int, id: Swift.String, requestedAdUnitId: Swift.String, requestedFloorPrice: Swift.Float64, requestId: Swift.Int)
   @objc public static func OnExternalMediationResponse(_ provider: Swift.String, id: Swift.String, id2: Swift.String?, revenue: Swift.Float64, precision: Swift.String?, status: Swift.Int, providerStatus: Swift.String?, networkStatus: Swift.String?, network: Swift.String?, baseObject: [Swift.String : Any]?)
@@ -132,6 +133,7 @@ import os
   @objc public var _rewarded: NeftaSDK.AdInsight?
   @objc public var _insight: NeftaSDK.AdInsight?
   @objc public var _insightB: NeftaSDK.AdInsight?
+  @objc public var _insightC: NeftaSDK.AdInsight?
   @objc override dynamic public var description: Swift.String {
     @objc get
   }

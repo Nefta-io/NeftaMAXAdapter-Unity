@@ -123,7 +123,7 @@ namespace Editor.Tests
 
             NeftaAdapterEvents.UnitTestOverrideOnInsight(requestId, insightType, insightJson);
             _insight = null;
-            NeftaAdapterEvents.GetInsights(insightType, null, OnInsight);
+            NeftaAdapterEvents.GetInsights(insightType, 0,  null, OnInsight);
             yield return WaitOnInsightResponse(5f);
         }
         

@@ -131,11 +131,13 @@ namespace NeftaCustomAdapter
         public double _floorPrice;
         public float _delay;
         public AdInsight _insightB;
+        public AdInsight _insightC;
         
         public AdInsight(NeftaAdapterEvents.AdType type, AdConfigurationDto dto)
         {
             _type = type;
             _insightB = null;
+            _insightC = null;
             if (dto != null)
             {
                 _requestId = dto.request_id;
@@ -147,6 +149,10 @@ namespace NeftaCustomAdapter
                 if (dto.b != null && dto.b.request_id > 0)
                 {
                     _insightB = new AdInsight(type, dto.b);
+                }
+                if (dto.c != null && dto.c.request_id > 0)
+                {
+                    _insightC = new AdInsight(type, dto.c);
                 }
             }
             else

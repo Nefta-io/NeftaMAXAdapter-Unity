@@ -76,9 +76,9 @@ namespace AdDemo
                 _other[t].onClick.AddListener(() => { SimOnAdFailedEvent(_tracks[ti], 0); });                
             }
             
-            _tracks[0] = new Track("Rewarded D", false);
-            _tracks[1] = new Track("Rewarded A", true);
-            _tracks[2] = new Track("Rewarded B", true);
+            _tracks[0] = new Track("Rewarded D", 0);
+            _tracks[1] = new Track("Rewarded A", 1);
+            _tracks[2] = new Track("Rewarded B", 2);
             NeftaSdk.Initialize();
             IsOptimized = isOptimized;
         }
@@ -92,7 +92,7 @@ namespace AdDemo
             }
         }
 
-        protected override void LoadAsOptimized(string adUnitId, string bidFloor)
+        protected override void LoadAsOptimized(bool isOptimized, string adUnitId, string bidFloor)
         {
             for (var t = 0; t < _tracks.Length; t++)
             {

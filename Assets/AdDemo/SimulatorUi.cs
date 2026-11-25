@@ -82,7 +82,7 @@ namespace AdDemo
         [SerializeField] private Button _bOther;
         [SerializeField] private Text _bStatus;
         
-        [Header("Track D")]
+        [Header("Track C")]
         [SerializeField] private Image _cFill3Renderer;
         [SerializeField] private Button _cFill3;
         [SerializeField] private Image _cFill2Renderer;
@@ -158,11 +158,11 @@ namespace AdDemo
 
             if (_isRewarded)
             {
-                NeftaSdk.LoadRewardedAd("Rewarded D");
+                NeftaSdk.LoadRewardedAd("Rewarded C");
             }
             else
             {
-                NeftaSdk.LoadInterstitial("Interstitial D");
+                NeftaSdk.LoadInterstitial("Interstitial C");
             }
         }
         

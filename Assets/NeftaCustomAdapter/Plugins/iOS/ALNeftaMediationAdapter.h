@@ -22,8 +22,8 @@ typedef NS_ENUM(NSInteger, AdType) {
 + (void)InitWithClientId:(NSString *_Nonnull)clientId optimizationType:(OptimizationType)optimizationType onReady:(void (^ _Nonnull)(InitConfiguration * _Nonnull))onReady NS_SWIFT_NAME(Init(clientId:optimizationType:onReady:));
 + (double)GetRetryDelayInSeconds:(AdInsight * _Nullable)insight adUnitId:(NSString * _Nonnull)adUnitId NS_SWIFT_NAME(GetRetryDelayInSeconds(insight:adUnitId:));
 
-+ (void)GetInsights:(NSInteger)insights previousInsight:(AdInsight * _Nullable)previousInsight callback:(void (^ _Nullable)(Insights * _Nonnull))callback;
-+ (void)GetInsightsBridge:(NSInteger)requestId insights:(NSInteger)insights previousRequestId:(NSInteger)previousRequestId;
++ (void)GetInsights:(NSInteger)insights index:(NSInteger)index previousInsight:(AdInsight * _Nullable)previousInsight callback:(void (^ _Nullable)(Insights * _Nonnull))callback;
++ (void)GetInsightsBridge:(NSInteger)requestId insights:(NSInteger)insights index:(NSInteger)index previousRequestId:(NSInteger)previousRequestId;
 
 + (void)OnExternalMediationRequestWithBanner:(MAAdView * _Nonnull)banner insight:(AdInsight * _Nullable)insight;
 + (void)OnExternalMediationRequestWithBanner:(MAAdView * _Nonnull)banner;

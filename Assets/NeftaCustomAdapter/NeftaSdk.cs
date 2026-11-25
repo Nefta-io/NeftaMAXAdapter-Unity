@@ -4,7 +4,7 @@ namespace NeftaCustomAdapter
 {
     public class NeftaSdk
     {
-        private const string IntegrationVersion = "2.1.0";
+        private const string IntegrationVersion = "2.2.0";
         
         private static bool _isInitialized;
         private static bool _isNeftaInitialized;
@@ -28,6 +28,7 @@ namespace NeftaCustomAdapter
             if (!Interstitial.IsOptimized)
             {
                 NeftaAdapterEvents.OnExternalMediationRequest(NeftaAdapterEvents.AdType.Interstitial, adUnitId);
+                Interstitial.OnInternalAdRequest?.Invoke(adUnitId);
                 MaxSdk.LoadInterstitial(adUnitId);
             }
             else
@@ -93,6 +94,7 @@ namespace NeftaCustomAdapter
             if (!Rewarded.IsOptimized)
             {
                 NeftaAdapterEvents.OnExternalMediationRequest(NeftaAdapterEvents.AdType.Rewarded, adUnitId);
+                Rewarded.OnInternalAdRequest?.Invoke(adUnitId);
                 MaxSdk.LoadRewardedAd(adUnitId);
             }
             else

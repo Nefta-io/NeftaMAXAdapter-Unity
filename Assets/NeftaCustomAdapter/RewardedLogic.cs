@@ -33,15 +33,19 @@ namespace NeftaCustomAdapter
             LoadOrTriggerAlreadyLoaded();
         }
 
-        protected override void LoadAsOptimized(string adUnitId, string bidFloor)
+        protected override void LoadAsOptimized(bool isOptimized, string adUnitId, string bidFloor)
         {
-            MaxSdk.SetRewardedAdExtraParameter(adUnitId, "disable_auto_retries", "true");
+            if (isOptimized)
+            {
+                MaxSdk.SetRewardedAdExtraParameter(adUnitId, "disable_auto_retries", "true");   
+            }
             MaxSdk.SetRewardedAdExtraParameter(adUnitId, "jC7Fp", bidFloor);
             MaxSdk.LoadRewardedAd(adUnitId);
         }
 
         protected override void LoadAsDefault(string adUnitId)
         {
+            MaxSdk.SetRewardedAdExtraParameter(adUnitId, "jC7Fp", "");
             MaxSdk.LoadRewardedAd(adUnitId);
         }
 

@@ -13,7 +13,7 @@ OcclusionCullingSettings:
 --- !u!104 &2
 RenderSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 9
+  serializedVersion: 10
   m_Fog: 0
   m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   m_FogMode: 3
@@ -42,8 +42,8 @@ RenderSettings:
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 12
-  m_GIWorkflowMode: 1
+  serializedVersion: 13
+  m_BakeOnSceneLoad: 0
   m_GISettings:
     serializedVersion: 2
     m_BounceScale: 1
@@ -66,9 +66,6 @@ LightmapSettings:
     m_LightmapParameters: {fileID: 0}
     m_LightmapsBakeMode: 1
     m_TextureCompression: 1
-    m_FinalGather: 0
-    m_FinalGatherFiltering: 1
-    m_FinalGatherRayCount: 256
     m_ReflectionCompression: 2
     m_MixedBakeMode: 2
     m_BakeBackend: 1
@@ -1497,6 +1494,8 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+  m_MaxWidth: -1
+  m_MaxHeight: -1
 --- !u!114 &159307940
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2176,6 +2175,8 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+  m_MaxWidth: -1
+  m_MaxHeight: -1
 --- !u!1 &266583995
 GameObject:
   m_ObjectHideFlags: 0
@@ -3369,8 +3370,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 854.19836, y: -74.375}
-  m_SizeDelta: {x: 171.6032, y: 80}
+  m_AnchoredPosition: {x: 855.1667, y: -74.375}
+  m_SizeDelta: {x: 169.66667, y: 80}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &435216725
 MonoBehaviour:
@@ -4029,6 +4030,8 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+  m_MaxWidth: -1
+  m_MaxHeight: -1
 --- !u!1 &523198874
 GameObject:
   m_ObjectHideFlags: 0
@@ -5212,8 +5215,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 588.0113, y: -74.375}
-  m_SizeDelta: {x: 167.99248, y: 80}
+  m_AnchoredPosition: {x: 585.5, y: -74.375}
+  m_SizeDelta: {x: 169.66667, y: 80}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &725824215
 MonoBehaviour:
@@ -6402,6 +6405,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
+  m_UseReflectionProbes: 0
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -6567,6 +6571,8 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+  m_MaxWidth: -1
+  m_MaxHeight: -1
 --- !u!1 &929691883
 GameObject:
   m_ObjectHideFlags: 0
@@ -7303,6 +7309,8 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+  m_MaxWidth: -1
+  m_MaxHeight: -1
 --- !u!1 &1083616288
 GameObject:
   m_ObjectHideFlags: 0
@@ -9601,8 +9609,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 582.5952, y: -74.375}
-  m_SizeDelta: {x: 171.6032, y: 80}
+  m_AnchoredPosition: {x: 585.5, y: -74.375}
+  m_SizeDelta: {x: 169.66667, y: 80}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1521087788
 MonoBehaviour:
@@ -9817,8 +9825,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 856.0037, y: -74.375}
-  m_SizeDelta: {x: 167.99248, y: 80}
+  m_AnchoredPosition: {x: 855.1667, y: -74.375}
+  m_SizeDelta: {x: 169.66667, y: 80}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1576543201
 MonoBehaviour:
@@ -10085,7 +10093,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: D
+  m_Text: C
 --- !u!114 &1657445718
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10106,6 +10114,8 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+  m_MaxWidth: -1
+  m_MaxHeight: -1
 --- !u!222 &1657445719
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -10955,6 +10965,8 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+  m_MaxWidth: -1
+  m_MaxHeight: -1
 --- !u!114 &1742127996
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10988,7 +11000,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: D
+  m_Text: C
 --- !u!222 &1742127997
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -11153,7 +11165,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 60, y: -74.375}
-  m_SizeDelta: {x: 336.7936, y: 80}
+  m_SizeDelta: {x: 340.6667, y: 80}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!114 &1778525538
 MonoBehaviour:
@@ -11539,6 +11551,8 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+  m_MaxWidth: -1
+  m_MaxHeight: -1
 --- !u!1 &1823095623
 GameObject:
   m_ObjectHideFlags: 0
@@ -13769,7 +13783,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 60, y: -74.375}
-  m_SizeDelta: {x: 344.01505, y: 80}
+  m_SizeDelta: {x: 340.6667, y: 80}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!114 &2137823990
 MonoBehaviour:

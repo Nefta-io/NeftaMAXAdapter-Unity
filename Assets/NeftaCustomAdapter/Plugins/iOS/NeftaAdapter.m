@@ -29,7 +29,7 @@ extern "C" {
     const char * NeftaPlugin_GetNuid(bool present);
     void NeftaPlugin_OnAttributionChangedBridge(int mmp, const char *mmpId, const char *network, const char *campaign, const char *costType, double cost, const char *costCurrency);
     void NeftaPlugin_OnPurchase(const char *productId, double revenue, const char *currency);
-    void NeftaPlugin_GetInsights(int requestId, int insights, int previousRequestId);
+    void NeftaPlugin_GetInsights(int requestId, int insights, int index, int previousRequestId);
     void NeftaPlugin_SetOverride(const char *root);
     void NeftaPlugin_ReportBridge(const char *message);
 #ifdef __cplusplus
@@ -140,7 +140,7 @@ void NeftaPlugin_Init(const char *appId, const char *clientId, int optimizationT
             NeftaAdapter_Flush();
         } else {
             const char *aR = adapterResponse != nil ? adapterResponse.UTF8String : NULL;
-            _onInsights(requestId, adapterResponseType, aR);
+            _onInsights((int)requestId, (int)adapterResponseType, aR);
         }
     };
 }
@@ -193,8 +193,8 @@ void NeftaPlugin_OnPurchase(const char *productId, double revenue, const char *c
    [NeftaPlugin OnPurchaseWithProductId: p revenue: revenue currency: c];
 }
 
-void NeftaPlugin_GetInsights(int requestId, int insights, int previousRequestId) {
-    [ALNeftaMediationAdapter GetInsightsBridge: requestId insights: insights previousRequestId: previousRequestId];
+void NeftaPlugin_GetInsights(int requestId, int insights, int index, int previousRequestId) {
+    [ALNeftaMediationAdapter GetInsightsBridge: requestId insights: insights index: index previousRequestId: previousRequestId];
 }
 
 void NeftaPlugin_SetOverride(const char *root) {

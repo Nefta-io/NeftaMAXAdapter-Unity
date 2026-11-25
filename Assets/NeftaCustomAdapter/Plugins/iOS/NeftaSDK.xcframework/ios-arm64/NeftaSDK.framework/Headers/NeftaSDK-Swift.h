@@ -308,6 +308,7 @@ SWIFT_CLASS("_TtC8NeftaSDK9AdInsight")
 @property (nonatomic) NSInteger _adOpportunityId;
 @property (nonatomic) NSInteger _auctionId;
 @property (nonatomic, readonly) enum Types _type;
+@property (nonatomic, readonly, copy) NSString * _Nonnull _trackId;
 @property (nonatomic) double _floorPrice;
 @property (nonatomic, copy) NSString * _Nullable _adUnit;
 @property (nonatomic) float _delay;
@@ -370,6 +371,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger Rewarded;)
 @property (nonatomic, strong) AdInsight * _Nullable _rewarded;
 @property (nonatomic, strong) AdInsight * _Nullable _insight;
 @property (nonatomic, strong) AdInsight * _Nullable _insightB;
+@property (nonatomic, strong) AdInsight * _Nullable _insightC;
 @property (nonatomic, readonly, copy) NSString * _Nonnull description;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
@@ -406,8 +408,8 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) NeftaPlugin * _Nullabl
 /// \param hasUserConsent Consent status in GDPR region or “do not sell my personal information” state in CCPA region 
 ///
 + (void)SetHasUserConsent:(BOOL)hasUserConsent;
-- (void)GetInsightsBridge:(NSInteger)requestId insights:(NSInteger)insights previousRequestId:(NSInteger)previousRequestId;
-- (void)GetInsights:(NSInteger)insights previousInsight:(AdInsight * _Nullable)previousInsight callback:(void (^ _Nonnull)(Insights * _Nonnull))callback;
+- (void)GetInsightsBridge:(NSInteger)requestId insights:(NSInteger)insights index:(NSInteger)index previousRequestId:(NSInteger)previousRequestId;
+- (void)GetInsights:(NSInteger)insights index:(NSInteger)index previousInsight:(AdInsight * _Nullable)previousInsight callback:(void (^ _Nonnull)(Insights * _Nonnull))callback;
 - (NSString * _Nonnull)GetNuidWithPresent:(BOOL)present SWIFT_WARN_UNUSED_RESULT;
 + (void)OnExternalMediationRequest:(NSString * _Nonnull)provider adType:(NSInteger)adType id:(NSString * _Nonnull)id requestedAdUnitId:(NSString * _Nonnull)requestedAdUnitId requestedFloorPrice:(double)requestedFloorPrice requestId:(NSInteger)requestId;
 + (void)OnExternalMediationResponse:(NSString * _Nonnull)provider id:(NSString * _Nonnull)id id2:(NSString * _Nullable)id2 revenue:(double)revenue precision:(NSString * _Nullable)precision status:(NSInteger)status providerStatus:(NSString * _Nullable)providerStatus networkStatus:(NSString * _Nullable)networkStatus network:(NSString * _Nullable)network baseObject:(NSDictionary<NSString *, id> * _Nullable)baseObject;

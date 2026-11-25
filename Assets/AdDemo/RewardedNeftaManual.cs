@@ -19,15 +19,15 @@ namespace AdDemo
         private class Track
         {
             public readonly string AdUnitId;
-            public readonly bool IsOptimized;
+            public readonly int Index;
             public State State;
             public AdInsight Insight;
             public MaxSdkBase.AdInfo AdInfo;
 
-            public Track(string adUnitId, bool isOptimized)
+            public Track(string adUnitId, int index)
             {
                 AdUnitId = adUnitId;
-                IsOptimized = isOptimized;
+                Index = index;
             }
         }
         
@@ -46,9 +46,9 @@ namespace AdDemo
 
             _tracks = new Track[]
             {
-                new Track(RewardedUi.DefaultAdUnitId, false),
-                new Track(RewardedUi.OptimizedAdUnitIdA, true),
-                new Track(RewardedUi.OptimizedAdUnitIdB, true)
+                new Track(RewardedUi.DefaultAdUnitId, 0),
+                new Track(RewardedUi.OptimizedAdUnitIdA, 1),
+                new Track(RewardedUi.OptimizedAdUnitIdB, 2)
             };
             
             MaxSdkCallbacks.Rewarded.OnAdLoadedEvent += OnAdLoadedEvent;
@@ -93,40 +93,48 @@ namespace AdDemo
         private void Load(Track track)
         {
             track.State = State.Loading;
-
-            if (track.IsOptimized)
+            NeftaAdapterEvents.GetInsights(Insights.Rewarded, track.Index, track.Insight, (Insights insights) =>
             {
-                NeftaAdapterEvents.GetInsights(Insights.Rewarded, track.Insight, (Insights insights) =>
+                _ui.SetStatus($"Load with Insights: {insights}");
+                if (insights.Insight != null)
                 {
-                    _ui.SetStatus($"Load with Insights: {insights}");
-                    if (insights.Insight != null)
-                    {
-                        LoadOptimizedTrack(track, insights.Insight);
-                        
-                        if (track == _tracks[1] && _tracks.Length > 2 && _tracks[2].State == State.Idle && insights.Insight._insightB != null) {
-                            _tracks[2].State = State.Loading;
+                    LoadOptimizedTrack(track, insights.Insight);
+                    if (track.Index == 1) {
+                        if (_tracks.Length > 2 && _tracks[2].State == State.Idle && insights.Insight._insightB != null)
+                        {
                             LoadOptimizedTrack(_tracks[2], insights.Insight._insightB);
                         }
+                        if ((_tracks[0].State == State.Idle || _tracks[0].State == State.Delay) && insights.Insight._insightC != null) {
+                            LoadOptimizedTrack(_tracks[0], insights.Insight._insightC);
+                        }
+                    }
+                }
+                else
+                {
+                    if (track.Index == 0)
+                    {
+                        MaxSdk.SetInterstitialExtraParameter(track.AdUnitId, "jC7Fp", "");
+                        NeftaAdapterEvents.OnExternalMediationRequest(NeftaAdapterEvents.AdType.Rewarded, track.AdUnitId);
+
+                        _ui.SetStatus($"Loading {track.AdUnitId} as Default");
+                        MaxSdk.LoadRewardedAd(track.AdUnitId);
                     }
                     else
                     {
                         _ = RetryOptimizedWithDelay(track);
                     }
-                });
-            }
-            else
-            {
-                NeftaAdapterEvents.OnExternalMediationRequest(NeftaAdapterEvents.AdType.Rewarded, track.AdUnitId);
-            
-                _ui.SetStatus($"Loading {track.AdUnitId} as Default");
-                MaxSdk.LoadRewardedAd(track.AdUnitId);
-            }
+                }
+            });
         }
 
         private void LoadOptimizedTrack(Track track, AdInsight insight)
         {
+            track.State = State.Loading;
             track.Insight = insight;
-            MaxSdk.SetRewardedAdExtraParameter(track.AdUnitId, "disable_auto_retries", "true");
+            if (track.Index != 0)
+            {
+                MaxSdk.SetInterstitialExtraParameter(track.AdUnitId, "disable_auto_retries", "true");   
+            }
             var bidFloor = "";
             if (track.Insight._floorPrice >= 0)
             {
@@ -252,7 +260,7 @@ namespace AdDemo
                 if (track.AdUnitId == adUnitId)
                 {
                     _ = WaitDelay(track, NeftaAdapterEvents.GetRetryDelayInSeconds(track.Insight, track.AdUnitId));
-                    if (track.IsOptimized)
+                    if (track.Index != 0)
                     {
                         _ = ContinueOptimized();
                     }
@@ -327,8 +335,11 @@ namespace AdDemo
                 return;
             }
 #endif
-            track.State = State.Idle;
-            ContinueLoading();
+            if (track.State == State.Delay)
+            {
+                track.State = State.Idle;
+                ContinueLoading();   
+            }
         }
 
         public void OnInterstitialAvailabilityChanged(bool isAvailable)
@@ -352,7 +363,7 @@ namespace AdDemo
                     
                     _ui.SetAvailability(true);
 
-                    if (track.IsOptimized)
+                    if (track.Index != 0)
                     {
                         _ = ContinueOptimized();
                     }

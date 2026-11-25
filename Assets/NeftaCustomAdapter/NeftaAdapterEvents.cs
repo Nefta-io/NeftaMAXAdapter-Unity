@@ -125,7 +125,7 @@ namespace NeftaCustomAdapter
         private static extern void NeftaPlugin_OnPurchase(string productId, double revenue, string currency);
 
         [DllImport ("__Internal")]
-        private static extern void NeftaPlugin_GetInsights(int requestId, int insights, int previousRequestId);
+        private static extern void NeftaPlugin_GetInsights(int requestId, int insights, int index, int previousRequestId);
         
         [DllImport ("__Internal")]
         private static extern void NeftaPlugin_SetOverride(string root);
@@ -505,7 +505,7 @@ namespace NeftaCustomAdapter
 #endif
         }
 
-        public static void GetInsights(int insights, AdInsight previousInsight, OnInsightsCallback callback)
+        public static void GetInsights(int insights, int index, AdInsight previousInsight, OnInsightsCallback callback)
         {
             var id = 0;
             var previousRequestId = -1;
@@ -523,11 +523,11 @@ namespace NeftaCustomAdapter
             }
 
 #if UNITY_EDITOR
-            _plugin.GetInsights(id, insights, previousRequestId);
+            _plugin.GetInsights(id, insights, index, previousRequestId);
 #elif UNITY_IOS
-            NeftaPlugin_GetInsights(id, insights, previousRequestId);
+            NeftaPlugin_GetInsights(id, insights, index, previousRequestId);
 #elif UNITY_ANDROID
-            NeftaAdapterClass.CallStatic("GetInsightsBridge", id, insights, previousRequestId);
+            NeftaAdapterClass.CallStatic("GetInsightsBridge", id, insights, index, previousRequestId);
 #endif
         }
 

@@ -43,7 +43,7 @@ namespace Editor.Tests.PlayTests
             MaxSdkCallbacks.Rewarded.OnAdRevenuePaidEvent -= OnAdRevenuePaidCallback;
         }
 
-        protected override void LoadAsOptimized(string adUnitId, string bidFloor)
+        protected override void LoadAsOptimized(bool isOptimized, string adUnitId, string bidFloor)
         {
             LoadRequests.Add(new LoadRequest(adUnitId, true, bidFloor));
         }

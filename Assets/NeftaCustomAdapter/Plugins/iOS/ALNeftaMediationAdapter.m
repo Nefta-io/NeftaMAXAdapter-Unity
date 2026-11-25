@@ -34,13 +34,13 @@ static bool _isSampled;
     return (double)[NeftaPlugin GetRetryDelayInSeconds: insight adUnitId: adUnitId];
 }
 
-+ (void)GetInsights:(NSInteger)insights previousInsight:(AdInsight * _Nullable)previousInsight callback:(void (^ _Nullable)(Insights * _Nonnull))callback {
++ (void)GetInsights:(NSInteger)insights index:(NSInteger)index previousInsight:(AdInsight * _Nullable)previousInsight callback:(void (^ _Nullable)(Insights * _Nonnull))callback {
     [self TryGetDebugData: true];
-    [_plugin GetInsights: insights previousInsight: previousInsight callback: callback];
+    [_plugin GetInsights: insights index: index previousInsight: previousInsight callback: callback];
 }
-+ (void)GetInsightsBridge:(NSInteger)requestId insights:(NSInteger)insights previousRequestId:(NSInteger)previousRequestId {
++ (void)GetInsightsBridge:(NSInteger)requestId insights:(NSInteger)insights index:(NSInteger)index previousRequestId:(NSInteger)previousRequestId {
     [self TryGetDebugData: true];
-    [NeftaPlugin._instance GetInsightsBridge: requestId insights: insights previousRequestId: previousRequestId];
+    [NeftaPlugin._instance GetInsightsBridge: requestId insights: insights index: index previousRequestId: previousRequestId];
 }
 
 + (void)OnExternalMediationRequestWithBanner:(MAAdView * _Nonnull)banner insight:(AdInsight * _Nullable)insight {
